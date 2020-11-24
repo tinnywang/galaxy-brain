@@ -1,0 +1,30 @@
+{
+  "name": "galaxy-brain",
+  "version": "1.0.0",
+  "description": "A WebGL homage to the galaxy brain meme.",
+  "scripts": {
+    "start": "webpack serve --config webpack.config.js --mode development --hot --watch",
+    "build": "webpack --config webpack.config.js"
+  },
+  "author": "tinnywang@gmail.com",
+  "license": "MIT",
+  "dependencies": {},
+  "devDependencies": {
+    "@types/jquery": "^3.5.4",
+    "eslint": "^7.14.0",
+    "jquery": "^3.5.1",
+    "ts-loader": "^8.0.11",
+    "typescript": "^4.1.2",
+    "webpack": "^4.44.2",
+    "webpack-cli": "^4.2.0",
+    "webpack-dev-server": "^3.11.0"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/tinnywang/galaxy-brain.git"
+  },
+  "bugs": {
+    "url": "https://github.com/tinnywang/galaxy-brain/issues"
+  },
+  "homepage": "https://github.com/tinnywang/galaxy-brain#readme"
+}
