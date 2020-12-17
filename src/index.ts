@@ -2,7 +2,7 @@ import $ from "jquery";
 import { initGL } from "./gl";
 import { Object } from "./object";
 
-$(document).ready(function () {
+$(function () {
   const $canvas: JQuery<HTMLCanvasElement> = $("canvas");
   try {
     initGL($canvas[0]);
