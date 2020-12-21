@@ -1,21 +1,38 @@
 import $ from "jquery";
 import { initGL } from "./gl";
 import { Object } from "./object";
+import { Cube } from "./renderable";
+import { initShader } from "./shaders/shader";
 
 $(function () {
   const $canvas: JQuery<HTMLCanvasElement> = $("canvas");
+  const canvas = $canvas[0]
+  canvas.width = canvas.clientWidth;
+  canvas.height = canvas.clientHeight;
+
   try {
-    initGL($canvas[0]);
-  } catch (e) {
+    const gl = initGL(canvas);
+    const shader = initShader(gl);
+
+    const path = "https://raw.githubusercontent.com/tinnywang/rubiks-cube/master/models/rubiks-cube.json";
+    $.get(path, (data: string) => {
+      const objects: Array<Object> = JSON.parse(data);
+
+      const renderables = objects.map((o) => {
+        switch (o.name) {
+          case "Cube": return new Cube(gl, shader, o);
+          default: throw new Error(`Unknown object "${o.name}"`);
+        }
+      })
+
+      const render = (_: number) => {
+        renderables.forEach((r) => r.render());
+        requestAnimationFrame(render);
+      }
+      render(performance.now());
+
+    })
+  } catch(e) {
     console.error(e);
   }
-
-  const path =
-    "https://raw.githubusercontent.com/tinnywang/rubiks-cube/master/models/rubiks-cube.json";
-  $.get(path, (data: string) => {
-    let objects: Array<Object> = JSON.parse(data)
-    objects.forEach((o) => {
-      console.log(o);
-    })
-  });
-});
+})

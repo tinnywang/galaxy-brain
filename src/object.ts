@@ -9,12 +9,12 @@ export interface Object {
 
 interface Face {
     material: Material
-    vertexIndices: Array<number>
+    vertex_indices: Array<number>
 }
 
 interface Material {
     ambient: vec3,
     diffuse: vec3,
     specular: vec3,
-    specularExponent: number,
+    specular_exponent: number,
 }

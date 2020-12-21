@@ -5,7 +5,7 @@ module.exports = {
   devServer: {
     compress: true,
     port: 8000,
-    publicPath: '/dist'
+    publicPath: '/dist',
   },
   devtool: 'inline-source-map',
   module: {
@@ -14,6 +14,10 @@ module.exports = {
         test: /\.tsx?$/,
         use: 'ts-loader',
         exclude: /node_modules/,
+      },
+      {
+        test: /\.(glsl|vs|fs)$/,
+        use: 'ts-shader-loader',
       },
     ],
   },
