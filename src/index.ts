@@ -2,7 +2,7 @@ import $ from "jquery";
 import initGL from "./gl";
 import { Object } from "./object";
 import { Cube } from "./renderables/cube";
-import { FlatShader } from "./shaders/flat/shader";
+import { TransparentShader } from "./shaders/transparent/shader";
 
 $(() => {
   const $canvas: JQuery<HTMLCanvasElement> = $("canvas");
@@ -12,7 +12,7 @@ $(() => {
 
   try {
     const gl = initGL(canvas);
-    const shader = new FlatShader(gl);
+    const shader = new TransparentShader(gl);
 
     const path =
       "https://raw.githubusercontent.com/tinnywang/rubiks-cube/master/models/rubiks-cube.json";
