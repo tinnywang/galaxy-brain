@@ -10,7 +10,7 @@ interface Buffer {
 }
 
 export abstract class Renderable {
-    readonly buffers: Buffer;
+    readonly buffer: Buffer;
     readonly gl: WebGLRenderingContext;
     readonly matrix: Matrix;
     readonly object: Object;
@@ -34,7 +34,7 @@ export abstract class Renderable {
         gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, faces);
         gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, new Uint16Array(buffer), gl.STATIC_DRAW);
 
-        this.buffers = {
+        this.buffer = {
             vertices: vertices,
             normals: normals,
             faces: faces,
@@ -46,19 +46,7 @@ export abstract class Renderable {
     }
 
     render() {
-        this.gl.uniformMatrix4fv(this.shader.modelViewProjectionMatrix, false, this.matrix.modelViewProjection);
-
-        this.gl.bindBuffer(this.gl.ARRAY_BUFFER, this.buffers.vertices);
-        this.gl.vertexAttribPointer(this.shader.vertexPosition, 3, this.gl.FLOAT, false, 0, 0);
-
-        let offset = 0;
-        this.gl.bindBuffer(this.gl.ELEMENT_ARRAY_BUFFER, this.buffers.faces);
-        this.object.faces.forEach((f) => {
-            this.gl.uniform3fv(this.shader.color, f.material.diffuse);
-            this.gl.drawElements(this.gl.TRIANGLES, f.vertex_indices.length, this.gl.UNSIGNED_SHORT, offset);
-            // Offset must be a multiple of 2 since an unsigned short is 2 bytes.
-            offset += f.vertex_indices.length * 2;
-        })
+        this.shader.render(this);
     }
 }
 

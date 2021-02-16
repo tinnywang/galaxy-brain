@@ -1,56 +1,48 @@
-import vertexSrc from './flat/vertex.glsl';
-import fragmentSrc from './flat/fragment.glsl';
+import { Renderable } from "../renderable";
 
-export interface Shader {
-    program: WebGLProgram
-    vertexPosition: number
-    modelViewProjectionMatrix: WebGLUniformLocation | null
-    color: WebGLUniformLocation | null
-}
+export abstract class Shader {
+    readonly gl: WebGL2RenderingContext;
+    readonly program: WebGLProgram;
 
-export function initShader(gl: WebGLRenderingContext): Shader {
-    const shaderProgram = gl.createProgram();
-    if (shaderProgram === null) {
-        throw new Error("Unable to create a WebGLProgram.")
+    constructor(gl: WebGL2RenderingContext, vertexSrc: string, fragmentSrc: string) {
+        const program = gl.createProgram();
+        if (program === null) {
+            throw new Error("Unable to create a WebGLProgram.")
+        }
+
+        const vertexShader = this.compileShader(gl, gl.VERTEX_SHADER, vertexSrc);
+        const fragmentShader = this.compileShader(gl, gl.FRAGMENT_SHADER, fragmentSrc);
+
+        gl.attachShader(program, vertexShader);
+        gl.attachShader(program, fragmentShader);
+        gl.linkProgram(program);
+
+        if (!gl.getProgramParameter(program, gl.LINK_STATUS)) {
+            throw new Error('Unable to initialize the shader program: ' + gl.getProgramInfoLog(program));
+        }
+
+        gl.useProgram(program);
+
+        this.gl = gl;
+        this.program = program;
     }
 
-    const vertexShader = compileShader(gl, gl.VERTEX_SHADER, vertexSrc);
-    const fragmentShader = compileShader(gl, gl.FRAGMENT_SHADER, fragmentSrc);
+    compileShader(gl: WebGLRenderingContext, type: number, src: string): WebGLShader {
+        const shader = gl.createShader(type);
+        if (shader === null) {
+            throw new Error("Unable to create a WebGLShader.")
+        }
 
-    gl.attachShader(shaderProgram, vertexShader);
-    gl.attachShader(shaderProgram, fragmentShader);
-    gl.linkProgram(shaderProgram);
+        gl.shaderSource(shader, src);
+        gl.compileShader(shader);
 
-    if (!gl.getProgramParameter(shaderProgram, gl.LINK_STATUS)) {
-        throw new Error('Unable to initialize the shader program: ' + gl.getProgramInfoLog(shaderProgram));
+        if (!gl.getShaderParameter(shader, gl.COMPILE_STATUS)) {
+            gl.deleteShader(shader);
+            throw new Error("Unable to compile shader: " + src);
+        }
+    
+        return shader;
     }
 
-    gl.useProgram(shaderProgram);
-
-    const vertexPosition = gl.getAttribLocation(shaderProgram, 'vertexPosition');
-    gl.enableVertexAttribArray(vertexPosition)
-
-    return {
-        program: shaderProgram,
-        vertexPosition,
-        modelViewProjectionMatrix: gl.getUniformLocation(shaderProgram, 'modelViewProjectionMatrix'),
-        color: gl.getUniformLocation(shaderProgram, 'color'),
-    }
-}
-
-function compileShader(gl: WebGLRenderingContext, type: number, src: string): WebGLShader {
-    const shader = gl.createShader(type);
-    if (shader === null) {
-        throw new Error("Unable to create a WebGLShader.")
-    }
-
-    gl.shaderSource(shader, src);
-    gl.compileShader(shader);
-
-    if (!gl.getShaderParameter(shader, gl.COMPILE_STATUS)) {
-        gl.deleteShader(shader);
-        throw new Error("Unable to compile shader: " + src);
-    }
-  
-    return shader;
+    abstract render(_: Renderable | ArrayBufferView): void;
 }

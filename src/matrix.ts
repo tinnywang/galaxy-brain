@@ -8,9 +8,9 @@ const NEAR = 1;
 const FAR = 1000;
 
 export class Matrix {
-    readonly view: mat4;
-    readonly projection: mat4;
-    readonly modelView: mat4;
+    private view: mat4;
+    private projection: mat4;
+    private modelView: mat4;
     readonly modelViewProjection: mat4;
 
     constructor(gl: WebGLRenderingContext, model?: mat4) {

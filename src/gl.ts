@@ -1,5 +1,5 @@
-export function initGL(canvas: HTMLCanvasElement): WebGLRenderingContext {
-  const gl = canvas.getContext("webgl");
+export function initGL(canvas: HTMLCanvasElement): WebGL2RenderingContext {
+  const gl = canvas.getContext("webgl2");
   if (gl === null) {
     throw new Error("Unable to initialize WebGL. Your browser or machine may not support it.");
   }
