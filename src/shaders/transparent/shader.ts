@@ -1,40 +1,51 @@
 import vertexSrc from './vertex.glsl';
 import fragmentSrc from './fragment.glsl';
 import { Shader } from '../shader';
-import { FlatShader } from '../flat/shader';
 import { ImageShader } from '../image/shader';
 import { Renderable } from '../../renderable';
 
 const NUM_PASSES = 4;
 
 export class TransparentShader extends Shader {
-    private flatShader: FlatShader;
     private imageShader: ImageShader;
 
     private framebuffer: WebGLFramebuffer | null;
     private depthTextures: Array<WebGLTexture>
     private colorbuffers: Array<WebGLRenderbuffer>;
 
+    // TODO: encapuslate GLSL variables in interface?
+    readonly vertexPosition: number
+    readonly modelViewProjectionMatrix: WebGLUniformLocation | null
+    readonly color: WebGLUniformLocation | null
+    readonly depthTextureLoc: WebGLUniformLocation | null;
+
+
     constructor(gl: WebGL2RenderingContext) {
         super(gl, vertexSrc, fragmentSrc);
 
-        this.flatShader = new FlatShader(gl);
         this.imageShader = new ImageShader(gl);
 
         this.framebuffer = gl.createFramebuffer();
         this.depthTextures = this.createDepthTextures(NUM_PASSES);
         this.colorbuffers = this.createRenderbuffers(NUM_PASSES, this.gl.RGBA4);
+
+        this.vertexPosition = this.gl.getAttribLocation(this.program, 'vertexPosition');
+        this.modelViewProjectionMatrix = gl.getUniformLocation(this.program, 'modelViewProjectionMatrix');
+        this.color = gl.getUniformLocation(this.program, 'color');
+
+        this.depthTextureLoc = gl.getUniformLocation(this.program, 'depthTexture');
     }
 
     render(r: Renderable) {
-        this.gl.useProgram(this.program);
-
         for (let i = 0; i < NUM_PASSES; i++) {
             this.gl.clear(this.gl.COLOR_BUFFER_BIT);
             this.gl.bindFramebuffer(this.gl.FRAMEBUFFER, this.framebuffer);
 
             // depth unit 0
+            this.gl.useProgram(this.program);
             this.bindDepthTexture(this.depthTextures[i%2]);
+            this.gl.uniform1i(this.depthTextureLoc, 0);
+
             if (i === 0) {
                 this.gl.disable(this.gl.DEPTH_TEST);
             } else {
@@ -42,6 +53,8 @@ export class TransparentShader extends Shader {
             }
             this.gl.depthMask(false);
             this.gl.depthFunc(this.gl.GREATER);
+
+            this.draw(r);
 
             // depth unit 1
             this.bindDepthTexture(this.depthTextures[(i+1)%2]);
@@ -53,8 +66,11 @@ export class TransparentShader extends Shader {
             this.gl.enable(this.gl.DEPTH_TEST)
             this.gl.depthFunc(this.gl.LESS);
 
-            this.flatShader.render(r);
+            this.draw(r);
         }
+
+        // TODO: remove this line and alpha blend color buffers into final image.
+        this.bindRenderbuffer(this.colorbuffers[3], this.gl.COLOR_ATTACHMENT0);
 
         const pixels = new Uint8Array(this.gl.drawingBufferWidth * this.gl.drawingBufferHeight * 4);
         this.gl.readPixels(0, 0, this.gl.drawingBufferWidth, this.gl.drawingBufferHeight, this.gl.RGBA, this.gl.UNSIGNED_BYTE, pixels);
@@ -62,6 +78,24 @@ export class TransparentShader extends Shader {
         // Now that we've read pixels from the bound framebuffer, unbind the framebuffer so that we draw to the screen.
         this.gl.bindFramebuffer(this.gl.FRAMEBUFFER, null);
         this.imageShader.render(pixels);
+    }
+
+    private draw(r: Renderable) {
+        this.gl.bindBuffer(this.gl.ARRAY_BUFFER, r.buffer.vertices);
+        this.gl.vertexAttribPointer(this.vertexPosition, 3, this.gl.FLOAT, false, 0, 0);
+        this.gl.enableVertexAttribArray(this.vertexPosition)
+
+        this.gl.uniformMatrix4fv(this.modelViewProjectionMatrix, false, r.matrix.modelViewProjection);
+
+        let offset = 0;
+        this.gl.bindBuffer(this.gl.ELEMENT_ARRAY_BUFFER, r.buffer.faces);
+        r.object.faces.forEach((f) => {
+            this.gl.uniform3fv(this.color, f.material.diffuse);
+
+            this.gl.drawElements(this.gl.TRIANGLES, f.vertex_indices.length, this.gl.UNSIGNED_SHORT, offset);
+            // Offset must be a multiple of 2 since an unsigned short is 2 bytes.
+            offset += f.vertex_indices.length * 2;
+        })
     }
 
     private bindRenderbuffer(rb: WebGLRenderbuffer, attachment: number) {
