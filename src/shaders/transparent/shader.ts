@@ -2,7 +2,7 @@ import vertexSrc from './vertex.glsl';
 import fragmentSrc from './fragment.glsl';
 import { Shader } from '../shader';
 import { ImageShader } from '../image/shader';
-import { Renderable } from '../../renderable';
+import { Renderable } from '../../renderables/renderable';
 
 const NUM_PASSES = 4;
 
@@ -18,6 +18,11 @@ export class TransparentShader extends Shader {
     readonly modelViewProjectionMatrix: WebGLUniformLocation | null
     readonly color: WebGLUniformLocation | null
     readonly depthTextureLoc: WebGLUniformLocation | null;
+    readonly shouldDepthPeel: WebGLUniformLocation | null;
+    readonly widthLoc: WebGLUniformLocation | null;
+    readonly heightLoc: WebGLUniformLocation | null;
+    readonly nearLoc: WebGLUniformLocation | null;
+    readonly farLoc: WebGLUniformLocation | null;
 
 
     constructor(gl: WebGL2RenderingContext) {
@@ -26,7 +31,7 @@ export class TransparentShader extends Shader {
         this.imageShader = new ImageShader(gl);
 
         this.framebuffer = gl.createFramebuffer();
-        this.depthTextures = this.createDepthTextures(NUM_PASSES);
+        this.depthTextures = this.createDepthTextures();
         this.colorbuffers = this.createRenderbuffers(NUM_PASSES, this.gl.RGBA4);
 
         this.vertexPosition = this.gl.getAttribLocation(this.program, 'vertexPosition');
@@ -34,6 +39,11 @@ export class TransparentShader extends Shader {
         this.color = gl.getUniformLocation(this.program, 'color');
 
         this.depthTextureLoc = gl.getUniformLocation(this.program, 'depthTexture');
+        this.shouldDepthPeel = gl.getUniformLocation(this.program, 'shouldDepthPeel');
+        this.widthLoc = gl.getUniformLocation(this.program, 'width');
+        this.heightLoc = gl.getUniformLocation(this.program, 'height');
+        this.nearLoc = gl.getUniformLocation(this.program, 'near');
+        this.farLoc = gl.getUniformLocation(this.program, 'far');
     }
 
     render(r: Renderable) {
@@ -41,27 +51,30 @@ export class TransparentShader extends Shader {
             this.gl.clear(this.gl.COLOR_BUFFER_BIT);
             this.gl.bindFramebuffer(this.gl.FRAMEBUFFER, this.framebuffer);
 
+            const readIndex = i % 2;
+            const writeIndex = (i+1) % 2;
+
             // depth unit 0
             this.gl.useProgram(this.program);
-            this.bindDepthTexture(this.depthTextures[i%2]);
+            this.bindDepthTexture(this.depthTextures[readIndex]);
             this.gl.uniform1i(this.depthTextureLoc, 0);
 
-            if (i === 0) {
-                this.gl.disable(this.gl.DEPTH_TEST);
-            } else {
-                this.gl.enable(this.gl.DEPTH_TEST);
-            }
-            this.gl.depthMask(false);
-            this.gl.depthFunc(this.gl.GREATER);
+            this.gl.activeTexture(this.gl.TEXTURE0 + readIndex);
+            this.gl.bindTexture(this.gl.TEXTURE_2D, this.depthTextures[readIndex]);
+            this.gl.uniform1i(this.depthTextureLoc, readIndex);
 
-            this.draw(r);
+            // No depth peeling on 0th iteration.
+            this.gl.uniform1i(this.shouldDepthPeel, i);
+            this.gl.uniform1f(this.widthLoc, this.gl.drawingBufferWidth);
+            this.gl.uniform1f(this.heightLoc, this.gl.drawingBufferHeight);
 
             // depth unit 1
-            this.bindDepthTexture(this.depthTextures[(i+1)%2]);
+            this.bindDepthTexture(this.depthTextures[writeIndex]);
             this.bindRenderbuffer(this.colorbuffers[i], this.gl.COLOR_ATTACHMENT0);
 
-            this.gl.clear(this.gl.DEPTH_BUFFER_BIT);
-
+            this.gl.clear(this.gl.COLOR_BUFFER_BIT | this.gl.DEPTH_BUFFER_BIT);
+            this.gl.enable(this.gl.DEPTH_TEST);
+            this.gl.disable(this.gl.CULL_FACE);
             this.gl.depthMask(true);
             this.gl.enable(this.gl.DEPTH_TEST)
             this.gl.depthFunc(this.gl.LESS);
@@ -126,20 +139,21 @@ export class TransparentShader extends Shader {
         return buffers;
     }
 
-    private createDepthTextures(n: number): Array<WebGLTexture> {
+    private createDepthTextures(): Array<WebGLTexture> {
         const textures = new Array<WebGLTexture>();
 
-        for (let i = 0; i < n; i++) {
+        for (let i = 0; i < 2; i++) {
             const texture = this.gl.createTexture();
             if (texture === null) {
                 throw new Error("Unable to create texture.")
             }
 
             this.gl.bindTexture(this.gl.TEXTURE_2D, texture);
-            this.gl.texImage2D(this.gl.TEXTURE_2D, 0, this.gl.DEPTH_COMPONENT16, this.gl.drawingBufferWidth, this.gl.drawingBufferHeight, 0, this.gl.DEPTH_COMPONENT, this.gl.UNSIGNED_SHORT, null);
-            this.gl.texParameteri(this.gl.TEXTURE_2D, this.gl.TEXTURE_MIN_FILTER, this.gl.LINEAR);
-            this.gl.texParameteri(this.gl.TEXTURE_2D, this.gl.TEXTURE_WRAP_S, this.gl.CLAMP_TO_EDGE);
-            this.gl.texParameteri(this.gl.TEXTURE_2D, this.gl.TEXTURE_WRAP_T, this.gl.CLAMP_TO_EDGE);
+            this.gl.texImage2D(this.gl.TEXTURE_2D, 0, this.gl.DEPTH_COMPONENT24, this.gl.drawingBufferWidth, this.gl.drawingBufferHeight, 0, this.gl.DEPTH_COMPONENT, this.gl.UNSIGNED_INT, null);
+
+            this.gl.texParameteri(this.gl.TEXTURE_2D, this.gl.TEXTURE_MIN_FILTER, this.gl.NEAREST);
+            this.gl.texParameteri(this.gl.TEXTURE_2D, this.gl.TEXTURE_MAG_FILTER, this.gl.NEAREST);
+            this.gl.texParameteri(this.gl.TEXTURE_2D, this.gl.TEXTURE_COMPARE_MODE, this.gl.NONE);
 
             textures.push(texture);
         }
