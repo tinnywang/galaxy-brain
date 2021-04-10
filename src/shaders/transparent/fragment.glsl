@@ -1,14 +1,18 @@
+#version 300 es
+
+precision highp float;
+
 uniform sampler2D depthTexture;
 uniform highp vec3 color;
 uniform bool shouldDepthPeel;
-uniform highp float width;
-uniform highp float height;
 
-void main(void) {
-    highp float d = texture2D(depthTexture, vec2(gl_FragCoord.x / width, gl_FragCoord.y / height)).r;
-    if (shouldDepthPeel && gl_FragCoord.z <= d) {
+out vec4 fragColor;
+
+void main() {
+    float depth = texelFetch(depthTexture, ivec2(gl_FragCoord.xy), 0).r;
+    if (shouldDepthPeel && gl_FragCoord.z <= depth) {
         discard;
     } else {
-        gl_FragColor = vec4(color, 1);
+        fragColor = vec4(color, 1);
     }
 }

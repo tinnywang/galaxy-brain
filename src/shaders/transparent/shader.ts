@@ -19,11 +19,6 @@ export class TransparentShader extends Shader {
     readonly color: WebGLUniformLocation | null
     readonly depthTextureLoc: WebGLUniformLocation | null;
     readonly shouldDepthPeel: WebGLUniformLocation | null;
-    readonly widthLoc: WebGLUniformLocation | null;
-    readonly heightLoc: WebGLUniformLocation | null;
-    readonly nearLoc: WebGLUniformLocation | null;
-    readonly farLoc: WebGLUniformLocation | null;
-
 
     constructor(gl: WebGL2RenderingContext) {
         super(gl, vertexSrc, fragmentSrc);
@@ -40,10 +35,6 @@ export class TransparentShader extends Shader {
 
         this.depthTextureLoc = gl.getUniformLocation(this.program, 'depthTexture');
         this.shouldDepthPeel = gl.getUniformLocation(this.program, 'shouldDepthPeel');
-        this.widthLoc = gl.getUniformLocation(this.program, 'width');
-        this.heightLoc = gl.getUniformLocation(this.program, 'height');
-        this.nearLoc = gl.getUniformLocation(this.program, 'near');
-        this.farLoc = gl.getUniformLocation(this.program, 'far');
     }
 
     render(r: Renderable) {
@@ -65,8 +56,6 @@ export class TransparentShader extends Shader {
 
             // No depth peeling on 0th iteration.
             this.gl.uniform1i(this.shouldDepthPeel, i);
-            this.gl.uniform1f(this.widthLoc, this.gl.drawingBufferWidth);
-            this.gl.uniform1f(this.heightLoc, this.gl.drawingBufferHeight);
 
             // depth unit 1
             this.bindDepthTexture(this.depthTextures[writeIndex]);
