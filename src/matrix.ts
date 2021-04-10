@@ -5,7 +5,7 @@ const CENTER = vec3.fromValues(0, 0, 0);
 const UP = vec3.fromValues(0, 1, 0);
 const FOV = glMatrix.toRadian(90);
 const NEAR = 1;
-const FAR = 1000;
+const FAR = 100;
 
 export class Matrix {
     private view: mat4;
