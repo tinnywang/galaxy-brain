@@ -13,7 +13,6 @@ export class TransparentShader extends Shader {
     private depthTextures: Array<WebGLTexture>
     private colorbuffers: Array<WebGLRenderbuffer>;
 
-    // TODO: encapuslate GLSL variables in interface?
     readonly vertexPosition: number
     readonly modelViewProjectionMatrix: WebGLUniformLocation | null
     readonly color: WebGLUniformLocation | null
