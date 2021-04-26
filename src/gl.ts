@@ -6,6 +6,7 @@ function initGL(canvas: HTMLCanvasElement): WebGL2RenderingContext {
     );
   }
 
+  gl.clearColor(1, 1, 1, 1);
   gl.clear(gl.COLOR_BUFFER_BIT);
 
   return gl;
