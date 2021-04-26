@@ -1,6 +1,8 @@
-attribute vec2 vertexPosition;
+#version 300 es
 
-varying highp vec2 texturePosition;
+in vec2 vertexPosition;
+
+out highp vec2 texturePosition;
 
 const vec2 scale = vec2(0.5, 0.5);
 
