@@ -59,21 +59,43 @@ export class TransparentShader extends Shader {
             })
         }
 
+        // Alpha-blend color buffers back-to-front.
+        const fb = this.gl.createFramebuffer();
+        this.gl.bindFramebuffer(this.gl.FRAMEBUFFER, fb);
+        // Bind color buffer.
+        const colorBuffer = this.gl.createRenderbuffer();
+        this.gl.bindRenderbuffer(this.gl.RENDERBUFFER, colorBuffer);
+        this.gl.renderbufferStorage(this.gl.RENDERBUFFER, this.gl.RGBA4, this.gl.drawingBufferWidth, this.gl.drawingBufferHeight);
+        this.gl.framebufferRenderbuffer(this.gl.FRAMEBUFFER, this.gl.COLOR_ATTACHMENT0, this.gl.RENDERBUFFER, colorBuffer);
+
+        this.gl.clear(this.gl.COLOR_BUFFER_BIT | this.gl.DEPTH_BUFFER_BIT);
+        this.gl.enable(this.gl.BLEND);
+        this.gl.blendFunc(this.gl.SRC_ALPHA, this.gl.ONE_MINUS_SRC_ALPHA);
+
+        for (let i = NUM_PASSES - 1; i >= 0; i--) {
+            this.imageShader.render(this.colorTextures[i]);
+        }
+
         const pixels = new Uint8Array(this.gl.drawingBufferWidth * this.gl.drawingBufferHeight * 4);
         this.gl.readPixels(0, 0, this.gl.drawingBufferWidth, this.gl.drawingBufferHeight, this.gl.RGBA, this.gl.UNSIGNED_BYTE, pixels);
 
-        // Now that we've read pixels from the bound framebuffer, unbind the framebuffer so that we draw to the screen.
-        this.gl.bindFramebuffer(this.gl.FRAMEBUFFER, null);
-        this.imageShader.render(pixels);
+        const texture = this.gl.createTexture();
+        if (texture) {
+            this.gl.activeTexture(this.gl.TEXTURE0);
+            this.gl.bindTexture(this.gl.TEXTURE_2D, texture);
+            this.gl.texImage2D(this.gl.TEXTURE_2D, 0, this.gl.RGBA, this.gl.drawingBufferWidth, this.gl.drawingBufferHeight, 0, this.gl.RGBA, this.gl.UNSIGNED_BYTE, pixels);
 
-        // Alpha blend color buffers back-to-front.
-        this.imageShader.render(pixels);
+            // Now that we've read pixels from the bound framebuffer, unbind the framebuffer so that we draw to the screen.
+            this.gl.bindFramebuffer(this.gl.FRAMEBUFFER, null);
+            this.imageShader.render(texture);
+        }
     }
 
     private depthPeel(i: number) {
         const readIndex = i % 2;
         const writeIndex = (i + 1) % 2;
 
+        this.gl.activeTexture(this.gl.TEXTURE0 + readIndex);
         this.gl.bindTexture(this.gl.TEXTURE_2D, this.depthTextures[readIndex]);
         this.gl.uniform1i(this.depthTextureLoc, readIndex);
 
@@ -81,28 +103,28 @@ export class TransparentShader extends Shader {
         this.gl.uniform1i(this.shouldDepthPeel, i);
 
         this.gl.bindFramebuffer(this.gl.FRAMEBUFFER, this.framebuffer);
+        this.gl.activeTexture(this.gl.TEXTURE0 + writeIndex);
         this.bindDepthTexture(this.depthTextures[writeIndex]);
         this.bindColorTexture(this.colorTextures[i], this.gl.COLOR_ATTACHMENT0);
 
         this.gl.clear(this.gl.COLOR_BUFFER_BIT | this.gl.DEPTH_BUFFER_BIT);
         this.gl.disable(this.gl.CULL_FACE);
         this.gl.enable(this.gl.DEPTH_TEST);
-        this.gl.depthMask(true);
         this.gl.depthFunc(this.gl.LESS)
     }
 
-    private bindColorTexture(texture: WebGLTexture, attachment: number) {
+    private bindColorTexture(texture: WebGLTexture | null, attachment: number) {
         this.gl.bindTexture(this.gl.TEXTURE_2D, texture);
         this.gl.framebufferTexture2D(this.gl.FRAMEBUFFER, attachment, this.gl.TEXTURE_2D, texture, 0);
     }
 
-    private bindDepthTexture(texture: WebGLTexture) {
+    private bindDepthTexture(texture: WebGLTexture | null) {
         this.gl.bindTexture(this.gl.TEXTURE_2D, texture);
         this.gl.framebufferTexture2D(this.gl.FRAMEBUFFER, this.gl.DEPTH_ATTACHMENT, this.gl.TEXTURE_2D, texture, 0);
     }
 
     private createColorTextures(n: number): Array<WebGLTexture> {
-        return this.createTextures(n, this.gl.TEXTURE2, this.gl.RGBA, this.gl.RGBA, this.gl.UNSIGNED_BYTE);
+        return this.createTextures(n, this.gl.TEXTURE0, this.gl.RGBA, this.gl.RGBA, this.gl.UNSIGNED_BYTE);
     }
 
     private createDualDepthTextures(): Array<WebGLTexture> {
