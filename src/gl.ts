@@ -1,5 +1,7 @@
 function initGL(canvas: HTMLCanvasElement): WebGL2RenderingContext {
-  const gl = canvas.getContext("webgl2");
+  const gl = canvas.getContext("webgl2", {
+    antialias: false,
+  });
   if (gl === null) {
     throw new Error(
       "Unable to initialize WebGL. Your browser or machine may not support it."
