@@ -1,12 +1,12 @@
 import $ from "jquery";
-import { initGL } from "./gl";
+import initGL from "./gl";
 import { Object } from "./object";
-import { Cube } from "./renderable";
+import { Cube } from "./renderables/cube";
 import { FlatShader } from "./shaders/flat/shader";
 
-$(function () {
+$(() => {
   const $canvas: JQuery<HTMLCanvasElement> = $("canvas");
-  const canvas = $canvas[0]
+  const canvas = $canvas[0];
   canvas.width = canvas.clientWidth;
   canvas.height = canvas.clientHeight;
 
@@ -14,25 +14,27 @@ $(function () {
     const gl = initGL(canvas);
     const shader = new FlatShader(gl);
 
-    const path = "https://raw.githubusercontent.com/tinnywang/rubiks-cube/master/models/rubiks-cube.json";
+    const path =
+      "https://raw.githubusercontent.com/tinnywang/rubiks-cube/master/models/rubiks-cube.json";
     $.get(path, (data: string) => {
       const objects: Array<Object> = JSON.parse(data);
 
       const renderables = objects.map((o) => {
         switch (o.name) {
-          case "Cube": return new Cube(gl, shader, o);
-          default: throw new Error(`Unknown object "${o.name}"`);
+          case "Cube":
+            return new Cube(gl, shader, o);
+          default:
+            throw new Error(`Unknown object "${o.name}"`);
         }
-      })
+      });
 
       const render = (_: number) => {
         renderables.forEach((r) => r.render());
         requestAnimationFrame(render);
-      }
+      };
       render(performance.now());
-
-    })
-  } catch(e) {
+    });
+  } catch (e) {
     console.error(e);
   }
-})
+});

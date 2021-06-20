@@ -7,16 +7,35 @@ const FOV = glMatrix.toRadian(90);
 const NEAR = 1;
 const FAR = 100;
 
-export class Matrix {
-    private view: mat4;
-    private projection: mat4;
-    private modelView: mat4;
-    readonly modelViewProjection: mat4;
+class Matrix {
+  private view: mat4;
 
-    constructor(gl: WebGLRenderingContext, model?: mat4) {
-        this.view = mat4.lookAt(mat4.create(), EYE, CENTER, UP);
-        this.projection = mat4.perspective(mat4.create(), FOV, gl.drawingBufferWidth / gl.drawingBufferHeight, NEAR, FAR);
-        this.modelView = mat4.multiply(mat4.create(), this.view, model || mat4.create());
-        this.modelViewProjection = mat4.multiply(mat4.create(), this.projection, this.modelView);
-    }
+  private projection: mat4;
+
+  private modelView: mat4;
+
+  readonly modelViewProjection: mat4;
+
+  constructor(gl: WebGLRenderingContext, model?: mat4) {
+    this.view = mat4.lookAt(mat4.create(), EYE, CENTER, UP);
+    this.projection = mat4.perspective(
+      mat4.create(),
+      FOV,
+      gl.drawingBufferWidth / gl.drawingBufferHeight,
+      NEAR,
+      FAR
+    );
+    this.modelView = mat4.multiply(
+      mat4.create(),
+      this.view,
+      model || mat4.create()
+    );
+    this.modelViewProjection = mat4.multiply(
+      mat4.create(),
+      this.projection,
+      this.modelView
+    );
+  }
 }
+
+export default Matrix;
