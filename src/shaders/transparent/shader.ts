@@ -12,6 +12,7 @@ export class TransparentShader extends Shader {
     private framebuffer: WebGLFramebuffer | null;
     private depthTextures: Array<WebGLTexture>
     private colorTextures: Array<WebGLTexture>;
+    private colorBuffer: WebGLRenderbuffer | null;
 
     readonly vertexPosition: number
     readonly modelViewProjectionMatrix: WebGLUniformLocation | null
@@ -27,6 +28,7 @@ export class TransparentShader extends Shader {
         this.framebuffer = gl.createFramebuffer();
         this.depthTextures = this.createDualDepthTextures();
         this.colorTextures = this.createColorTextures(NUM_PASSES);
+        this.colorBuffer = this.createColorBuffer();
 
         this.vertexPosition = this.gl.getAttribLocation(this.program, 'vertexPosition');
         this.modelViewProjectionMatrix = gl.getUniformLocation(this.program, 'modelViewProjectionMatrix');
@@ -60,15 +62,11 @@ export class TransparentShader extends Shader {
         }
 
         // Alpha-blend color buffers back-to-front.
-        const fb = this.gl.createFramebuffer();
-        this.gl.bindFramebuffer(this.gl.FRAMEBUFFER, fb);
-        // Bind color buffer.
-        const colorBuffer = this.gl.createRenderbuffer();
-        this.gl.bindRenderbuffer(this.gl.RENDERBUFFER, colorBuffer);
-        this.gl.renderbufferStorage(this.gl.RENDERBUFFER, this.gl.RGBA4, this.gl.drawingBufferWidth, this.gl.drawingBufferHeight);
-        this.gl.framebufferRenderbuffer(this.gl.FRAMEBUFFER, this.gl.COLOR_ATTACHMENT0, this.gl.RENDERBUFFER, colorBuffer);
+        this.gl.bindFramebuffer(this.gl.DRAW_FRAMEBUFFER, this.framebuffer);
+        this.bindRenderbuffer(this.colorBuffer, this.gl.COLOR_ATTACHMENT0);
 
         this.gl.clear(this.gl.COLOR_BUFFER_BIT | this.gl.DEPTH_BUFFER_BIT);
+        this.gl.disable(this.gl.DEPTH_TEST);
         this.gl.enable(this.gl.BLEND);
         this.gl.blendFunc(this.gl.SRC_ALPHA, this.gl.ONE_MINUS_SRC_ALPHA);
 
@@ -76,19 +74,13 @@ export class TransparentShader extends Shader {
             this.imageShader.render(this.colorTextures[i]);
         }
 
-        const pixels = new Uint8Array(this.gl.drawingBufferWidth * this.gl.drawingBufferHeight * 4);
-        this.gl.readPixels(0, 0, this.gl.drawingBufferWidth, this.gl.drawingBufferHeight, this.gl.RGBA, this.gl.UNSIGNED_BYTE, pixels);
-
-        const texture = this.gl.createTexture();
-        if (texture) {
-            this.gl.activeTexture(this.gl.TEXTURE0);
-            this.gl.bindTexture(this.gl.TEXTURE_2D, texture);
-            this.gl.texImage2D(this.gl.TEXTURE_2D, 0, this.gl.RGBA, this.gl.drawingBufferWidth, this.gl.drawingBufferHeight, 0, this.gl.RGBA, this.gl.UNSIGNED_BYTE, pixels);
-
-            // Now that we've read pixels from the bound framebuffer, unbind the framebuffer so that we draw to the screen.
-            this.gl.bindFramebuffer(this.gl.FRAMEBUFFER, null);
-            this.imageShader.render(texture);
-        }
+        this.gl.bindFramebuffer(this.gl.READ_FRAMEBUFFER, this.framebuffer);
+        this.gl.bindFramebuffer(this.gl.DRAW_FRAMEBUFFER, null);
+        this.gl.blitFramebuffer(
+            0, 0, this.gl.drawingBufferWidth, this.gl.drawingBufferHeight,
+            0, 0, this.gl.drawingBufferWidth, this.gl.drawingBufferHeight,
+            this.gl.COLOR_BUFFER_BIT, this.gl.NEAREST,
+        );
     }
 
     private depthPeel(i: number) {
@@ -102,10 +94,10 @@ export class TransparentShader extends Shader {
         // No depth peeling on 0th iteration.
         this.gl.uniform1i(this.shouldDepthPeel, i);
 
-        this.gl.bindFramebuffer(this.gl.FRAMEBUFFER, this.framebuffer);
+        this.gl.bindFramebuffer(this.gl.DRAW_FRAMEBUFFER, this.framebuffer);
         this.gl.activeTexture(this.gl.TEXTURE0 + writeIndex);
-        this.bindDepthTexture(this.depthTextures[writeIndex]);
-        this.bindColorTexture(this.colorTextures[i], this.gl.COLOR_ATTACHMENT0);
+        this.bindTexture(this.depthTextures[writeIndex], this.gl.DEPTH_ATTACHMENT);
+        this.bindTexture(this.colorTextures[i], this.gl.COLOR_ATTACHMENT0);
 
         this.gl.clear(this.gl.COLOR_BUFFER_BIT | this.gl.DEPTH_BUFFER_BIT);
         this.gl.disable(this.gl.CULL_FACE);
@@ -113,14 +105,14 @@ export class TransparentShader extends Shader {
         this.gl.depthFunc(this.gl.LESS)
     }
 
-    private bindColorTexture(texture: WebGLTexture | null, attachment: number) {
+    private bindTexture(texture: WebGLTexture | null, attachment: number) {
         this.gl.bindTexture(this.gl.TEXTURE_2D, texture);
-        this.gl.framebufferTexture2D(this.gl.FRAMEBUFFER, attachment, this.gl.TEXTURE_2D, texture, 0);
+        this.gl.framebufferTexture2D(this.gl.DRAW_FRAMEBUFFER, attachment, this.gl.TEXTURE_2D, texture, 0);
     }
 
-    private bindDepthTexture(texture: WebGLTexture | null) {
-        this.gl.bindTexture(this.gl.TEXTURE_2D, texture);
-        this.gl.framebufferTexture2D(this.gl.FRAMEBUFFER, this.gl.DEPTH_ATTACHMENT, this.gl.TEXTURE_2D, texture, 0);
+    private bindRenderbuffer(buffer: WebGLRenderbuffer | null, attachment: number) {
+        this.gl.bindRenderbuffer(this.gl.RENDERBUFFER, buffer);
+        this.gl.framebufferRenderbuffer(this.gl.DRAW_FRAMEBUFFER, attachment, this.gl.RENDERBUFFER, buffer);
     }
 
     private createColorTextures(n: number): Array<WebGLTexture> {
@@ -152,5 +144,15 @@ export class TransparentShader extends Shader {
         }
 
         return textures;
+    }
+
+    private createColorBuffer(): WebGLRenderbuffer {
+        const buffer = this.gl.createRenderbuffer();
+        if (buffer  === null) {
+            throw new Error("Unable to createe renderbuffer.")
+        }
+        this.gl.bindRenderbuffer(this.gl.RENDERBUFFER, buffer);
+        this.gl.renderbufferStorage(this.gl.RENDERBUFFER, this.gl.RGBA4, this.gl.drawingBufferWidth, this.gl.drawingBufferHeight);
+        return buffer;
     }
 }

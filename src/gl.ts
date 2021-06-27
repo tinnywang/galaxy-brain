@@ -1,6 +1,7 @@
 function initGL(canvas: HTMLCanvasElement): WebGL2RenderingContext {
   const gl = canvas.getContext("webgl2", {
     alpha: false,
+    antialias: false,
   });
   if (gl === null) {
     throw new Error(
