@@ -1,13 +1,13 @@
 import vertexSrc from './vertex.glsl';
 import fragmentSrc from './fragment.glsl';
 import { Shader } from '../shader';
-import { ImageShader } from '../image/shader';
+import { TextureShader } from '../texture/shader';
 import { Renderable } from '../../renderables/renderable';
 
 const NUM_PASSES = 4;
 
 export class TransparentShader extends Shader {
-    private imageShader: ImageShader;
+    private textureShader: TextureShader;
 
     private framebuffer: WebGLFramebuffer | null;
     private depthTextures: Array<WebGLTexture>
@@ -23,7 +23,7 @@ export class TransparentShader extends Shader {
     constructor(gl: WebGL2RenderingContext) {
         super(gl, vertexSrc, fragmentSrc);
 
-        this.imageShader = new ImageShader(gl);
+        this.textureShader = new TextureShader(gl);
 
         this.framebuffer = gl.createFramebuffer();
         this.depthTextures = this.createDualDepthTextures();
@@ -71,7 +71,7 @@ export class TransparentShader extends Shader {
         this.gl.blendFunc(this.gl.SRC_ALPHA, this.gl.ONE_MINUS_SRC_ALPHA);
 
         for (let i = NUM_PASSES - 1; i >= 0; i--) {
-            this.imageShader.render(this.colorTextures[i]);
+            this.textureShader.render(this.colorTextures[i]);
         }
 
         this.gl.bindFramebuffer(this.gl.READ_FRAMEBUFFER, this.framebuffer);

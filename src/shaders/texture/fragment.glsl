@@ -6,8 +6,8 @@ in vec2 texturePosition;
 
 out vec4 fragColor;
 
-uniform sampler2D imageTexture;
+uniform sampler2D textureImage;
 
 void main(void) {
-    fragColor = texture(imageTexture, texturePosition);
+    fragColor = texture(textureImage, texturePosition);
 }
