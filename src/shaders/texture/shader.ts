@@ -14,15 +14,13 @@ export class TextureShader extends Shader {
         1, 1
     ];
 
-    private vertexPosition: number;
-    private textureImage: WebGLUniformLocation | null;
     private verticesBuffer: WebGLBuffer | null;
 
     constructor(gl: WebGL2RenderingContext) {
         super(gl, vertexSrc, fragmentSrc);
 
-        this.vertexPosition = gl.getAttribLocation(this.program, 'vertexPosition');
-        this.textureImage = gl.getUniformLocation(this.program, 'textureImage');
+        this.location.setAttribute('vertexPosition');
+        this.location.setUniform('textureImage');
 
         this.verticesBuffer = gl.createBuffer();
         gl.bindBuffer(this.gl.ARRAY_BUFFER, this.verticesBuffer);
@@ -33,8 +31,9 @@ export class TextureShader extends Shader {
         this.gl.useProgram(this.program);
 
         this.gl.bindBuffer(this.gl.ARRAY_BUFFER, this.verticesBuffer);
-        this.gl.vertexAttribPointer(this.vertexPosition, 2, this.gl.FLOAT, false, 0, 0);
-        this.gl.enableVertexAttribArray(this.vertexPosition);
+        const vertexPosition = this.location.getAttribute('vertexPosition');
+        this.gl.vertexAttribPointer(vertexPosition, 2, this.gl.FLOAT, false, 0, 0);
+        this.gl.enableVertexAttribArray(vertexPosition);
 
         this.gl.activeTexture(this.gl.TEXTURE0);
         this.gl.bindTexture(this.gl.TEXTURE_2D, texture);
@@ -42,7 +41,7 @@ export class TextureShader extends Shader {
         this.gl.texParameteri(this.gl.TEXTURE_2D, this.gl.TEXTURE_WRAP_T, this.gl.CLAMP_TO_EDGE);
         this.gl.texParameteri(this.gl.TEXTURE_2D, this.gl.TEXTURE_MIN_FILTER, this.gl.LINEAR);
 
-        this.gl.uniform1i(this.textureImage, 0);
+        this.gl.uniform1i(this.location.getUniform('textureImage'), 0);
         this.gl.drawArrays(this.gl.TRIANGLES, 0, TextureShader.vertices.length);
     }
 }

@@ -4,16 +4,13 @@ import { Shader } from '../shader'
 import { Renderable } from '../../renderables/renderable'
 
 export class FlatShader extends Shader {
-    readonly vertexPosition: number
-    readonly modelViewProjectionMatrix: WebGLUniformLocation | null
-    readonly color: WebGLUniformLocation | null
 
     constructor (gl: WebGL2RenderingContext) {
       super(gl, vertexSrc, fragmentSrc)
 
-      this.vertexPosition = this.gl.getAttribLocation(this.program, 'vertexPosition')
-      this.modelViewProjectionMatrix = gl.getUniformLocation(this.program, 'modelViewProjectionMatrix')
-      this.color = gl.getUniformLocation(this.program, 'color')
+      this.location.setAttribute('vertexPosition');
+      this.location.setUniform('modelViewProjectionMatrix');
+      this.location.setUniform('color');
     }
 
     render (r: Renderable) {
@@ -26,15 +23,16 @@ export class FlatShader extends Shader {
       this.gl.clear(this.gl.COLOR_BUFFER_BIT | this.gl.DEPTH_BUFFER_BIT)
 
       this.gl.bindBuffer(this.gl.ARRAY_BUFFER, r.buffer.vertices)
-      this.gl.vertexAttribPointer(this.vertexPosition, 3, this.gl.FLOAT, false, 0, 0)
-      this.gl.enableVertexAttribArray(this.vertexPosition)
+      const vertexPosition = this.location.getAttribute('vertexPosition');
+      this.gl.vertexAttribPointer(vertexPosition, 3, this.gl.FLOAT, false, 0, 0)
+      this.gl.enableVertexAttribArray(vertexPosition)
 
-      this.gl.uniformMatrix4fv(this.modelViewProjectionMatrix, false, r.matrix.modelViewProjection)
+      this.gl.uniformMatrix4fv(this.location.getUniform('modelViewProjectionMatrix'), false, r.matrix.modelViewProjection)
 
       let offset = 0
       this.gl.bindBuffer(this.gl.ELEMENT_ARRAY_BUFFER, r.buffer.faces)
       r.object.faces.forEach((f) => {
-        this.gl.uniform3fv(this.color, f.material.diffuse)
+        this.gl.uniform3fv(this.location.getUniform('color'), f.material.diffuse)
 
         this.gl.drawElements(this.gl.TRIANGLES, f.vertex_indices.length, this.gl.UNSIGNED_SHORT, offset)
         // Offset must be a multiple of 2 since an unsigned short is 2 bytes.
