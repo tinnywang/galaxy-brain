@@ -1,8 +1,10 @@
 import { Renderable } from '../renderables/renderable'
+import { ShaderLocations } from './shader_locations';
 
 export abstract class Shader {
     readonly gl: WebGL2RenderingContext;
     readonly program: WebGLProgram;
+    readonly locations: ShaderLocations;
 
     constructor (gl: WebGL2RenderingContext, vertexSrc: string, fragmentSrc: string) {
       const program = gl.createProgram()
@@ -25,6 +27,7 @@ export abstract class Shader {
 
       this.gl = gl
       this.program = program
+      this.locations = new ShaderLocations(gl, program);
     }
 
     private compileShader (gl: WebGLRenderingContext, type: number, src: string): WebGLShader {
