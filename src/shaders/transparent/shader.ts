@@ -76,6 +76,8 @@ export class TransparentShader extends Shader {
 
         this.gl.bindFramebuffer(this.gl.READ_FRAMEBUFFER, this.framebuffer);
         this.gl.bindFramebuffer(this.gl.DRAW_FRAMEBUFFER, null);
+
+        this.gl.disable(this.gl.BLEND);
         this.gl.blitFramebuffer(
             0, 0, this.gl.drawingBufferWidth, this.gl.drawingBufferHeight,
             0, 0, this.gl.drawingBufferWidth, this.gl.drawingBufferHeight,
@@ -116,14 +118,14 @@ export class TransparentShader extends Shader {
     }
 
     private createColorTextures(n: number): Array<WebGLTexture> {
-        return this.createTextures(n, this.gl.TEXTURE0, this.gl.RGBA, this.gl.RGBA, this.gl.UNSIGNED_BYTE);
+        return this.createTextures(n, this.gl.RGBA, this.gl.RGBA, this.gl.UNSIGNED_BYTE);
     }
 
     private createDualDepthTextures(): Array<WebGLTexture> {
-        return this.createTextures(2, this.gl.TEXTURE0, this.gl.DEPTH_COMPONENT24, this.gl.DEPTH_COMPONENT, this.gl.UNSIGNED_INT);
+        return this.createTextures(2, this.gl.DEPTH_COMPONENT24, this.gl.DEPTH_COMPONENT, this.gl.UNSIGNED_INT);
     }
 
-    private createTextures(n: number, target: number, format: number, attachment: number, type: number): Array<WebGLTexture> {
+    private createTextures(n: number, format: number, attachment: number, type: number): Array<WebGLTexture> {
         const textures = new Array<WebGLTexture>();
 
         for (let i = 0; i < n; i++) {
@@ -132,7 +134,6 @@ export class TransparentShader extends Shader {
                 throw new Error("Unable to create texture.")
             }
 
-            this.gl.activeTexture(target + i);
             this.gl.bindTexture(this.gl.TEXTURE_2D, texture);
             this.gl.texImage2D(this.gl.TEXTURE_2D, 0, format, this.gl.drawingBufferWidth, this.gl.drawingBufferHeight, 0, attachment, type, null);
 
