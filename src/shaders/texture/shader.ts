@@ -19,8 +19,8 @@ export class TextureShader extends Shader {
     constructor(gl: WebGL2RenderingContext) {
         super(gl, vertexSrc, fragmentSrc);
 
-        this.location.setAttribute('vertexPosition');
-        this.location.setUniform('textureImage');
+        this.locations.setAttribute('vertexPosition');
+        this.locations.setUniform('textureImage');
 
         this.verticesBuffer = gl.createBuffer();
         gl.bindBuffer(this.gl.ARRAY_BUFFER, this.verticesBuffer);
@@ -31,7 +31,7 @@ export class TextureShader extends Shader {
         this.gl.useProgram(this.program);
 
         this.gl.bindBuffer(this.gl.ARRAY_BUFFER, this.verticesBuffer);
-        const vertexPosition = this.location.getAttribute('vertexPosition');
+        const vertexPosition = this.locations.getAttribute('vertexPosition');
         this.gl.vertexAttribPointer(vertexPosition, 2, this.gl.FLOAT, false, 0, 0);
         this.gl.enableVertexAttribArray(vertexPosition);
 
@@ -41,7 +41,7 @@ export class TextureShader extends Shader {
         this.gl.texParameteri(this.gl.TEXTURE_2D, this.gl.TEXTURE_WRAP_T, this.gl.CLAMP_TO_EDGE);
         this.gl.texParameteri(this.gl.TEXTURE_2D, this.gl.TEXTURE_MIN_FILTER, this.gl.LINEAR);
 
-        this.gl.uniform1i(this.location.getUniform('textureImage'), 0);
+        this.gl.uniform1i(this.locations.getUniform('textureImage'), 0);
         this.gl.drawArrays(this.gl.TRIANGLES, 0, TextureShader.vertices.length);
     }
 }

@@ -1,4 +1,4 @@
-export class ShaderLocation {
+export class ShaderLocations {
 	private gl: WebGL2RenderingContext;
 	private program: WebGLProgram;
 
@@ -17,8 +17,8 @@ export class ShaderLocation {
 	}
 
 	setUniform(name: string) {
-		const location = this.gl.getUniformLocation(this.program, name);
-		this.uniforms.set(name, location);
+		const locations = this.gl.getUniformLocation(this.program, name);
+		this.uniforms.set(name, locations);
 	}
 
 	getAttribute(name: string): GLint {
@@ -26,7 +26,7 @@ export class ShaderLocation {
 	}
 
 	setAttribute(name: string) {
-		const location = this.gl.getAttribLocation(this.program, name);
-		this.attributes.set(name, location);
+		const locations = this.gl.getAttribLocation(this.program, name);
+		this.attributes.set(name, locations);
 	}
 }

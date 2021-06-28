@@ -24,11 +24,11 @@ export class TransparentShader extends Shader {
         this.colorTextures = this.createColorTextures(NUM_PASSES);
         this.colorBuffer = this.createColorBuffer();
 
-        this.location.setAttribute('vertexPosition');
-        this.location.setUniform('modelViewProjectionMatrix');
-        this.location.setUniform('color');
-        this.location.setUniform('depthTexture');
-        this.location.setUniform('shouldDepthPeel');
+        this.locations.setAttribute('vertexPosition');
+        this.locations.setUniform('modelViewProjectionMatrix');
+        this.locations.setUniform('color');
+        this.locations.setUniform('depthTexture');
+        this.locations.setUniform('shouldDepthPeel');
     }
 
     render(r: Renderable) {
@@ -38,16 +38,16 @@ export class TransparentShader extends Shader {
             this.depthPeel(i);
 
             this.gl.bindBuffer(this.gl.ARRAY_BUFFER, r.buffer.vertices);
-            const vertexPosition = this.location.getAttribute('vertexPosition');
+            const vertexPosition = this.locations.getAttribute('vertexPosition');
             this.gl.vertexAttribPointer(vertexPosition, 3, this.gl.FLOAT, false, 0, 0);
             this.gl.enableVertexAttribArray(vertexPosition)
 
-            this.gl.uniformMatrix4fv(this.location.getUniform('modelViewProjectionMatrix'), false, r.matrix.modelViewProjection);
+            this.gl.uniformMatrix4fv(this.locations.getUniform('modelViewProjectionMatrix'), false, r.matrix.modelViewProjection);
 
             let offset = 0;
             this.gl.bindBuffer(this.gl.ELEMENT_ARRAY_BUFFER, r.buffer.faces);
             r.object.faces.forEach((f) => {
-                this.gl.uniform3fv(this.location.getUniform('color'), f.material.diffuse);
+                this.gl.uniform3fv(this.locations.getUniform('color'), f.material.diffuse);
 
                 this.gl.drawElements(this.gl.TRIANGLES, f.vertex_indices.length, this.gl.UNSIGNED_SHORT, offset);
                 // Offset must be a multiple of 2 since an unsigned short is 2 bytes.
@@ -85,10 +85,10 @@ export class TransparentShader extends Shader {
 
         this.gl.activeTexture(this.gl.TEXTURE0 + readIndex);
         this.gl.bindTexture(this.gl.TEXTURE_2D, this.depthTextures[readIndex]);
-        this.gl.uniform1i(this.location.getUniform('depthTexture'), readIndex);
+        this.gl.uniform1i(this.locations.getUniform('depthTexture'), readIndex);
 
         // No depth peeling on 0th iteration.
-        this.gl.uniform1i(this.location.getUniform('shouldDepthPeel'), i);
+        this.gl.uniform1i(this.locations.getUniform('shouldDepthPeel'), i);
 
         this.gl.bindFramebuffer(this.gl.DRAW_FRAMEBUFFER, this.framebuffer);
         this.gl.activeTexture(this.gl.TEXTURE0 + writeIndex);
