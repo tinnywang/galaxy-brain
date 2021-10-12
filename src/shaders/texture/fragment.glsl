@@ -12,6 +12,7 @@ uniform int height;
 
 const float FXAA_EDGE_THRESHOLD  = 0.125;
 const float FXAA_EDGE_THRESHOLD_MIN = 0.0625;
+const int FXAA_SEARCH_STEPS = 3;
 
 // Luminance conversion
 // http://developer.download.nvidia.com/assets/gamedev/files/sdk/11/FXAA_WhitePaper.pdf
@@ -19,16 +20,11 @@ float luma(vec4 rgba) {
     return rgba.g * (0.587/0.299) + rgba.x;
 }
 
-bool inTextureCoordRange(float v) {
-    return v >= 0.0 && v <= 1.0;
-}
+vec2 textureCoordOffset(vec2 position, vec2 offset) {
+    float x = offset.x / float(width);
+    float y = offset.y / float(height);
 
-vec4 fxaaTextureOffset(int xShift, int yShift) {
-    float x = float(xShift) / float(width);
-    float y = float(yShift) / float(height);
-
-    vec2 coords = texturePosition + vec2(x, y);
-    return texture(textureImage, coords);
+    return position + vec2(x, y);
 }
 
 mat3 lumaMatrix(void) {
@@ -36,7 +32,8 @@ mat3 lumaMatrix(void) {
 
     for (int row = 0; row < 3; row++) {
         for (int col = 0; col < 3; col++) {
-            matrix[col][row] = luma(fxaaTextureOffset(row - 1, col - 1));
+            vec2 textureCoord = textureCoordOffset(texturePosition, vec2(row - 1, col - 1));
+            matrix[col][row] = luma(texture(textureImage, textureCoord));
         }
     }
 
@@ -66,6 +63,67 @@ bool isHorizontalEdge(mat3 lumaMat) {
     return edgeHorz >= edgeVert;
 }
 
+struct EdgeEnd {
+    vec2 negative;
+    vec2 positive;
+};
+
+EdgeEnd endOfEdgeSearch(mat3 lumaMat) {
+    float lumaN, lumaP;
+    vec2 offset;
+
+    if (isHorizontalEdge(lumaMat)) {
+        lumaN = lumaMat[1][2]; // south
+        lumaP = lumaMat[1][0]; // north
+        offset = vec2(0, -1);
+    } else {
+        lumaN = lumaMat[0][1]; // west
+        lumaP = lumaMat[2][1]; // east
+        offset = vec2(1, 0);
+    }
+
+    vec2 posN = textureCoordOffset(texturePosition, offset * -1.0);
+    vec2 posP = textureCoordOffset(texturePosition, offset);
+
+    float gradientN = abs(lumaN - lumaMat[1][1]);
+    float gradientP = abs(lumaP - lumaMat[1][1]);
+    if (gradientP < gradientN) {
+        offset *= -1.0;
+    }
+
+    bool  doneN, doneP;
+    float lumaEndN, lumaEndP;
+
+    for (int i = 0; i < FXAA_SEARCH_STEPS; i++) {
+        if (!doneN) {
+            lumaEndN = luma(texture(textureImage, textureCoordOffset(posN, offset)));
+        }
+        if (!doneP) {
+            lumaEndP = luma(texture(textureImage, textureCoordOffset(posP, offset)));
+        }
+
+        doneN = doneN || abs(lumaEndN - lumaN) >= gradientN;
+        doneP = doneP || abs(lumaEndP - lumaP) >= gradientP;
+
+        if (doneN && doneP) {
+            break;
+        }
+
+        if (!doneN) {
+            posN -= offset;
+        }
+        if (!doneP) {
+            posP += offset;
+        }
+    }
+
+    EdgeEnd end;
+    end.negative = posN;
+    end.positive = posP;
+
+    return end;
+}
+
 void main(void) {
     vec4 rgba = texture(textureImage, texturePosition);
 
@@ -73,8 +131,8 @@ void main(void) {
     mat3 lm = lumaMatrix();
 
     // Local contrast check
-    float rangeMin = min(lm[1][1], min(min(lm[1][0], lm[0][1]), min(lm[2][1], lm[1][2])));
-    float rangeMax = max(lm[1][1], max(max(lm[1][0], lm[0][1]), max(lm[2][1], lm[1][2])));
+    float rangeMin = min(lm[1][1], min(min(lm[1][0], lm[0][1]), min(lm[1][2], lm[2][1])));
+    float rangeMax = max(lm[1][1], max(max(lm[1][0], lm[0][1]), max(lm[1][2], lm[2][1])));
 
     float range = rangeMax - rangeMin;
 
