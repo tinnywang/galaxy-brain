@@ -13,6 +13,9 @@ uniform int height;
 const float FXAA_EDGE_THRESHOLD  = 0.125;
 const float FXAA_EDGE_THRESHOLD_MIN = 0.0625;
 const int FXAA_SEARCH_STEPS = 3;
+const float FXAA_SUBPIX_TRIM = 0.25;
+const float FXAA_SUBPIX_TRIM_SCALE =  1.0; // TODO: figure out appropriate value.
+const float FXAA_SUBPIX_CAP = 0.75;
 
 // Luminance conversion
 // http://developer.download.nvidia.com/assets/gamedev/files/sdk/11/FXAA_WhitePaper.pdf
@@ -124,6 +127,13 @@ EdgeEnd endOfEdgeSearch(mat3 lumaMat) {
     return end;
 }
 
+float blendFactor(mat3 lumaMat, float localContrast) {
+    float lumaLowpass = (lumaMat[0][0] + lumaMat[1][2] + lumaMat[2][1] + lumaMat[0][1]) * 0.25;
+    float pixelContrast = abs(lumaLowpass - lumaMat[1][1]);
+    float blend = max(0.0, (pixelContrast / localContrast) - FXAA_SUBPIX_TRIM) * FXAA_SUBPIX_TRIM_SCALE;
+    return min(FXAA_SUBPIX_CAP, blend);
+}
+
 void main(void) {
     vec4 rgba = texture(textureImage, texturePosition);
 
@@ -139,6 +149,7 @@ void main(void) {
     if(range < max(FXAA_EDGE_THRESHOLD_MIN, rangeMax * FXAA_EDGE_THRESHOLD)) {
         fragColor = rgba;
     } else {
+        float blend = blendFactor(lm, range);
         if (isHorizontalEdge(lm)) {
             fragColor = vec4(1, 1, 0, 1);
         } else {
