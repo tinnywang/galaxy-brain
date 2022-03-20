@@ -47,5 +47,7 @@ export abstract class Shader {
       return shader
     }
 
-    abstract render(_: Renderable | WebGLTexture): void;
+    abstract render(... _: Renderable[]): void;
+
+    abstract render(_: WebGLTexture): void;
 }

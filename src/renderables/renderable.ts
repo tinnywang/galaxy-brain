@@ -1,6 +1,5 @@
 import { mat4 } from "gl-matrix";
 import { Object } from "../object";
-import { Shader } from "../shaders/shader";
 import Matrix from "../matrix";
 
 interface Buffer {
@@ -18,11 +17,8 @@ export abstract class Renderable {
 
   readonly object: Object;
 
-  readonly shader: Shader;
-
   constructor(
     gl: WebGLRenderingContext,
-    shader: Shader,
     o: Object,
     model?: mat4
   ) {
@@ -59,11 +55,6 @@ export abstract class Renderable {
     this.gl = gl;
     this.matrix = new Matrix(gl, model);
     this.object = o;
-    this.shader = shader;
-  }
-
-  render() {
-    this.shader.render(this);
   }
 }
 

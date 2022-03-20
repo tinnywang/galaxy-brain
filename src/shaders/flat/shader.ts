@@ -13,30 +13,31 @@ export class FlatShader extends Shader {
       this.locations.setUniform('color');
     }
 
-    render (r: Renderable) {
+    render (... renderables: Renderable[]) {
       this.gl.useProgram(this.program)
 
       this.gl.enable(this.gl.DEPTH_TEST);
       this.gl.depthFunc(this.gl.LEQUAL)
       this.gl.enable(this.gl.CULL_FACE)
       this.gl.cullFace(this.gl.BACK)
-      this.gl.clear(this.gl.COLOR_BUFFER_BIT | this.gl.DEPTH_BUFFER_BIT)
 
-      this.gl.bindBuffer(this.gl.ARRAY_BUFFER, r.buffer.vertices)
-      const vertexPosition = this.locations.getAttribute('vertexPosition');
-      this.gl.vertexAttribPointer(vertexPosition, 3, this.gl.FLOAT, false, 0, 0)
-      this.gl.enableVertexAttribArray(vertexPosition)
+      renderables.forEach((r) => {
+        this.gl.bindBuffer(this.gl.ARRAY_BUFFER, r.buffer.vertices)
+        const vertexPosition = this.locations.getAttribute('vertexPosition');
+        this.gl.vertexAttribPointer(vertexPosition, 3, this.gl.FLOAT, false, 0, 0)
+        this.gl.enableVertexAttribArray(vertexPosition)
 
-      this.gl.uniformMatrix4fv(this.locations.getUniform('modelViewProjectionMatrix'), false, r.matrix.modelViewProjection)
+        this.gl.uniformMatrix4fv(this.locations.getUniform('modelViewProjectionMatrix'), false, r.matrix.modelViewProjection)
 
-      let offset = 0
-      this.gl.bindBuffer(this.gl.ELEMENT_ARRAY_BUFFER, r.buffer.faces)
-      r.object.faces.forEach((f) => {
-        this.gl.uniform3fv(this.locations.getUniform('color'), f.material.diffuse)
+        let offset = 0
+        this.gl.bindBuffer(this.gl.ELEMENT_ARRAY_BUFFER, r.buffer.faces)
+        r.object.faces.forEach((f) => {
+          this.gl.uniform3fv(this.locations.getUniform('color'), f.material.diffuse)
 
-        this.gl.drawElements(this.gl.TRIANGLES, f.vertex_indices.length, this.gl.UNSIGNED_SHORT, offset)
-        // Offset must be a multiple of 2 since an unsigned short is 2 bytes.
-        offset += f.vertex_indices.length * 2
-      })
+          this.gl.drawElements(this.gl.TRIANGLES, f.vertex_indices.length, this.gl.UNSIGNED_SHORT, offset)
+          // Offset must be a multiple of 2 since an unsigned short is 2 bytes.
+          offset += f.vertex_indices.length * 2
+        })
+      });
     }
 }

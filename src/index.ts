@@ -1,7 +1,6 @@
 import $ from "jquery";
 import initGL from "./gl";
-import { Object } from "./object";
-import { Cube } from "./renderables/cube";
+import { Cube, Cube2 } from "./renderables/cube";
 import { TransparentShader } from "./shaders/transparent/shader";
 
 $(() => {
@@ -17,21 +16,15 @@ $(() => {
     const path =
       "https://raw.githubusercontent.com/tinnywang/rubiks-cube/master/models/rubiks-cube.json";
     $.get(path, (data: string) => {
-      const objects: Array<Object> = JSON.parse(data);
+      const cube = JSON.parse(data)[0];
+      const renderables = [new Cube(gl, cube), new Cube2(gl, cube)];
 
-      const renderables = objects.map((o) => {
-        switch (o.name) {
-          case "Cube":
-            return new Cube(gl, shader, o);
-          default:
-            throw new Error(`Unknown object "${o.name}"`);
-        }
-      });
-
-      const render = (_: number) => {
-        renderables.forEach((r) => r.render());
+      const render = (_: DOMHighResTimeStamp) => {
+        gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
+        shader.render(...renderables);
         requestAnimationFrame(render);
       };
+
       render(performance.now());
     });
   } catch (e) {
