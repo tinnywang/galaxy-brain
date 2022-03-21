@@ -13,13 +13,15 @@ export class FlatShader extends Shader {
       this.locations.setUniform('color');
     }
 
-    render (... renderables: Renderable[]) {
+    render(drawFramebuffer: WebGLFramebuffer, ...renderables: Renderable[]) {
       this.gl.useProgram(this.program)
 
       this.gl.enable(this.gl.DEPTH_TEST);
       this.gl.depthFunc(this.gl.LEQUAL)
       this.gl.enable(this.gl.CULL_FACE)
       this.gl.cullFace(this.gl.BACK)
+
+      this.gl.bindFramebuffer(this.gl.DRAW_FRAMEBUFFER, drawFramebuffer);
 
       renderables.forEach((r) => {
         this.gl.bindBuffer(this.gl.ARRAY_BUFFER, r.buffer.vertices)
