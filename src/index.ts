@@ -38,6 +38,7 @@ $(() => {
       throw new Error("failed to create color texture");
     }
 
+    gl.activeTexture(gl.TEXTURE1);
     gl.bindTexture(gl.TEXTURE_2D, colorTexture);
     gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.drawingBufferWidth, gl.drawingBufferHeight, 0, gl.RGBA, gl.UNSIGNED_BYTE, null);
 
@@ -63,18 +64,24 @@ $(() => {
 
         //shader.render(...renderables);
         flatShader.render(framebuffer, new Cube(gl, cube));
-        shader.render(framebuffer, depthTexture, new Cube2(gl, cube));
 
-        //shader.render(framebuffer, new Cube2(gl, cube));
-        //requestAnimationFrame(render);
+        shader.render(framebuffer, {
+          depthTexture: depthTexture,
+          colorTexture: colorTexture,
+        }, new Cube2(gl, cube));
 
         gl.bindFramebuffer(gl.READ_FRAMEBUFFER, framebuffer);
         gl.bindFramebuffer(gl.DRAW_FRAMEBUFFER, null);
+
+        gl.disable(gl.BLEND);
         gl.blitFramebuffer(
           0, 0, gl.drawingBufferWidth, gl.drawingBufferHeight,
           0, 0, gl.drawingBufferWidth, gl.drawingBufferHeight,
           gl.COLOR_BUFFER_BIT, gl.NEAREST,
         );
+
+        gl.flush();
+        requestAnimationFrame(render);
       };
 
       render(performance.now());

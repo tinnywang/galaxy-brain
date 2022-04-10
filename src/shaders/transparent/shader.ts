@@ -6,13 +6,17 @@ import { Renderable } from '../../renderables/renderable';
 
 const NUM_PASSES = 4;
 
+export interface OpaqueProps {
+    depthTexture: WebGLTexture;
+    colorTexture: WebGLTexture;
+}
+
 export class TransparentShader extends Shader {
     private textureShader: TextureShader;
 
     private framebuffer: WebGLFramebuffer | null;
     private depthTextures: Array<WebGLTexture>
     private colorTextures: Array<WebGLTexture>;
-    //private colorBuffer: WebGLRenderbuffer | null;
 
     constructor(gl: WebGL2RenderingContext) {
         super(gl, vertexSrc, fragmentSrc);
@@ -22,22 +26,27 @@ export class TransparentShader extends Shader {
         this.framebuffer = gl.createFramebuffer();
         this.depthTextures = this.createDualDepthTextures();
         this.colorTextures = this.createColorTextures(NUM_PASSES);
-        //this.colorBuffer = this.createColorBuffer(;
 
         this.locations.setAttribute('vertexPosition');
         this.locations.setUniform('modelViewProjectionMatrix');
         this.locations.setUniform('color');
         this.locations.setUniform('opaqueDepthTexture');
+        this.locations.setUniform('opaqueColorTexture');
         this.locations.setUniform('peelDepthTexture');
         this.locations.setUniform('shouldDepthPeel');
     }
 
-    render(drawFramebuffer: WebGLFramebuffer, opaqueDepthTexture: WebGLTexture, ...renderables: Renderable[]) {
+    render(drawFramebuffer: WebGLFramebuffer, opaque: OpaqueProps, ...renderables: Renderable[]) {
         this.gl.useProgram(this.program);
 
+        // Texture units 0 and 1 are used for the depth peel read/write textures.
+        this.gl.activeTexture(this.gl.TEXTURE2);
+        this.gl.bindTexture(this.gl.TEXTURE_2D, opaque.depthTexture);
+        this.gl.uniform1i(this.locations.getUniform('opaqueDepthTexture'), 2);
+
         this.gl.activeTexture(this.gl.TEXTURE3);
-        this.gl.bindTexture(this.gl.TEXTURE_2D, opaqueDepthTexture);
-        this.gl.uniform1i(this.locations.getUniform('opaqueDepthTexture'), 3);
+        this.gl.bindTexture(this.gl.TEXTURE_2D, opaque.colorTexture);
+        this.gl.uniform1i(this.locations.getUniform('opaqueColorTexture'), 3);
 
         for (let i = 0; i < NUM_PASSES; i++) {
             this.depthPeel(i);
@@ -63,10 +72,7 @@ export class TransparentShader extends Shader {
         }
 
         // Alpha-blend color buffers back-to-front.
-        /*
-        this.gl.bindFramebuffer(this.gl.DRAW_FRAMEBUFFER, this.framebuffer);
-        this.bindRenderbuffer(this.colorBuffer, this.gl.COLOR_ATTACHMENT0);
-        */
+        this.gl.bindFramebuffer(this.gl.READ_FRAMEBUFFER, this.framebuffer);
         this.gl.bindFramebuffer(this.gl.DRAW_FRAMEBUFFER, drawFramebuffer);
 
         this.gl.disable(this.gl.DEPTH_TEST);
@@ -76,18 +82,6 @@ export class TransparentShader extends Shader {
         for (let i = NUM_PASSES - 1; i >= 0; i--) {
             this.textureShader.render(this.colorTextures[i]);
         }
-
-        /*
-        this.gl.bindFramebuffer(this.gl.READ_FRAMEBUFFER, drawFramebuffer);
-        this.gl.bindFramebuffer(this.gl.DRAW_FRAMEBUFFER, null);
-
-        this.gl.disable(this.gl.BLEND);
-        this.gl.blitFramebuffer(
-            0, 0, this.gl.drawingBufferWidth, this.gl.drawingBufferHeight,
-            0, 0, this.gl.drawingBufferWidth, this.gl.drawingBufferHeight,
-            this.gl.COLOR_BUFFER_BIT, this.gl.NEAREST,
-        );
-        */
     }
 
     private depthPeel(i: number) {
@@ -117,13 +111,6 @@ export class TransparentShader extends Shader {
         this.gl.framebufferTexture2D(this.gl.DRAW_FRAMEBUFFER, attachment, this.gl.TEXTURE_2D, texture, 0);
     }
 
-    /*
-    private bindRenderbuffer(buffer: WebGLRenderbuffer | null, attachment: number) {
-        this.gl.bindRenderbuffer(this.gl.RENDERBUFFER, buffer);
-        this.gl.framebufferRenderbuffer(this.gl.DRAW_FRAMEBUFFER, attachment, this.gl.RENDERBUFFER, buffer);
-    }
-    */
-
     private createColorTextures(n: number): Array<WebGLTexture> {
         return this.createTextures(n, this.gl.RGBA, this.gl.RGBA, this.gl.UNSIGNED_BYTE);
     }
@@ -131,12 +118,6 @@ export class TransparentShader extends Shader {
     private createDualDepthTextures(): Array<WebGLTexture> {
         return this.createTextures(2, this.gl.DEPTH_COMPONENT24, this.gl.DEPTH_COMPONENT, this.gl.UNSIGNED_INT);
     }
-
-    /*
-    private createDepthTexture(): WebGLTexture {
-        return this.createTextures(1, this.gl.DEPTH_COMPONENT24, this.gl.DEPTH_COMPONENT, this.gl.UNSIGNED_INT)[0];
-    }
-    */
 
     private createTextures(n: number, format: number, attachment: number, type: number): Array<WebGLTexture> {
         const textures = new Array<WebGLTexture>();
@@ -159,16 +140,4 @@ export class TransparentShader extends Shader {
 
         return textures;
     }
-
-    /*
-    private createColorBuffer(): WebGLRenderbuffer {
-        const buffer = this.gl.createRenderbuffer();
-        if (buffer === null) {
-            throw new Error("Unable to createe renderbuffer.")
-        }
-        this.gl.bindRenderbuffer(this.gl.RENDERBUFFER, buffer);
-        this.gl.renderbufferStorage(this.gl.RENDERBUFFER, this.gl.RGBA4, this.gl.drawingBufferWidth, this.gl.drawingBufferHeight);
-        return buffer;
-    }
-    */
 }
