@@ -1,4 +1,4 @@
-//import { Renderable } from '../renderables/renderable'
+import { Renderable } from '../renderables/renderable';
 import { ShaderLocations } from './shader_locations';
 
 export abstract class Shader {
@@ -47,9 +47,7 @@ export abstract class Shader {
       return shader
     }
 
-    /*
     abstract render(buffer: WebGLFramebuffer, ...renderables: Renderable[]): void;
 
     abstract render(_: WebGLTexture): void;
-    */
 }
