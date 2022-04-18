@@ -1,4 +1,4 @@
-import { Renderable } from '../renderables/renderable'
+import { Renderable } from '../renderables/renderable';
 import { ShaderLocations } from './shader_locations';
 
 export abstract class Shader {
@@ -30,7 +30,7 @@ export abstract class Shader {
       this.locations = new ShaderLocations(gl, program);
     }
 
-    private compileShader (gl: WebGLRenderingContext, type: number, src: string): WebGLShader {
+    private compileShader (gl: WebGL2RenderingContext, type: number, src: string): WebGLShader {
       const shader = gl.createShader(type)
       if (shader === null) {
         throw new Error('Unable to create a WebGLShader.')
@@ -47,5 +47,7 @@ export abstract class Shader {
       return shader
     }
 
-    abstract render(_: Renderable | WebGLTexture): void;
+    abstract render(buffer: WebGLFramebuffer | null, ...renderables: Renderable[]): void;
+
+    abstract render(_: WebGLTexture): void;
 }
