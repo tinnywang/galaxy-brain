@@ -8,12 +8,7 @@ import WebGL2 from '../../gl';
 const NUM_PASSES = 4;
 
 export interface TransparentShaderProps {
-    opaque: OpaqueProps;
-}
-
-interface OpaqueProps {
-    depthTexture: WebGLTexture;
-    colorTexture: WebGLTexture;
+    opaqueDepthTexture: WebGLTexture;
 }
 
 export class TransparentShader extends Shader {
@@ -49,7 +44,7 @@ export class TransparentShader extends Shader {
 
         // Texture units 0 and 1 are used for the depth peel read/write textures.
         this.gl.activeTexture(this.gl.TEXTURE2);
-        this.gl.bindTexture(this.gl.TEXTURE_2D, this.props.opaque.depthTexture);
+        this.gl.bindTexture(this.gl.TEXTURE_2D, this.props.opaqueDepthTexture);
         this.gl.uniform1i(this.locations.getUniform('opaqueDepthTexture'), 2);
 
         for (let i = 0; i < NUM_PASSES; i++) {

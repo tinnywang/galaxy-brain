@@ -1,6 +1,6 @@
 import $ from "jquery";
 import WebGL2 from "./gl";
-import { Cube, Cube2, Cube3 } from "./renderables/cube";
+import { Cube, Cube2 } from "./renderables/cube";
 import { FlatShader } from "./shaders/flat/shader";
 import { TransparentShader } from "./shaders/transparent/shader";
 
@@ -43,7 +43,7 @@ $(() => {
 
     const flatShader = new FlatShader(gl);
     const transparentShader = new TransparentShader(gl, {
-      opaque: { depthTexture, colorTexture },
+      opaqueDepthTexture: depthTexture,
     });
 
     const path =
@@ -55,7 +55,7 @@ $(() => {
       const render = (_: DOMHighResTimeStamp) => {
         gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
 
-        flatShader.render(framebuffer, new Cube(gl, cube), new Cube3(gl, cube));
+        flatShader.render(framebuffer, new Cube(gl, cube));
         transparentShader.render(framebuffer, new Cube2(gl, cube));
 
         gl.bindFramebuffer(gl.READ_FRAMEBUFFER, framebuffer);

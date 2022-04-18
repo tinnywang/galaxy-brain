@@ -16,7 +16,7 @@ class Matrix {
 
   readonly modelViewProjection: mat4;
 
-  constructor(gl: WebGLRenderingContext, model?: mat4) {
+  constructor(gl: WebGL2RenderingContext, model?: mat4) {
     this.view = mat4.lookAt(mat4.create(), EYE, CENTER, UP);
     this.projection = mat4.perspective(
       mat4.create(),

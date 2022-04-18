@@ -3,7 +3,7 @@ import { Object } from "../object";
 import { Renderable } from "./renderable";
 
 export class Cube extends Renderable {
-  constructor(gl: WebGLRenderingContext, o: Object) {
+  constructor(gl: WebGL2RenderingContext, o: Object) {
     let model = mat4.rotateX(
       mat4.create(),
       mat4.create(),
@@ -15,7 +15,7 @@ export class Cube extends Renderable {
 }
 
 export class Cube2 extends Renderable {
-  constructor(gl: WebGLRenderingContext, o: Object) {
+  constructor(gl: WebGL2RenderingContext, o: Object) {
     const model = mat4.scale(mat4.create(), mat4.create(), vec3.fromValues(2, 2, 2));
     super(gl, o, model);
   }

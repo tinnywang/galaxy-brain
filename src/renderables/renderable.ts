@@ -11,14 +11,14 @@ interface Buffer {
 export abstract class Renderable {
   readonly buffer: Buffer;
 
-  readonly gl: WebGLRenderingContext;
+  readonly gl: WebGL2RenderingContext;
 
   readonly matrix: Matrix;
 
   readonly object: Object;
 
   constructor(
-    gl: WebGLRenderingContext,
+    gl: WebGL2RenderingContext,
     o: Object,
     model?: mat4
   ) {
