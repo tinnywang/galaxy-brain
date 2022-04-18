@@ -40,7 +40,6 @@ export class TransparentShader extends Shader {
         this.locations.setUniform('modelViewProjectionMatrix');
         this.locations.setUniform('color');
         this.locations.setUniform('opaqueDepthTexture');
-        this.locations.setUniform('opaqueColorTexture');
         this.locations.setUniform('peelDepthTexture');
         this.locations.setUniform('shouldDepthPeel');
     }
@@ -52,10 +51,6 @@ export class TransparentShader extends Shader {
         this.gl.activeTexture(this.gl.TEXTURE2);
         this.gl.bindTexture(this.gl.TEXTURE_2D, this.props.opaque.depthTexture);
         this.gl.uniform1i(this.locations.getUniform('opaqueDepthTexture'), 2);
-
-        this.gl.activeTexture(this.gl.TEXTURE3);
-        this.gl.bindTexture(this.gl.TEXTURE_2D, this.props.opaque.colorTexture);
-        this.gl.uniform1i(this.locations.getUniform('opaqueColorTexture'), 3);
 
         for (let i = 0; i < NUM_PASSES; i++) {
             this.depthPeel(i);

@@ -7,7 +7,6 @@ in float fragDepth;
 out vec4 fragColor;
 
 uniform sampler2D opaqueDepthTexture;
-uniform sampler2D opaqueColorTexture;
 uniform sampler2D peelDepthTexture;
 uniform highp vec3 color;
 uniform bool shouldDepthPeel;
@@ -24,7 +23,7 @@ void main() {
     if (shouldDepthPeel && gl_FragDepth <= peelDepth) {
         discard;
     } else if (opaqueDepth < gl_FragDepth) {
-        fragColor = texelFetch(opaqueColorTexture, textCoord, 0);
+        discard;
     } else {
         fragColor = vec4(color, 0.8);
     }
