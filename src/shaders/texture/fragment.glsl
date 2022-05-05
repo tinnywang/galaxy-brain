@@ -7,8 +7,6 @@ in vec2 texturePosition;
 out vec4 fragColor;
 
 uniform sampler2D textureImage;
-uniform int width;
-uniform int height;
 
 const float FXAA_EDGE_THRESHOLD  = 0.125;
 const float FXAA_EDGE_THRESHOLD_MIN = 0.0625;
@@ -24,8 +22,9 @@ float luma(vec4 rgba) {
 }
 
 vec2 textureCoordOffset(vec2 position, vec2 offset) {
-    float x = offset.x / float(width);
-    float y = offset.y / float(height);
+    ivec2 ts = textureSize(textureImage, 0);
+    float x = offset.x / float(ts.x);
+    float y = offset.y / float(ts.y);
 
     return position + vec2(x, y);
 }
@@ -69,40 +68,44 @@ bool isHorizontalEdge(mat3 lumaMat) {
 struct EdgeEnd {
     vec2 negative;
     vec2 positive;
+    vec2 pixelOffset;
 };
 
 EdgeEnd endOfEdgeSearch(mat3 lumaMat) {
+    vec2 texelSize = 1.0 / vec2(textureSize(textureImage, 0));
     float lumaN, lumaP;
-    vec2 offset;
+    vec2 pixelOffset, edgeOffset;
 
+    // TODO: check pixelOffset for horiztonal edge. Should it be negated from the get-go?
     if (isHorizontalEdge(lumaMat)) {
         lumaN = lumaMat[1][2]; // south
         lumaP = lumaMat[1][0]; // north
-        offset = vec2(0, -1);
+        pixelOffset = vec2(0, -texelSize.y);
+        edgeOffset = vec2(texelSize.x, 0);
     } else {
         lumaN = lumaMat[0][1]; // west
         lumaP = lumaMat[2][1]; // east
-        offset = vec2(1, 0);
+        pixelOffset = vec2(texelSize.x, 0);
+        edgeOffset = vec2(0, -texelSize.y);
     }
-
-    vec2 posN = textureCoordOffset(texturePosition, offset * -1.0);
-    vec2 posP = textureCoordOffset(texturePosition, offset);
 
     float gradientN = abs(lumaN - lumaMat[1][1]);
     float gradientP = abs(lumaP - lumaMat[1][1]);
     if (gradientP < gradientN) {
-        offset *= -1.0;
+        pixelOffset *= -1.0;
     }
 
+    vec2 posN = texturePosition;
+    vec2 posP = texturePosition;
     bool  doneN, doneP;
     float lumaEndN, lumaEndP;
 
     for (int i = 0; i < FXAA_SEARCH_STEPS; i++) {
         if (!doneN) {
-            lumaEndN = luma(texture(textureImage, textureCoordOffset(posN, offset)));
+            lumaEndN = luma(texture(textureImage, posN - edgeOffset));
         }
         if (!doneP) {
-            lumaEndP = luma(texture(textureImage, textureCoordOffset(posP, offset)));
+            lumaEndP = luma(texture(textureImage, posP + edgeOffset));
         }
 
         doneN = doneN || abs(lumaEndN - lumaN) >= gradientN;
@@ -113,16 +116,17 @@ EdgeEnd endOfEdgeSearch(mat3 lumaMat) {
         }
 
         if (!doneN) {
-            posN -= offset;
+            posN -= edgeOffset;
         }
         if (!doneP) {
-            posP += offset;
+            posP += edgeOffset;
         }
     }
 
     EdgeEnd end;
     end.negative = posN;
     end.positive = posP;
+    end.pixelOffset = pixelOffset;
 
     return end;
 }
@@ -150,10 +154,18 @@ void main(void) {
         fragColor = rgba;
     } else {
         float blend = blendFactor(lm, range);
+        EdgeEnd end = endOfEdgeSearch(lm);
+        float distance;
+        float edgeBlend;
+
         if (isHorizontalEdge(lm)) {
-            fragColor = vec4(1, 1, 0, 1);
+            distance = min(texturePosition.x - end.negative.x, end.positive.x - texturePosition.x);
+            edgeBlend = 0.5 - distance / (end.positive.x - end.negative.x);
         } else {
-            fragColor = vec4(0, 1, 1, 1);
+            distance = min(end.negative.y - texturePosition.y, texturePosition.y - end.positive.y);
+            edgeBlend = 0.5 - distance / (end.negative.y - end.positive.y);
         }
+
+        fragColor = texture(textureImage, texturePosition + end.pixelOffset * edgeBlend);
     }
 }
