@@ -1,6 +1,6 @@
 import $ from "jquery";
 import WebGL2 from "./gl";
-import { Cube, Cube2 } from "./renderables/cube";
+import { Cube } from "./renderables/cube";
 import { FlatShader } from "./shaders/flat/shader";
 import { TransparentShader } from "./shaders/transparent/shader";
 
@@ -55,8 +55,8 @@ $(() => {
       const render = (_: DOMHighResTimeStamp) => {
         gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
 
-        flatShader.render(framebuffer, new Cube(gl, cube));
-        transparentShader.render(framebuffer, new Cube2(gl, cube));
+        flatShader.render(framebuffer);
+        transparentShader.render(framebuffer, new Cube(gl, cube));
 
         gl.bindFramebuffer(gl.READ_FRAMEBUFFER, framebuffer);
         gl.bindFramebuffer(gl.DRAW_FRAMEBUFFER, null);

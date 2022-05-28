@@ -131,11 +131,25 @@ EdgeEnd endOfEdgeSearch(mat3 lumaMat) {
     return end;
 }
 
-float blendFactor(mat3 lumaMat, float localContrast) {
-    float lumaLowpass = (lumaMat[0][0] + lumaMat[1][2] + lumaMat[2][1] + lumaMat[0][1]) * 0.25;
+float subpixelAliasing(mat3 lumaMat, float localContrast) {
+    float lumaLowpass = (lumaMat[1][0] + lumaMat[0][1] + lumaMat[2][1] + lumaMat[1][2]) * 0.25;
     float pixelContrast = abs(lumaLowpass - lumaMat[1][1]);
     float blend = max(0.0, (pixelContrast / localContrast) - FXAA_SUBPIX_TRIM) * FXAA_SUBPIX_TRIM_SCALE;
     return min(FXAA_SUBPIX_CAP, blend);
+}
+
+vec4 lowpass(vec2 position, mat3 lumaMat, float localContrast) {
+    vec4 rgbN = texture(textureImage, textureCoordOffset(position, vec2(0, -1)));
+    vec4 rgbW = texture(textureImage, textureCoordOffset(position, vec2(-1, 0)));
+    vec4 rgbM = texture(textureImage, position);
+    vec4 rgbE = texture(textureImage, textureCoordOffset(position, vec2(1, 0)));
+    vec4 rgbS = texture(textureImage, textureCoordOffset(position, vec2(0, 1)));
+    vec4 rgbNW = texture(textureImage, textureCoordOffset(position, vec2(-1, -1)));
+    vec4 rgbNE = texture(textureImage, textureCoordOffset(position, vec2(1, -1)));
+    vec4 rgbSW = texture(textureImage, textureCoordOffset(position, vec2(-1, 1)));
+    vec4 rgbSE = texture(textureImage, textureCoordOffset(position, vec2(1, 1)));
+    return (rgbN + rgbW + rgbM + rgbE + rgbS + rgbNW + rgbNE + rgbSW + rgbSE) / 9.0;
+    //return (rgbN + rgbW + rgbM + rgbE + rgbS + rgbNW + rgbNE + rgbSW + rgbSE) * subpixelAliasing(lumaMat, localContrast) / 9.0;
 }
 
 void main(void) {
@@ -153,19 +167,22 @@ void main(void) {
     if(range < max(FXAA_EDGE_THRESHOLD_MIN, rangeMax * FXAA_EDGE_THRESHOLD)) {
         fragColor = rgba;
     } else {
-        float blend = blendFactor(lm, range);
         EdgeEnd end = endOfEdgeSearch(lm);
         float distance;
         float edgeBlend;
+        float sa = subpixelAliasing(lm, range);
+        vec2 subpixelTexturePosition = texturePosition;
 
         if (isHorizontalEdge(lm)) {
             distance = min(texturePosition.x - end.negative.x, end.positive.x - texturePosition.x);
-            edgeBlend = 0.5 - distance / (end.positive.x - end.negative.x);
+            edgeBlend = distance / (end.positive.x - end.negative.x);
+            subpixelTexturePosition.y += min(edgeBlend, sa) * float(FXAA_SEARCH_STEPS);
         } else {
             distance = min(end.negative.y - texturePosition.y, texturePosition.y - end.positive.y);
-            edgeBlend = 0.5 - distance / (end.negative.y - end.positive.y);
+            edgeBlend = distance / (end.negative.y - end.positive.y);
+            subpixelTexturePosition.x += min(edgeBlend, sa) * float(FXAA_SEARCH_STEPS);
         }
 
-        fragColor = texture(textureImage, texturePosition + end.pixelOffset * edgeBlend);
+        fragColor = texture(textureImage, subpixelTexturePosition);
     }
 }
