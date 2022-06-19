@@ -7,81 +7,71 @@ in vec2 texturePosition;
 out vec4 fragColor;
 
 uniform sampler2D textureImage;
-uniform int width;
-uniform int height;
 
 const float FXAA_EDGE_THRESHOLD  = 0.125;
 const float FXAA_EDGE_THRESHOLD_MIN = 0.0625;
 
 // Luminance conversion
 // http://developer.download.nvidia.com/assets/gamedev/files/sdk/11/FXAA_WhitePaper.pdf
-float luma(vec4 rgba) {
+float luminance(vec4 rgba) {
     return rgba.g * (0.587/0.299) + rgba.x;
 }
 
-bool inTextureCoordRange(float v) {
-    return v >= 0.0 && v <= 1.0;
+vec2 texelSize(void) {
+    ivec2 ts = textureSize(textureImage, 0);
+    return 1.0 / vec2(ts);
 }
 
-vec4 fxaaTextureOffset(int xShift, int yShift) {
-    float x = float(xShift) / float(width);
-    float y = float(yShift) / float(height);
-
-    vec2 coords = texturePosition + vec2(x, y);
+vec4 textureAtOffset(float x, float y) {
+    vec2 ts = texelSize();
+    vec2 coords = texturePosition + vec2(x * ts.x, y * ts.y);
     return texture(textureImage, coords);
 }
 
-mat3 lumaMatrix(void) {
-    mat3 matrix;
+struct Luma {
+    float n, s, e, w, ne, nw, se, sw, m;
+    float min, max, range;
+};
 
-    for (int row = 0; row < 3; row++) {
-        for (int col = 0; col < 3; col++) {
-            matrix[col][row] = luma(fxaaTextureOffset(row - 1, col - 1));
-        }
-    }
+Luma getLuma(void) {
+    Luma luma;
 
-    return matrix;
+    luma.n = luminance(textureAtOffset(0.0, 1.0));
+    luma.s = luminance(textureAtOffset(0.0, -1.0));
+    luma.e = luminance(textureAtOffset(1.0, 0.0));
+    luma.w = luminance(textureAtOffset(-1.0, 0.0));
+    luma.ne = luminance(textureAtOffset(1.0, 1.0));
+    luma.nw = luminance(textureAtOffset(-1.0, 1.0));
+    luma.se = luminance(textureAtOffset(1.0, -1.0));
+    luma.sw = luminance(textureAtOffset(-1.0, -1.0));
+    luma.m = luminance(textureAtOffset(0.0, 0.0));
+
+    // Calculate local contrast.
+    luma.min = min(luma.m, min(min(luma.n, luma.w), min(luma.e, luma.s)));
+    luma.max = max(luma.m, max(max(luma.n, luma.w), max(luma.e, luma.s)));
+    luma.range = luma.max - luma.min;
+
+    return luma;
 }
 
-float weightedAvgMagnitude(mat3 weights, mat3 lumaMat) {
-    float avg = 0.0;
-
-    for (int i = 0; i < 3; i++) {
-        avg += abs(dot(lumaMat[i], weights[i]));
-    }
-
-    return avg;
-}
-
-bool isHorizontalEdge(mat3 lumaMat) {
-    const mat3 weights = mat3(
-        0.25, -0.5, 0.25,
-        0.5, -1, 0.5,
-        0.25, -0.5, 0.25
-    );
-
-    float edgeVert = weightedAvgMagnitude(weights, lumaMat);
-    float edgeHorz = weightedAvgMagnitude(weights, transpose(lumaMat));
-
-    return edgeHorz >= edgeVert;
+bool isHorizontalEdge(Luma luma) {
+    float vertical = abs(0.25 * luma.nw - 0.5 * luma.n + 0.25 * luma.ne) +
+        abs(0.5 * luma.w - luma.m + 0.5 * luma.e) +
+        abs(0.25 * luma.sw - 0.5 * luma.s + 0.25 * luma.se);
+    float horizontal = abs(0.25 * luma.nw - 0.5 * luma.w + 0.25 * luma.sw) +
+        abs(0.5 * luma.n - luma.m + 0.5 * luma.s) +
+        abs(0.25 * luma.ne - 0.5 * luma.e + 0.25 * luma.se);
+    return horizontal >= vertical;
 }
 
 void main(void) {
     vec4 rgba = texture(textureImage, texturePosition);
 
-    // Matrices are column-major.
-    mat3 lm = lumaMatrix();
-
-    // Local contrast check
-    float rangeMin = min(lm[1][1], min(min(lm[1][0], lm[0][1]), min(lm[2][1], lm[1][2])));
-    float rangeMax = max(lm[1][1], max(max(lm[1][0], lm[0][1]), max(lm[2][1], lm[1][2])));
-
-    float range = rangeMax - rangeMin;
-
-    if(range < max(FXAA_EDGE_THRESHOLD_MIN, rangeMax * FXAA_EDGE_THRESHOLD)) {
-        fragColor = rgba;
+    Luma luma = getLuma();
+    if (luma.range < max(FXAA_EDGE_THRESHOLD_MIN, luma.max * FXAA_EDGE_THRESHOLD)) {
+      fragColor = rgba;
     } else {
-        if (isHorizontalEdge(lm)) {
+        if (isHorizontalEdge(luma)) {
             fragColor = vec4(1, 1, 0, 1);
         } else {
             fragColor = vec4(0, 1, 1, 1);
