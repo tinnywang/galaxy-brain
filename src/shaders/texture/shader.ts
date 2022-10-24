@@ -21,6 +21,7 @@ export class TextureShader extends Shader {
 
         this.locations.setAttribute('vertexPosition');
         this.locations.setUniform('textureImage');
+        this.locations.setUniform('antiAlias');
 
         this.verticesBuffer = gl.createBuffer();
         gl.bindBuffer(this.gl.ARRAY_BUFFER, this.verticesBuffer);
@@ -42,6 +43,7 @@ export class TextureShader extends Shader {
         this.gl.texParameteri(this.gl.TEXTURE_2D, this.gl.TEXTURE_MIN_FILTER, this.gl.LINEAR);
 
         this.gl.uniform1i(this.locations.getUniform('textureImage'), 0);
+        this.gl.uniform1i(this.locations.getUniform('antiAlias'), 1);
         this.gl.drawArrays(this.gl.TRIANGLES, 0, TextureShader.vertices.length);
     }
 }
