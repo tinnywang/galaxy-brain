@@ -72,7 +72,7 @@ $(() => {
           gl.drawingBufferWidth,
           gl.drawingBufferHeight,
           gl.COLOR_BUFFER_BIT,
-          gl.NEAREST
+          gl.LINEAR
         );
 
         gl.flush();

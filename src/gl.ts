@@ -20,7 +20,7 @@ class WebGL2 {
     gl: WebGL2RenderingContext,
     n: number
   ): Array<WebGLTexture> {
-    return WebGL2.createTextures(gl, n, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE);
+    return WebGL2.createTextures(gl, n, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, gl.LINEAR);
   }
 
   static createDepthTextures(
@@ -32,7 +32,8 @@ class WebGL2 {
       n,
       gl.DEPTH_COMPONENT24,
       gl.DEPTH_COMPONENT,
-      gl.UNSIGNED_INT
+      gl.UNSIGNED_INT,
+      gl.NEAREST,
     );
   }
 
@@ -41,7 +42,8 @@ class WebGL2 {
     n: number,
     format: number,
     attachment: number,
-    type: number
+    type: number,
+    filter: number
   ): Array<WebGLTexture> {
     const textures = new Array<WebGLTexture>();
 
@@ -64,8 +66,8 @@ class WebGL2 {
         null
       );
 
-      gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.NEAREST);
-      gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.NEAREST);
+      gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, filter);
+      gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, filter);
       gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_COMPARE_MODE, gl.NONE);
 
       textures.push(texture);
