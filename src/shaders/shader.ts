@@ -6,7 +6,7 @@ export abstract class Shader {
     readonly program: WebGLProgram;
     readonly locations: ShaderLocations;
 
-    constructor (gl: WebGL2RenderingContext, vertexSrc: string, fragmentSrc: string) {
+    constructor(gl: WebGL2RenderingContext, vertexSrc: string, fragmentSrc: string) {
       const program = gl.createProgram()
       if (program === null) {
         throw new Error('Unable to create a WebGLProgram.')
@@ -30,7 +30,7 @@ export abstract class Shader {
       this.locations = new ShaderLocations(gl, program);
     }
 
-    private compileShader (gl: WebGL2RenderingContext, type: number, src: string): WebGLShader {
+    private compileShader(gl: WebGL2RenderingContext, type: number, src: string): WebGLShader {
       const shader = gl.createShader(type)
       if (shader === null) {
         throw new Error('Unable to create a WebGLShader.')
@@ -47,7 +47,7 @@ export abstract class Shader {
       return shader
     }
 
-    abstract render(buffer: WebGLFramebuffer | null, ...renderables: Renderable[]): void;
-
-    abstract render(_: WebGLTexture): void;
+    render(_framebuffer: WebGLFramebuffer, ..._renderables: Renderable[]) {
+      this.gl.useProgram(this.program);
+    }
 }

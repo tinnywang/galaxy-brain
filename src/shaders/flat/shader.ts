@@ -14,7 +14,7 @@ export class FlatShader extends Shader {
     }
 
     render(drawFramebuffer: WebGLFramebuffer, ...renderables: Renderable[]) {
-      this.gl.useProgram(this.program)
+      super.render(drawFramebuffer, ...renderables);
 
       this.gl.enable(this.gl.DEPTH_TEST);
       this.gl.depthFunc(this.gl.LEQUAL)

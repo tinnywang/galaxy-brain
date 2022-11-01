@@ -1,7 +1,7 @@
 import vertexSrc from './vertex.glsl';
 import fragmentSrc from './fragment.glsl';
 import { Shader } from '../shader';
-import { TextureShader } from '../texture/shader';
+import { PostProcessing } from '../post_processing/shader';
 import { Renderable } from '../../renderables/renderable';
 import WebGL2 from '../../gl';
 
@@ -14,7 +14,7 @@ export interface TransparentShaderProps {
 export class TransparentShader extends Shader {
     private props: TransparentShaderProps;
 
-    private textureShader: TextureShader;
+    private postProcessing: PostProcessing;
 
     private framebuffer: WebGLFramebuffer | null;
     private depthTextures: Array<WebGLTexture>
@@ -25,7 +25,7 @@ export class TransparentShader extends Shader {
 
         this.props = props;
 
-        this.textureShader = new TextureShader(gl);
+        this.postProcessing = new PostProcessing(gl);
 
         this.framebuffer = gl.createFramebuffer();
         this.depthTextures = WebGL2.createDepthTextures(this.gl, 2);
@@ -40,7 +40,7 @@ export class TransparentShader extends Shader {
     }
 
     render(drawFramebuffer: WebGLFramebuffer, ...renderables: Renderable[]) {
-        this.gl.useProgram(this.program);
+        super.render(drawFramebuffer, ...renderables);
 
         // Texture units 0 and 1 are used for the depth peel read/write textures.
         this.gl.activeTexture(this.gl.TEXTURE2);
@@ -70,7 +70,7 @@ export class TransparentShader extends Shader {
             });
         }
 
-        // Alpha-blend color buffers back-to-front.
+        // Alpha-blend color textures back-to-front.
         this.gl.bindFramebuffer(this.gl.READ_FRAMEBUFFER, this.framebuffer);
         this.gl.bindFramebuffer(this.gl.DRAW_FRAMEBUFFER, drawFramebuffer);
 
@@ -79,7 +79,7 @@ export class TransparentShader extends Shader {
         this.gl.blendFunc(this.gl.SRC_ALPHA, this.gl.ONE_MINUS_SRC_ALPHA);
 
         for (let i = NUM_PASSES - 1; i >= 0; i--) {
-            this.textureShader.render(this.colorTextures[i]);
+            this.postProcessing.render(this.colorTextures[i]);
         }
     }
 
