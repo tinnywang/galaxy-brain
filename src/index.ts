@@ -3,6 +3,7 @@ import WebGL2 from "./gl";
 import { Cube, Cube2 } from "./renderables/cube";
 import { FlatShader } from "./shaders/flat/shader";
 import { TransparentShader } from "./shaders/transparent/shader";
+import { FXAA } from "./shaders/fxaa/shader";
 
 $(() => {
   const $canvas: JQuery<HTMLCanvasElement> = $("canvas");
@@ -45,6 +46,7 @@ $(() => {
     const transparentShader = new TransparentShader(gl, {
       opaqueDepthTexture: depthTexture,
     });
+    const fxaa = new FXAA(gl);
 
     const path =
       "https://raw.githubusercontent.com/tinnywang/rubiks-cube/master/models/rubiks-cube.json";
@@ -62,18 +64,9 @@ $(() => {
         gl.bindFramebuffer(gl.DRAW_FRAMEBUFFER, null);
 
         gl.disable(gl.BLEND);
-        gl.blitFramebuffer(
-          0,
-          0,
-          gl.drawingBufferWidth,
-          gl.drawingBufferHeight,
-          0,
-          0,
-          gl.drawingBufferWidth,
-          gl.drawingBufferHeight,
-          gl.COLOR_BUFFER_BIT,
-          gl.LINEAR
-        );
+
+        // Post-processing effects.
+        fxaa.render(colorTexture);
 
         gl.flush();
         requestAnimationFrame(render);
