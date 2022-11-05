@@ -8,7 +8,7 @@ out vec4 fragColor;
 
 uniform sampler2D textureImage;
 
-const int FXAA_SEARCH_STEPS = 3;
+const int FXAA_SEARCH_STEPS = 12;
 const float FXAA_EDGE_THRESHOLD = 0.125;
 const float FXAA_EDGE_THRESHOLD_MIN = 0.0625;
 const float FXAA_SUBPIX_TRIM = 0.25;
@@ -28,7 +28,7 @@ vec2 texelSize(void) {
 
 vec4 textureAtOffset(vec2 offset) {
     vec2 ts = texelSize();
-    vec2 coords = texturePosition + vec2(offset.x * ts.x, offset.y * ts.y);
+    vec2 coords = texturePosition + offset * ts;
     return texture(textureImage, coords);
 }
 
@@ -75,10 +75,22 @@ float subPixelBlendFactor(Luma luma) {
     return min(FXAA_SUBPIX_CAP, blendL);
 }
 
+/*
+float subPixelBlendFactor(Luma luma) {
+    float bf = 2.0 * (luma.n + luma.e + luma.s + luma.w);
+    bf += luma.ne + luma.nw + luma.se + luma.sw;
+    bf /= 12.0;
+    bf = clamp(bf / luma.range, 0.0, 1.0);
+    bf = smoothstep(0.0, 1.0, bf);
+    return bf * bf;
+}
+*/
+
 struct Edge {
     bool isHorizontal;
     vec2 perpendicularOffset;
     vec2 parallelOffset;
+    float luma;
     vec2 fxaaOffset;
 };
 
@@ -92,15 +104,15 @@ Edge getEdge(Luma luma) {
     if (edge.isHorizontal) {
         edge.perpendicularOffset = vec2(0, 1);
         edge.parallelOffset = vec2(1, 0);
-        lumaN = 0.5 * (luma.s + luma.m);
-        lumaP = 0.5 * (luma.n + luma.m);
+        lumaN = luma.s;
+        lumaP = luma.n;
         gradientN = abs(luma.s - luma.m);
         gradientP = abs(luma.n - luma.m);
     } else {
         edge.perpendicularOffset = vec2(1, 0);
         edge.parallelOffset = vec2(0, 1);
-        lumaN = 0.5 * (luma.w + luma.m);
-        lumaP = 0.5 * (luma.e + luma.m);
+        lumaN = luma.w;
+        lumaP = luma.e;
         gradientN = abs(luma.w - luma.m);
         gradientP = abs(luma.e - luma.m);
     }
@@ -109,22 +121,25 @@ Edge getEdge(Luma luma) {
 
     if (gradientP < gradientN) {
         edge.perpendicularOffset *= -1.0;
+        edge.luma = 0.5 * (lumaN + luma.m);
+    } else {
+        edge.luma = 0.5 * (lumaP + luma.m);
     }
 
     float lumaEndN, lumaEndP;
     bool doneN, doneP;
-    vec2 offsetN = -1.0 * edge.parallelOffset;
-    vec2 offsetP = edge.parallelOffset;
+    vec2 offsetN = -edge.parallelOffset + 0.5 * edge.perpendicularOffset;
+    vec2 offsetP = edge.parallelOffset + 0.5 * edge.perpendicularOffset;
 
     for (int i = 0; i < FXAA_SEARCH_STEPS; i++) {
         if (!doneN) {
-            lumaEndN = luminance(textureAtOffset(offsetN + 0.5 * edge.perpendicularOffset));
+            lumaEndN = luminance(textureAtOffset(offsetN)) - edge.luma;
         }
         if (!doneP) {
-            lumaEndP = luminance(textureAtOffset(offsetP + 0.5 * edge.perpendicularOffset));
+            lumaEndP = luminance(textureAtOffset(offsetP)) - edge.luma;
         }
-         doneN = doneN || abs(lumaEndN - lumaN) >= gradientScaled;
-         doneP = doneP || abs(lumaEndP - lumaP) >= gradientScaled;
+         doneN = doneN || abs(lumaEndN) >= gradientScaled;
+         doneP = doneP || abs(lumaEndP) >= gradientScaled;
         if (doneN && doneP) {
             break;
         }
@@ -145,19 +160,12 @@ Edge getEdge(Luma luma) {
         distP = abs(offsetP.y);
     }
 
-    float lumaAvg, lumaEnd;
-    if (distN < distP) {
-        lumaAvg = lumaN;
-        lumaEnd = lumaEndN - lumaN;
-    } else {
-        lumaAvg = lumaP;
-        lumaEnd = lumaEndP - lumaP;
-    }
+    float lumaEnd = distN < distP ? lumaEndN : lumaEndP;
+    float pixelOffset = 0.5 - min(distN, distP) / (distN + distP);
+    float offset = (lumaEnd < 0.0) != (luma.m < edge.luma) ? pixelOffset : 0.0;
+    offset = max(offset, subPixelBlendFactor(luma));
 
-    vec2 offset = (lumaEnd < 0.0) != (luma.m < lumaAvg) ? edge.perpendicularOffset : vec2(0, 0);
-    float edgeBlend = 0.5 - min(distN, distP) / (distN + distP);
-
-    edge.fxaaOffset = offset * max(edgeBlend, subPixelBlendFactor(luma));
+    edge.fxaaOffset = offset * edge.perpendicularOffset;
     return edge;
 }
 
