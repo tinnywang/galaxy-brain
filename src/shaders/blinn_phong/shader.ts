@@ -3,7 +3,7 @@ import fragmentSrc from './fragment.glsl'
 import { Shader } from '../shader'
 import { Renderable } from '../../renderables/renderable'
 
-export class FlatShader extends Shader {
+export class BlinnPhongShader extends Shader {
 
     constructor (gl: WebGL2RenderingContext) {
       super(gl, vertexSrc, fragmentSrc)

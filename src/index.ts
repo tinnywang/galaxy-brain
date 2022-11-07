@@ -1,7 +1,7 @@
 import $ from "jquery";
 import WebGL2 from "./gl";
 import { Cube, Cube2 } from "./renderables/cube";
-import { FlatShader } from "./shaders/flat/shader";
+import { BlinnPhongShader } from "./shaders/blinn_phong/shader";
 import { TransparentShader } from "./shaders/transparent/shader";
 import { FXAA } from "./shaders/fxaa/shader";
 
@@ -42,7 +42,7 @@ $(() => {
       0
     );
 
-    const flatShader = new FlatShader(gl);
+    const blinnPhongShader = new BlinnPhongShader(gl);
     const transparentShader = new TransparentShader(gl, {
       opaqueDepthTexture: depthTexture,
     });
@@ -57,7 +57,7 @@ $(() => {
       const render = (_: DOMHighResTimeStamp) => {
         gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
 
-        flatShader.render(framebuffer, new Cube(gl, cube));
+        blinnPhongShader.render(framebuffer, new Cube(gl, cube));
         transparentShader.render(framebuffer, new Cube2(gl, cube));
 
         gl.bindFramebuffer(gl.READ_FRAMEBUFFER, framebuffer);
