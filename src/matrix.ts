@@ -10,11 +10,9 @@ const FAR = 100;
 class Matrix {
   private view: mat4;
 
-  private projection: mat4;
+  readonly projection: mat4;
 
-  private modelView: mat4;
-
-  readonly modelViewProjection: mat4;
+  readonly modelView: mat4;
 
   constructor(gl: WebGL2RenderingContext, model?: mat4) {
     this.view = mat4.lookAt(mat4.create(), EYE, CENTER, UP);
@@ -29,11 +27,6 @@ class Matrix {
       mat4.create(),
       this.view,
       model || mat4.create()
-    );
-    this.modelViewProjection = mat4.multiply(
-      mat4.create(),
-      this.projection,
-      this.modelView
     );
   }
 }
