@@ -1,13 +1,14 @@
 import { vec3, glMatrix, mat4 } from "gl-matrix";
 
-const EYE = vec3.fromValues(0, 0, 10);
-const CENTER = vec3.fromValues(0, 0, 0);
-const UP = vec3.fromValues(0, 1, 0);
-const FOV = glMatrix.toRadian(90);
-const NEAR = 1;
-const FAR = 100;
-
 class Matrix {
+  static readonly EYE = vec3.fromValues(0, 0, 10);
+
+  private static readonly CENTER = vec3.fromValues(0, 0, 0);
+  private static readonly UP = vec3.fromValues(0, 1, 0);
+  private static readonly FOV = glMatrix.toRadian(90);
+  private static readonly NEAR = 1;
+  private static readonly FAR = 100;
+
   private view: mat4;
 
   readonly projection: mat4;
@@ -15,13 +16,13 @@ class Matrix {
   readonly modelView: mat4;
 
   constructor(gl: WebGL2RenderingContext, model?: mat4) {
-    this.view = mat4.lookAt(mat4.create(), EYE, CENTER, UP);
+    this.view = mat4.lookAt(mat4.create(), Matrix.EYE, Matrix.CENTER, Matrix.UP);
     this.projection = mat4.perspective(
       mat4.create(),
-      FOV,
+      Matrix.FOV,
       gl.drawingBufferWidth / gl.drawingBufferHeight,
-      NEAR,
-      FAR
+      Matrix.NEAR,
+      Matrix.FAR
     );
     this.modelView = mat4.multiply(
       mat4.create(),

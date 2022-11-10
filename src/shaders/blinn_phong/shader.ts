@@ -2,6 +2,7 @@ import vertexSrc from './vertex.glsl'
 import fragmentSrc from './fragment.glsl'
 import { Shader } from '../shader'
 import { Renderable } from '../../renderables/renderable'
+import Matrix from '../../matrix'
 
 export class BlinnPhongShader extends Shader {
 
@@ -13,6 +14,7 @@ export class BlinnPhongShader extends Shader {
         this.locations.setUniform('projectionMatrix');
         this.locations.setUniform('color');
         this.locations.setAttribute('normal');
+        this.locations.setAttribute('eye');
     }
 
     render(drawFramebuffer: WebGLFramebuffer, ...renderables: Renderable[]) {
@@ -24,6 +26,8 @@ export class BlinnPhongShader extends Shader {
         this.gl.cullFace(this.gl.BACK)
 
         this.gl.bindFramebuffer(this.gl.DRAW_FRAMEBUFFER, drawFramebuffer);
+
+        this.gl.uniform3fv(this.locations.getUniform('eye'), Matrix.EYE);
 
         renderables.forEach((r) => {
             this.gl.bindBuffer(this.gl.ARRAY_BUFFER, r.buffer.vertices);
