@@ -4,6 +4,7 @@ import { Shader } from '../shader';
 import { PostProcessing } from '../post_processing/shader';
 import { Renderable } from '../../renderables/renderable';
 import WebGL2 from '../../gl';
+import { Light } from '../../light';
 
 const NUM_PASSES = 4;
 
@@ -40,8 +41,8 @@ export class TransparentShader extends Shader {
         this.locations.setUniform('shouldDepthPeel');
     }
 
-    render(drawFramebuffer: WebGLFramebuffer, ...renderables: Renderable[]) {
-        super.render(drawFramebuffer, ...renderables);
+    render(drawFramebuffer: WebGLFramebuffer, light: Light, ...renderables: Renderable[]) {
+        super.render(drawFramebuffer, light, ...renderables);
 
         // Texture units 0 and 1 are used for the depth peel read/write textures.
         this.gl.activeTexture(this.gl.TEXTURE2);

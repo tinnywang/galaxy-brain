@@ -3,6 +3,7 @@ import fragmentSrc from './fragment.glsl'
 import { Shader } from '../shader'
 import { Renderable } from '../../renderables/renderable'
 import Matrix from '../../matrix'
+import { Light } from '../../light'
 
 export class BlinnPhongShader extends Shader {
 
@@ -12,13 +13,21 @@ export class BlinnPhongShader extends Shader {
         this.locations.setAttribute('vertexPosition');
         this.locations.setUniform('modelViewMatrix');
         this.locations.setUniform('projectionMatrix');
-        this.locations.setUniform('color');
         this.locations.setAttribute('normal');
         this.locations.setAttribute('eye');
+
+        this.locations.setUniform('material.ambient');
+        this.locations.setUniform('material.diffuse');
+        this.locations.setUniform('material.specular');
+        this.locations.setUniform('material.specularExponent');
+
+        this.locations.setUniform('light.position');
+        this.locations.setUniform('light.color');
+        this.locations.setUniform('light.intensity');
     }
 
-    render(drawFramebuffer: WebGLFramebuffer, ...renderables: Renderable[]) {
-        super.render(drawFramebuffer, ...renderables);
+    render(drawFramebuffer: WebGLFramebuffer, light: Light, ...renderables: Renderable[]) {
+        super.render(drawFramebuffer, light, ...renderables);
 
         this.gl.enable(this.gl.DEPTH_TEST);
         this.gl.depthFunc(this.gl.LEQUAL)
@@ -38,10 +47,17 @@ export class BlinnPhongShader extends Shader {
             this.gl.uniformMatrix4fv(this.locations.getUniform('modelViewMatrix'), false, r.matrix.modelView);
             this.gl.uniformMatrix4fv(this.locations.getUniform('projectionMatrix'), false, r.matrix.projection);
 
+            this.gl.uniform3fv(this.locations.getUniform('light.position'), light.position);
+            this.gl.uniform3fv(this.locations.getUniform('light.color'), light.color);
+            this.gl.uniform1f(this.locations.getUniform('light.intensity'), light.intensity);
+
             let offset = 0
-            this.gl.bindBuffer(this.gl.ELEMENT_ARRAY_BUFFER, r.buffer.faces)
+            this.gl.bindBuffer(this.gl.ELEMENT_ARRAY_BUFFER, r.buffer.faces);
             r.object.faces.forEach((f) => {
-                this.gl.uniform3fv(this.locations.getUniform('color'), f.material.diffuse)
+                this.gl.uniform3fv(this.locations.getUniform('material.ambient'), f.material.diffuse);
+                this.gl.uniform3fv(this.locations.getUniform('material.diffuse'), f.material.diffuse);
+                this.gl.uniform3fv(this.locations.getUniform('material.specular'), f.material.specular);
+                this.gl.uniform1f(this.locations.getUniform('material.specularExponent'), f.material.specular_exponent);
 
                 this.gl.bindBuffer(this.gl.ARRAY_BUFFER, r.buffer.normals);
                 const normal = this.locations.getAttribute('normal');

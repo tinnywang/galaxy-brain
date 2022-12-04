@@ -1,3 +1,4 @@
+import { vec3 } from "gl-matrix";
 import $ from "jquery";
 import WebGL2 from "./gl";
 import { Cube, Cube2 } from "./renderables/cube";
@@ -48,6 +49,12 @@ $(() => {
     });
     const fxaa = new FXAA(gl);
 
+    const light = {
+      position: vec3.fromValues(0, 10, -10),
+      color: vec3.fromValues(1, 1, 1),
+      power: 0.5,
+    };
+
     const path =
       "https://raw.githubusercontent.com/tinnywang/rubiks-cube/master/models/rubiks-cube.json";
 
@@ -57,8 +64,8 @@ $(() => {
       const render = (_: DOMHighResTimeStamp) => {
         gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
 
-        blinnPhongShader.render(framebuffer, new Cube(gl, cube));
-        transparentShader.render(framebuffer, new Cube2(gl, cube));
+        blinnPhongShader.render(framebuffer, light, new Cube(gl, cube));
+        transparentShader.render(framebuffer, light, new Cube2(gl, cube));
 
         gl.bindFramebuffer(gl.READ_FRAMEBUFFER, framebuffer);
         gl.bindFramebuffer(gl.DRAW_FRAMEBUFFER, null);
