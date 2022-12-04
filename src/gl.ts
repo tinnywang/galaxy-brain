@@ -20,7 +20,14 @@ class WebGL2 {
     gl: WebGL2RenderingContext,
     n: number
   ): Array<WebGLTexture> {
-    return WebGL2.createTextures(gl, n, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, gl.LINEAR);
+    return WebGL2.createTextures(
+      gl,
+      n,
+      gl.RGBA,
+      gl.RGBA,
+      gl.UNSIGNED_BYTE,
+      gl.LINEAR
+    );
   }
 
   static createDepthTextures(
@@ -33,7 +40,7 @@ class WebGL2 {
       gl.DEPTH_COMPONENT24,
       gl.DEPTH_COMPONENT,
       gl.UNSIGNED_INT,
-      gl.NEAREST,
+      gl.NEAREST
     );
   }
 

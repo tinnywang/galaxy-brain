@@ -23,7 +23,7 @@ export class BlinnPhongShader extends Shader {
 
         this.locations.setUniform('light.position');
         this.locations.setUniform('light.color');
-        this.locations.setUniform('light.intensity');
+        this.locations.setUniform('light.power');
     }
 
     render(drawFramebuffer: WebGLFramebuffer, light: Light, ...renderables: Renderable[]) {
@@ -49,7 +49,7 @@ export class BlinnPhongShader extends Shader {
 
             this.gl.uniform3fv(this.locations.getUniform('light.position'), light.position);
             this.gl.uniform3fv(this.locations.getUniform('light.color'), light.color);
-            this.gl.uniform1f(this.locations.getUniform('light.intensity'), light.intensity);
+            this.gl.uniform1f(this.locations.getUniform('light.power'), light.power);
 
             let offset = 0
             this.gl.bindBuffer(this.gl.ELEMENT_ARRAY_BUFFER, r.buffer.faces);

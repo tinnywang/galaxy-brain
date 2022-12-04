@@ -8,13 +8,12 @@ in vec4 fragPosition;
 
 out vec4 fragColor;
 
-uniform vec3 color;
 uniform vec3 eye;
 
 uniform struct Light {
     vec3 position;
     vec3 color;
-    float intensity;
+    float power;
 } light;
 
 uniform struct Material {
@@ -30,10 +29,19 @@ void main(void) {
     vec3 position = fragPosition.xyz / fragPosition.w;
     vec3 eyeDirection = normalize(eye - position);
     vec3 lightDirection = normalize(light.position - position);
+    vec3 lightColor = light.color * light.power / length(lightDirection);
 
-    vec3 diffuse = material.diffuse * light.intensity * max(dot(lightDirection, fragNormal), 0.0);
-    vec3 reflection = normalize(reflect(-lightDirection, fragNormal));
-    vec3 specular = material.specular * light.intensity * pow(max(dot(reflection, eyeDirection), 0.0), material.specularExponent);
+    float lambertian = max(dot(lightDirection, fragNormal), 0.0);
+    float specular = 0.0;
 
-    fragColor = vec4(diffuse + specular + material.ambient, 1.0);
+    if (lambertian > 0.0) {
+        vec3 reflection = normalize(reflect(-lightDirection, fragNormal));
+        specular = pow(max(dot(reflection, eyeDirection), 0.0), material.specularExponent);
+    }
+
+    vec3 color = material.ambient +
+        material.diffuse * lambertian * lightColor +
+        material.specular * specular * lightColor;
+
+    fragColor = vec4(color, 1);
 }
