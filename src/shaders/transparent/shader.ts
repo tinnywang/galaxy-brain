@@ -32,7 +32,8 @@ export class TransparentShader extends Shader {
         this.colorTextures = WebGL2.createColorTextures(this.gl, NUM_PASSES);
 
         this.locations.setAttribute('vertexPosition');
-        this.locations.setUniform('modelViewProjectionMatrix');
+        this.locations.setUniform('modelViewMatrix');
+        this.locations.setUniform('projectionMatrix');
         this.locations.setUniform('color');
         this.locations.setUniform('opaqueDepthTexture');
         this.locations.setUniform('peelDepthTexture');
@@ -54,9 +55,10 @@ export class TransparentShader extends Shader {
                 this.gl.bindBuffer(this.gl.ARRAY_BUFFER, r.buffer.vertices);
                 const vertexPosition = this.locations.getAttribute('vertexPosition');
                 this.gl.vertexAttribPointer(vertexPosition, 3, this.gl.FLOAT, false, 0, 0);
-                this.gl.enableVertexAttribArray(vertexPosition)
+                this.gl.enableVertexAttribArray(vertexPosition);
 
-                this.gl.uniformMatrix4fv(this.locations.getUniform('modelViewProjectionMatrix'), false, r.matrix.modelViewProjection);
+                this.gl.uniformMatrix4fv(this.locations.getUniform('modelViewMatrix'), false, r.matrix.modelView);
+                this.gl.uniformMatrix4fv(this.locations.getUniform('projectionMatrix'), false, r.matrix.projection);
 
                 let offset = 0;
                 this.gl.bindBuffer(this.gl.ELEMENT_ARRAY_BUFFER, r.buffer.faces);
