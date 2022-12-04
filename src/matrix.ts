@@ -1,8 +1,6 @@
 import { vec3, glMatrix, mat4 } from "gl-matrix";
 
 class Matrix {
-  static readonly EYE = vec3.fromValues(0, 0, 10);
-
   private static readonly CENTER = vec3.fromValues(0, 0, 0);
 
   private static readonly UP = vec3.fromValues(0, 1, 0);
@@ -13,7 +11,9 @@ class Matrix {
 
   private static readonly FAR = 100;
 
-  private view: mat4;
+  static readonly EYE = vec3.fromValues(0, 0, 10);
+
+  private readonly view: mat4;
 
   readonly projection: mat4;
 
