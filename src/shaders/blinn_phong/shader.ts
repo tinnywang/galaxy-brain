@@ -6,9 +6,10 @@ import Matrix from '../../matrix'
 import { Light } from '../../light'
 
 export class BlinnPhongShader extends Shader {
+    private readonly lights: Light[];
 
-    constructor(gl: WebGL2RenderingContext) {
-        super(gl, vertexSrc, fragmentSrc)
+    constructor(gl: WebGL2RenderingContext, lights: Light[]) {
+        super(gl, vertexSrc, fragmentSrc.replace('${numLights}', lights.length.toString()));
 
         this.locations.setAttribute('vertexPosition');
         this.locations.setUniform('modelViewMatrix');
@@ -21,13 +22,16 @@ export class BlinnPhongShader extends Shader {
         this.locations.setUniform('material.specular');
         this.locations.setUniform('material.specularExponent');
 
-        this.locations.setUniform('light.position');
-        this.locations.setUniform('light.color');
-        this.locations.setUniform('light.power');
+        this.lights = lights;
+        this.lights.forEach((_, i) => {
+            this.locations.setUniform(`lights[${i}].position`);
+            this.locations.setUniform(`lights[${i}].color`);
+            this.locations.setUniform(`lights[${i}].power`);
+        });
     }
 
-    render(drawFramebuffer: WebGLFramebuffer, light: Light, ...renderables: Renderable[]) {
-        super.render(drawFramebuffer, light, ...renderables);
+    render(drawFramebuffer: WebGLFramebuffer, ...renderables: Renderable[]) {
+        super.render(drawFramebuffer, ...renderables);
 
         this.gl.enable(this.gl.DEPTH_TEST);
         this.gl.depthFunc(this.gl.LEQUAL)
@@ -47,9 +51,11 @@ export class BlinnPhongShader extends Shader {
             this.gl.uniformMatrix4fv(this.locations.getUniform('modelViewMatrix'), false, r.matrix.modelView);
             this.gl.uniformMatrix4fv(this.locations.getUniform('projectionMatrix'), false, r.matrix.projection);
 
-            this.gl.uniform3fv(this.locations.getUniform('light.position'), light.position);
-            this.gl.uniform3fv(this.locations.getUniform('light.color'), light.color);
-            this.gl.uniform1f(this.locations.getUniform('light.power'), light.power);
+            this.lights.forEach((light, i) => {
+                this.gl.uniform3fv(this.locations.getUniform(`lights[${i}].position`), light.position);
+                this.gl.uniform3fv(this.locations.getUniform(`lights[${i}].color`), light.color);
+                this.gl.uniform1f(this.locations.getUniform(`lights[${i}].power`), light.power);
+            });
 
             let offset = 0
             this.gl.bindBuffer(this.gl.ELEMENT_ARRAY_BUFFER, r.buffer.faces);

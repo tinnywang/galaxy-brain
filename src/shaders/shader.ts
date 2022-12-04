@@ -1,4 +1,3 @@
-import { Light } from '../light';
 import { Renderable } from '../renderables/renderable';
 import { ShaderLocations } from './shader_locations';
 
@@ -48,7 +47,7 @@ export abstract class Shader {
       return shader
     }
 
-    render(_framebuffer: WebGLFramebuffer, _light: Light, ..._renderables: Renderable[]) {
+    render(_framebuffer: WebGLFramebuffer, ..._renderables: Renderable[]) {
       this.gl.useProgram(this.program);
     }
 }
