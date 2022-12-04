@@ -42,6 +42,12 @@ export class BlinnPhongShader extends Shader {
 
         this.gl.uniform3fv(this.locations.getUniform('eye'), Matrix.EYE);
 
+        this.lights.forEach((light, i) => {
+            this.gl.uniform3fv(this.locations.getUniform(`lights[${i}].position`), light.position);
+            this.gl.uniform3fv(this.locations.getUniform(`lights[${i}].color`), light.color);
+            this.gl.uniform1f(this.locations.getUniform(`lights[${i}].power`), light.power);
+        });
+
         renderables.forEach((r) => {
             this.gl.bindBuffer(this.gl.ARRAY_BUFFER, r.buffer.vertices);
             const vertexPosition = this.locations.getAttribute('vertexPosition');
@@ -50,12 +56,6 @@ export class BlinnPhongShader extends Shader {
 
             this.gl.uniformMatrix4fv(this.locations.getUniform('modelViewMatrix'), false, r.matrix.modelView);
             this.gl.uniformMatrix4fv(this.locations.getUniform('projectionMatrix'), false, r.matrix.projection);
-
-            this.lights.forEach((light, i) => {
-                this.gl.uniform3fv(this.locations.getUniform(`lights[${i}].position`), light.position);
-                this.gl.uniform3fv(this.locations.getUniform(`lights[${i}].color`), light.color);
-                this.gl.uniform1f(this.locations.getUniform(`lights[${i}].power`), light.power);
-            });
 
             let offset = 0
             this.gl.bindBuffer(this.gl.ELEMENT_ARRAY_BUFFER, r.buffer.faces);
