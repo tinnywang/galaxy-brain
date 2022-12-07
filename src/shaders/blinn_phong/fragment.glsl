@@ -34,7 +34,8 @@ void main(void) {
     for (int i = 0; i < NUM_LIGHTS; i++) {
         Light light = lights[i];
         vec3 lightDirection = normalize(light.position - position);
-        vec3 lightColor = light.color * light.power / length(lightDirection);
+        float lightDistance = length(light.position - position);
+        vec3 lightColor = light.color * light.power / (lightDistance * lightDistance);
 
         float lambertian = max(dot(lightDirection, fragNormal), 0.0);
         float specular = 0.0;

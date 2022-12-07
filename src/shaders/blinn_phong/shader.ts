@@ -60,7 +60,7 @@ export class BlinnPhongShader extends Shader {
             let offset = 0
             this.gl.bindBuffer(this.gl.ELEMENT_ARRAY_BUFFER, r.buffer.faces);
             r.object.faces.forEach((f) => {
-                this.gl.uniform3fv(this.locations.getUniform('material.ambient'), f.material.diffuse);
+                this.gl.uniform3fv(this.locations.getUniform('material.ambient'), f.material.ambient);
                 this.gl.uniform3fv(this.locations.getUniform('material.diffuse'), f.material.diffuse);
                 this.gl.uniform3fv(this.locations.getUniform('material.specular'), f.material.specular);
                 this.gl.uniform1f(this.locations.getUniform('material.specularExponent'), f.material.specular_exponent);
