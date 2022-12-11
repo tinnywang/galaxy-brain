@@ -5,7 +5,9 @@ module.exports = {
   devServer: {
     compress: true,
     port: 8000,
-    publicPath: '/dist',
+    static: {
+      directory: __dirname,
+    }
   },
   devtool: 'inline-source-map',
   module: {
@@ -18,6 +20,10 @@ module.exports = {
       {
         test: /\.(glsl|vs|fs)$/,
         use: 'ts-shader-loader',
+      },
+      {
+        test: /\.(jpg|jpeg|png)$/,
+        type: 'asset/resource',
       },
     ],
   },
