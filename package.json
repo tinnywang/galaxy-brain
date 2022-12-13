@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "description": "A WebGL homage to the galaxy brain meme.",
   "scripts": {
-    "start": "webpack serve --config webpack.config.js --mode development --hot --watch",
+    "start": "webpack serve --config webpack.config.js --mode development --hot",
     "build": "webpack --config webpack.config.js",
     "lint": "eslint --fix 'src/*.ts'"
   },
@@ -12,7 +12,7 @@
   "dependencies": {
     "gl-matrix": "^3.3.0",
     "jquery": "^3.5.1"
-   },
+  },
   "devDependencies": {
     "@types/jquery": "^3.5.4",
     "@typescript-eslint/eslint-plugin": "^4.27.0",
@@ -24,12 +24,12 @@
     "eslint-plugin-import": "^2.23.4",
     "eslint-plugin-prettier": "^3.4.0",
     "prettier": "2.3.1",
-    "ts-loader": "^8.0.11",
+    "ts-loader": "^9.4.2",
     "ts-shader-loader": "^1.0.6",
     "typescript": "^4.1.2",
-    "webpack": "^4.44.2",
-    "webpack-cli": "^4.2.0",
-    "webpack-dev-server": "^3.11.0"
+    "webpack": "^5.75.0",
+    "webpack-cli": "^5.0.1",
+    "webpack-dev-server": "^4.11.1"
   },
   "repository": {
     "type": "git",
