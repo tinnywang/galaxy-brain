@@ -53,7 +53,7 @@ export abstract class Renderable {
       faces,
     };
     this.gl = gl;
-    this.matrix = new Matrix(gl, model);
+    this.matrix = new Matrix(gl, { model });
     this.object = o;
   }
 }

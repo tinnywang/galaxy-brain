@@ -1,5 +1,10 @@
 import { vec3, glMatrix, mat4 } from "gl-matrix";
 
+interface MatrixProps {
+  eye?: vec3;
+  model?: mat4;
+}
+
 class Matrix {
   private static readonly CENTER = vec3.fromValues(0, 0, 0);
 
@@ -19,10 +24,10 @@ class Matrix {
 
   readonly modelView: mat4;
 
-  constructor(gl: WebGL2RenderingContext, model?: mat4) {
+  constructor(gl: WebGL2RenderingContext, props?: MatrixProps) {
     this.view = mat4.lookAt(
       mat4.create(),
-      Matrix.EYE,
+      props?.eye ?? Matrix.EYE,
       Matrix.CENTER,
       Matrix.UP
     );
@@ -36,7 +41,7 @@ class Matrix {
     this.modelView = mat4.multiply(
       mat4.create(),
       this.view,
-      model || mat4.create()
+      props?.model ?? mat4.create(),
     );
   }
 }
