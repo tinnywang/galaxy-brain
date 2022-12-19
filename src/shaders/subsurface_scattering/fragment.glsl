@@ -26,11 +26,11 @@ void main() {
     if (opaqueDepth < fragDepth) {
         discard;
     } else {
-        float lightDepth0 = texelFetch(lightDepthTexture, ivec2(lightTextCoord).xy, 0).r;
+        float lightDepth0 = texture(lightDepthTexture, lightTextCoord.xy).r;
         float lightDepth1 = length(fragLightPosition);
-        float lightDistance = abs(lightDepth0 - lightDepth1);
+        float lightDistance = lightDepth1 - lightDepth0;
 
-        fragColor = exp(-lightDistance * SIGMA) * vec4(color, 1);
-        // fragColor = vec4(color, 1);
+        // fragColor = exp(-lightDistance * SIGMA) * vec4(color, 1);
+        fragColor = vec4(lightDepth0, 0, 0, 1);
     }
 }

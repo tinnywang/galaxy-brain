@@ -67,7 +67,7 @@ $(() => {
         gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
 
         // blinnPhongShader.render(framebuffer, new Teapot(gl, teapot));
-        subsurfaceScattering.render(null, new Teapot(gl, teapot));
+        subsurfaceScattering.render(framebuffer, new Teapot(gl, teapot));
         // transparentShader.render(framebuffer, new Teapot(gl, teapot));
 
         gl.bindFramebuffer(gl.READ_FRAMEBUFFER, framebuffer);

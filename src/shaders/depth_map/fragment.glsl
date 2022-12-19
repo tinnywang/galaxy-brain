@@ -3,8 +3,7 @@
 precision highp float;
 
 in float fragDepth;
-
-out vec4 fragColor;
+in float fragDistance;
 
 uniform sampler2D opaqueDepthTexture;
 
@@ -15,7 +14,6 @@ void main() {
     if (opaqueDepth < fragDepth) {
         discard;
     } else {
-        gl_FragDepth = fragDepth;
-        fragColor = vec4(fragDepth, 0, 0, 1);
+        gl_FragDepth = fragDistance;
     }
 }
