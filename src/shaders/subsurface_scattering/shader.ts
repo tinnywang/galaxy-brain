@@ -41,7 +41,7 @@ export class SubsurfaceScattering extends Shader {
         this.locations.setUniform('color');
     }
 
-    render(drawFramebuffer: WebGLFramebuffer, ...renderables: Renderable[]) {
+    render(drawFramebuffer: WebGLFramebuffer | null, ...renderables: Renderable[]) {
         // Generate depth maps from the light's perspective.
         this.depthMap.render(this.framebuffer, ...renderables);
 

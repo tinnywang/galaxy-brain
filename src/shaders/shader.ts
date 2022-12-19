@@ -47,7 +47,7 @@ export abstract class Shader {
       return shader
     }
 
-    render(_framebuffer: WebGLFramebuffer, ..._renderables: Renderable[]) {
+    render(_framebuffer: WebGLFramebuffer | null, ..._renderables: Renderable[]) {
       this.gl.useProgram(this.program);
     }
 }
