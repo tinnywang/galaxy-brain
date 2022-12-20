@@ -22,7 +22,6 @@ $(() => {
     gl.bindFramebuffer(gl.DRAW_FRAMEBUFFER, framebuffer);
 
     const depthTexture = WebGL2.createDepthTextures(gl, 1)[0];
-    gl.activeTexture(gl.TEXTURE0);
     gl.bindTexture(gl.TEXTURE_2D, depthTexture);
     gl.framebufferTexture2D(
       gl.DRAW_FRAMEBUFFER,
@@ -33,7 +32,6 @@ $(() => {
     );
 
     const colorTexture = WebGL2.createColorTextures(gl, 1)[0];
-    gl.activeTexture(gl.TEXTURE1);
     gl.bindTexture(gl.TEXTURE_2D, colorTexture);
     gl.framebufferTexture2D(
       gl.DRAW_FRAMEBUFFER,
