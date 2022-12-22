@@ -3,7 +3,6 @@
 in vec4 vertexPosition;
 
 out highp float fragDepth;
-out highp float fragDistance;
 
 uniform mat4 modelViewMatrix;
 uniform mat4 projectionMatrix;
@@ -13,6 +12,4 @@ void main() {
     gl_Position = projectionMatrix * fragPosition;
 
     fragDepth = gl_Position.z / gl_Position.w;
-
-    fragDistance = length(fragPosition);
 }

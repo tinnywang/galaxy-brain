@@ -1,11 +1,10 @@
 #version 300 es
 
-#define SIGMA 1.3
+#define SIGMA 10.0
 
 precision highp float;
 
 in float fragDepth;
-in vec4 fragLightPosition;
 in vec4 lightTextCoord;
 
 out vec4 fragColor;
@@ -26,11 +25,9 @@ void main() {
     if (opaqueDepth < fragDepth) {
         discard;
     } else {
-        float lightDepth0 = texture(lightDepthTexture, lightTextCoord.xy).r;
-        float lightDepth1 = length(fragLightPosition);
-        float lightDistance = lightDepth1 - lightDepth0;
+        float lightDepth = texture(lightDepthTexture, lightTextCoord.xy).r;
+        float lightDistance = abs(fragDepth - lightDepth);
 
-        // fragColor = exp(-lightDistance * SIGMA) * vec4(color, 1);
-        fragColor = vec4(lightDepth0, 0, 0, 1);
+        fragColor = exp(-lightDistance * SIGMA) * vec4(color, 1);
     }
 }

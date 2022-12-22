@@ -56,6 +56,8 @@ export class SubsurfaceScattering extends Shader {
         this.gl.enable(this.gl.CULL_FACE);
         this.gl.cullFace(this.gl.BACK);
 
+        this.gl.uniform3fv(this.locations.getUniform('color'), this.props.light.color);
+
         renderables.forEach((r) => {
             this.gl.bindBuffer(this.gl.ARRAY_BUFFER, r.buffer.vertices);
             const vertexPosition = this.locations.getAttribute('vertexPosition');
@@ -77,8 +79,6 @@ export class SubsurfaceScattering extends Shader {
             let offset = 0
             this.gl.bindBuffer(this.gl.ELEMENT_ARRAY_BUFFER, r.buffer.faces);
             r.object.faces.forEach((f) => {
-                this.gl.uniform3fv(this.locations.getUniform('color'), f.material.diffuse);
-
                 this.gl.drawElements(this.gl.TRIANGLES, f.vertex_indices.length, this.gl.UNSIGNED_SHORT, offset);
                 // Offset must be a multiple of 2 since an unsigned short is 2 bytes.
                 offset += f.vertex_indices.length * 2
