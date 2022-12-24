@@ -44,12 +44,12 @@ $(() => {
     );
 
     const light = {
-      position: vec3.fromValues(0, 0, -10),
-      color: vec3.fromValues(0, 0.5, 1),
+      position: vec3.fromValues(0, 10, -10),
+      color: vec3.fromValues(1, 1, 1),
       power: 40,
     };
 
-    // const blinnPhongShader = new BlinnPhongShader(gl, lights);
+    // const blinnPhongShader = new BlinnPhongShader(gl, [light]);
     // const transparentShader = new TransparentShader(gl, { opaqueDepthTexture: depthTexture });
     const subsurfaceScattering = new SubsurfaceScattering(gl, {
       light,

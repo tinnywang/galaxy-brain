@@ -36,7 +36,6 @@ export class DepthMap extends Shader {
     render(drawFramebuffer: WebGLFramebuffer | null, ...renderables: Renderable[]) {
         super.render(drawFramebuffer, ...renderables);
 
-        this.gl.clear(this.gl.COLOR_BUFFER_BIT | this.gl.DEPTH_BUFFER_BIT);
         this.gl.enable(this.gl.DEPTH_TEST);
         this.gl.depthFunc(this.gl.LEQUAL);
         this.gl.enable(this.gl.CULL_FACE);
