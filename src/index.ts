@@ -1,12 +1,12 @@
-import { vec3 } from "gl-matrix";
+// import { vec3 } from "gl-matrix";
 import $ from "jquery";
 import WebGL2 from "./gl";
 // import { Cube } from "./renderables/cube";
 import { Teapot } from "./renderables/teapot";
 // import { BlinnPhongShader } from "./shaders/blinn_phong/shader";
-import { SubsurfaceScattering } from "./shaders/subsurface_scattering/shader";
+// import { SubsurfaceScattering } from "./shaders/subsurface_scattering/shader";
 import { FXAA } from "./shaders/fxaa/shader";
-// import { TransparentShader } from "./shaders/transparent/shader";
+import { TransparentShader } from "./shaders/transparent/shader";
 
 $(() => {
   const $canvas: JQuery<HTMLCanvasElement> = $("canvas");
@@ -43,18 +43,22 @@ $(() => {
       0
     );
 
+    /*
     const light = {
       position: vec3.fromValues(0, 10, -10),
       color: vec3.fromValues(1, 1, 1),
       power: 40,
     };
+    */
 
     // const blinnPhongShader = new BlinnPhongShader(gl, [light]);
-    // const transparentShader = new TransparentShader(gl, { opaqueDepthTexture: depthTexture });
+    const transparentShader = new TransparentShader(gl, { opaqueDepthTexture: depthTexture });
+    /*
     const subsurfaceScattering = new SubsurfaceScattering(gl, {
       light,
       opaqueDepthTexture: depthTexture,
     });
+    */
     const fxaa = new FXAA(gl);
 
     const path = //"https://raw.githubusercontent.com/tinnywang/rubiks-cube/master/models/rubiks-cube.json";
@@ -67,8 +71,8 @@ $(() => {
         gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
 
         // blinnPhongShader.render(framebuffer, new Teapot(gl, teapot));
-        subsurfaceScattering.render(framebuffer, new Teapot(gl, teapot));
-        // transparentShader.render(framebuffer, new Teapot(gl, teapot));
+        // subsurfaceScattering.render(framebuffer, new Teapot(gl, teapot));
+        transparentShader.render(framebuffer, new Teapot(gl, teapot));
 
         gl.bindFramebuffer(gl.READ_FRAMEBUFFER, framebuffer);
         gl.bindFramebuffer(gl.DRAW_FRAMEBUFFER, null);
