@@ -6,13 +6,13 @@ precision highp float;
 
 in float fragDepth;
 in vec4 lightTextCoord;
+in float lightFragDist;
 
 out vec4 fragColor;
 
 uniform sampler2D opaqueDepthTexture;
 uniform sampler2D lightDepthTexture;
 uniform highp vec3 color;
-
 
 void main() {
     // Use pre-computed fragment depth to eliminate variance between gl_FragCoord.z and depth texture
@@ -25,8 +25,8 @@ void main() {
     if (opaqueDepth < fragDepth) {
         discard;
     } else {
-        float lightDepth = texture(lightDepthTexture, lightTextCoord.xy).r;
-        float lightDistance = abs(fragDepth - lightDepth);
+        float lightDepth = 1.0 / texture(lightDepthTexture, lightTextCoord.xy).r;
+        float lightDistance = abs(lightFragDist - lightDepth);
 
         fragColor = exp(-lightDistance * SIGMA) * vec4(color, 1);
     }

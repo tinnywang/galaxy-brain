@@ -26,6 +26,7 @@ export class DepthMap extends Shader {
 
         this.depthTexture = WebGL2.createDepthTextures(this.gl, 1)[0];
 
+        this.locations.setAttribute('normal');
         this.locations.setAttribute('vertexPosition');
         this.locations.setUniform('modelViewMatrix');
         this.locations.setUniform('projectionMatrix');
@@ -59,6 +60,11 @@ export class DepthMap extends Shader {
             const vertexPosition = this.locations.getAttribute('vertexPosition');
             this.gl.vertexAttribPointer(vertexPosition, 3, this.gl.FLOAT, false, 0, 0);
             this.gl.enableVertexAttribArray(vertexPosition);
+
+            this.gl.bindBuffer(this.gl.ARRAY_BUFFER, r.buffer.normals);
+            const normal = this.locations.getAttribute('normal');
+            this.gl.vertexAttribPointer(normal, 3, this.gl.FLOAT, false, 0, 0);
+            this.gl.enableVertexAttribArray(normal);
 
             let offset = 0
             this.gl.bindBuffer(this.gl.ELEMENT_ARRAY_BUFFER, r.buffer.faces);
