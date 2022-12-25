@@ -27,7 +27,7 @@ export class DepthPeeling {
         shader.locations.setUniform('shouldDepthPeel');
     }
 
-    public depthPeel(func: (_: Renderable) => void, renderables: Renderable[]) {
+    public depthPeel(func: (r: Renderable, i: number) => void, renderables: Renderable[]) {
         const gl = this.shader.gl;
         gl.useProgram(this.shader.program);
 
@@ -56,7 +56,7 @@ export class DepthPeeling {
             gl.enable(gl.DEPTH_TEST);
             gl.depthFunc(gl.LESS);
 
-            renderables.forEach(func);
+            renderables.forEach((r: Renderable) => func(r, i));
         }
     }
 }

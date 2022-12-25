@@ -4,7 +4,7 @@ import { Shader } from '../shader';
 import { Renderable } from '../../renderables/renderable';
 import Matrix from '../../matrix';
 import { vec3 } from 'gl-matrix';
-import WebGL2 from '../../gl';
+import { DepthPeeling } from '../depth_peeling/shader';
 
 export interface DepthMapProps {
     eye: vec3;
@@ -12,49 +12,31 @@ export interface DepthMapProps {
 }
 
 export class DepthMap extends Shader {
-    private props: DepthMapProps;
+    private depthPeeling: DepthPeeling;
 
     public readonly matrix: Matrix;
-    public readonly depthTexture: WebGLTexture;
 
     constructor(gl: WebGL2RenderingContext, props: DepthMapProps) {
         super(gl, vertexSrc, fragmentSrc);
 
-        this.props = props;
+        this.depthPeeling = new DepthPeeling(this, {
+            opaqueDepthTexture: props.opaqueDepthTexture,
+            iterations: 4,
+        });
 
         this.matrix = new Matrix(gl, { eye: props.eye });
-
-        this.depthTexture = WebGL2.createDepthTextures(this.gl, 1)[0];
 
         this.locations.setAttribute('normal');
         this.locations.setAttribute('vertexPosition');
         this.locations.setUniform('modelViewMatrix');
         this.locations.setUniform('projectionMatrix');
-        this.locations.setUniform('opaqueDepthTexture');
     }
 
-    render(drawFramebuffer: WebGLFramebuffer | null, ...renderables: Renderable[]) {
-        super.render(drawFramebuffer, ...renderables);
-
-        this.gl.enable(this.gl.DEPTH_TEST);
-        this.gl.depthFunc(this.gl.LEQUAL);
-        this.gl.enable(this.gl.CULL_FACE);
-        this.gl.cullFace(this.gl.BACK);
-
-        this.gl.bindFramebuffer(this.gl.DRAW_FRAMEBUFFER, drawFramebuffer);
-
-        this.gl.activeTexture(this.gl.TEXTURE0);
-        this.gl.bindTexture(this.gl.TEXTURE_2D, this.depthTexture);
-        this.gl.framebufferTexture2D(this.gl.DRAW_FRAMEBUFFER, this.gl.DEPTH_ATTACHMENT, this.gl.TEXTURE_2D, this.depthTexture, 0);
-
+    render(...renderables: Renderable[]) {
         this.gl.uniformMatrix4fv(this.locations.getUniform('modelViewMatrix'), false, this.matrix.modelView);
         this.gl.uniformMatrix4fv(this.locations.getUniform('projectionMatrix'), false, this.matrix.projection);
 
-        this.gl.activeTexture(this.gl.TEXTURE1);
-        this.gl.bindTexture(this.gl.TEXTURE_2D, this.props.opaqueDepthTexture);
-        this.gl.uniform1i(this.locations.getUniform('opaqueDepthTexture'), 1);
-
-        renderables.forEach((r) => {
+        this.depthPeeling.depthPeel((r: Renderable, _: number) => {
             this.gl.bindBuffer(this.gl.ARRAY_BUFFER, r.buffer.vertices);
             const vertexPosition = this.locations.getAttribute('vertexPosition');
             this.gl.vertexAttribPointer(vertexPosition, 3, this.gl.FLOAT, false, 0, 0);
@@ -72,6 +54,10 @@ export class DepthMap extends Shader {
                 // Offset must be a multiple of 2 since an unsigned short is 2 bytes.
                 offset += f.vertex_indices.length * 2
             })
-        });
+        }, renderables);
+    }
+
+    public depthTexture(i: number): WebGLTexture | null {
+        return this.depthPeeling.depthTextures.at(i - 2) || null;
     }
 }

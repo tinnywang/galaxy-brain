@@ -4,6 +4,10 @@ import { Shader } from '../shader';
 import { Renderable } from '../../renderables/renderable';
 import { Light } from '../../light';
 import { DepthMap } from '../depth_map/shader';
+import { DepthPeeling } from '../depth_peeling/shader';
+import { PostProcessing } from '../post_processing/shader';
+
+const NUM_PASSES = 4;
 
 export interface SubsurfaceScatteringProps {
     light: Light;
@@ -12,25 +16,24 @@ export interface SubsurfaceScatteringProps {
 
 export class SubsurfaceScattering extends Shader {
     private props: SubsurfaceScatteringProps;
-    private framebuffer: WebGLFramebuffer;
     private depthMap: DepthMap;
-
+    private depthPeeling: DepthPeeling;
+    private postProcessing: PostProcessing;
 
     constructor(gl: WebGL2RenderingContext, props: SubsurfaceScatteringProps) {
         super(gl, vertexSrc, fragmentSrc);
 
         this.props = props;
 
-        const framebuffer = gl.createFramebuffer();
-        if (framebuffer === null) {
-            throw new Error('Unable to create WebGLFramebuffer.');
-        }
-        this.framebuffer = framebuffer;
-
         this.depthMap = new DepthMap(gl, {
             ...props,
             eye: props.light.position,
         });
+        this.depthPeeling = new DepthPeeling(this, {
+            opaqueDepthTexture: props.opaqueDepthTexture,
+            iterations: NUM_PASSES,
+        });
+        this.postProcessing = new PostProcessing(gl);
 
         this.locations.setAttribute('vertexPosition');
         this.locations.setUniform('modelViewMatrix');
@@ -43,37 +46,24 @@ export class SubsurfaceScattering extends Shader {
 
     render(drawFramebuffer: WebGLFramebuffer | null, ...renderables: Renderable[]) {
         // Generate depth maps from the light's perspective.
-        this.depthMap.render(this.framebuffer, ...renderables);
-
-        this.gl.useProgram(this.program);
-
-        this.gl.bindFramebuffer(this.gl.DRAW_FRAMEBUFFER, drawFramebuffer);
-        this.gl.framebufferTexture2D(this.gl.DRAW_FRAMEBUFFER, this.gl.DEPTH_ATTACHMENT, this.gl.TEXTURE_2D, null, 0);
-
-        this.gl.enable(this.gl.DEPTH_TEST);
-        this.gl.depthFunc(this.gl.LEQUAL);
-        this.gl.enable(this.gl.CULL_FACE);
-        this.gl.cullFace(this.gl.BACK);
+        this.depthMap.render(...renderables);
 
         this.gl.uniform3fv(this.locations.getUniform('color'), this.props.light.color);
+        this.gl.uniformMatrix4fv(this.locations.getUniform('modelLightMatrix'), false, this.depthMap.matrix.modelView);
 
-        renderables.forEach((r) => {
+        this.depthPeeling.depthPeel((r: Renderable, i: number) => {
+            this.gl.uniformMatrix4fv(this.locations.getUniform('modelViewMatrix'), false, r.matrix.modelView);
+            this.gl.uniformMatrix4fv(this.locations.getUniform('projectionMatrix'), false, r.matrix.projection);
+
             this.gl.bindBuffer(this.gl.ARRAY_BUFFER, r.buffer.vertices);
             const vertexPosition = this.locations.getAttribute('vertexPosition');
             this.gl.vertexAttribPointer(vertexPosition, 3, this.gl.FLOAT, false, 0, 0);
             this.gl.enableVertexAttribArray(vertexPosition);
 
-            this.gl.uniformMatrix4fv(this.locations.getUniform('modelViewMatrix'), false, r.matrix.modelView);
-            this.gl.uniformMatrix4fv(this.locations.getUniform('projectionMatrix'), false, r.matrix.projection);
-            this.gl.uniformMatrix4fv(this.locations.getUniform('modelLightMatrix'), false, this.depthMap.matrix.modelView);
-
-            this.gl.activeTexture(this.gl.TEXTURE0);
-            this.gl.bindTexture(this.gl.TEXTURE_2D, this.depthMap.depthTexture);
-            this.gl.uniform1i(this.locations.getUniform('lightDepthTexture'), 0);
-
-            this.gl.activeTexture(this.gl.TEXTURE1);
-            this.gl.bindTexture(this.gl.TEXTURE_2D, this.props.opaqueDepthTexture);
-            this.gl.uniform1i(this.locations.getUniform('opaqueDepthTexture'), 1);
+            // Texture units 0 and 1 are used for depth peeling.
+            this.gl.activeTexture(this.gl.TEXTURE2);
+            this.gl.bindTexture(this.gl.TEXTURE_2D, this.depthMap.depthTexture(i));
+            this.gl.uniform1i(this.locations.getUniform('lightDepthTexture'), 2);
 
             let offset = 0
             this.gl.bindBuffer(this.gl.ELEMENT_ARRAY_BUFFER, r.buffer.faces);
@@ -82,6 +72,18 @@ export class SubsurfaceScattering extends Shader {
                 // Offset must be a multiple of 2 since an unsigned short is 2 bytes.
                 offset += f.vertex_indices.length * 2
             })
-        });
+        }, renderables);
+
+        // Alpha-blend color textures back-to-front.
+        this.gl.bindFramebuffer(this.gl.READ_FRAMEBUFFER, this.depthPeeling.framebuffer);
+        this.gl.bindFramebuffer(this.gl.DRAW_FRAMEBUFFER, drawFramebuffer);
+
+        this.gl.disable(this.gl.DEPTH_TEST);
+        this.gl.enable(this.gl.BLEND);
+        this.gl.blendFunc(this.gl.SRC_ALPHA, this.gl.ONE_MINUS_SRC_ALPHA);
+
+        for (let i = NUM_PASSES - 1; i >= 0; i--) {
+            this.postProcessing.render(this.depthPeeling.colorTextures[i]);
+        }
     }
 }

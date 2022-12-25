@@ -34,7 +34,7 @@ export class TransparentShader extends Shader {
     }
 
     render(drawFramebuffer: WebGLFramebuffer, ...renderables: Renderable[]) {
-        this.depthPeeling.depthPeel((r: Renderable) => {
+        this.depthPeeling.depthPeel((r: Renderable, _: number) => {
             this.gl.bindBuffer(this.gl.ARRAY_BUFFER, r.buffer.vertices);
             const vertexPosition = this.locations.getAttribute('vertexPosition');
             this.gl.vertexAttribPointer(vertexPosition, 3, this.gl.FLOAT, false, 0, 0);
