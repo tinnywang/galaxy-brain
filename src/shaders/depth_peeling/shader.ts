@@ -29,7 +29,6 @@ export class DepthPeeling {
 
     public depthPeel(func: (r: Renderable, i: number) => void, renderables: Renderable[]) {
         const gl = this.shader.gl;
-        gl.useProgram(this.shader.program);
 
         // Texture unit 0 is used for the depth peel read/write texture.
         gl.activeTexture(gl.TEXTURE1);
@@ -38,7 +37,7 @@ export class DepthPeeling {
 
         for (let i = 0; i < this.props.iterations; i++) {
             const readTexture = this.depthTextures.at(i - 1) || null;
-            const writeTexture = this.depthTextures.at(i)  || null;
+            const writeTexture = this.depthTextures.at(i) || null;
 
             gl.activeTexture(gl.TEXTURE0);
             gl.bindTexture(gl.TEXTURE_2D, readTexture);

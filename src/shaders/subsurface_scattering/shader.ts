@@ -48,6 +48,8 @@ export class SubsurfaceScattering extends Shader {
         // Generate depth maps from the light's perspective.
         this.depthMap.render(...renderables);
 
+        this.gl.useProgram(this.program);
+
         this.gl.uniform3fv(this.locations.getUniform('color'), this.props.light.color);
         this.gl.uniformMatrix4fv(this.locations.getUniform('modelLightMatrix'), false, this.depthMap.matrix.modelView);
 

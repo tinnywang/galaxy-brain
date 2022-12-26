@@ -33,6 +33,8 @@ export class DepthMap extends Shader {
     }
 
     render(...renderables: Renderable[]) {
+        this.gl.useProgram(this.program);
+
         this.gl.uniformMatrix4fv(this.locations.getUniform('modelViewMatrix'), false, this.matrix.modelView);
         this.gl.uniformMatrix4fv(this.locations.getUniform('projectionMatrix'), false, this.matrix.projection);
 
@@ -58,6 +60,6 @@ export class DepthMap extends Shader {
     }
 
     public depthTexture(i: number): WebGLTexture | null {
-        return this.depthPeeling.depthTextures.at(i - 2) || null;
+        return this.depthPeeling.colorTextures.at(i - 2) || null;
     }
 }

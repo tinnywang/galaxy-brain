@@ -1,6 +1,6 @@
 #version 300 es
 
-#define SIGMA 1.5
+#define SIGMA 0.05
 
 precision highp float;
 

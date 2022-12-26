@@ -5,6 +5,8 @@ precision highp float;
 in float fragDepth;
 in float fragDistance;
 
+out vec4 fragColor;
+
 uniform sampler2D opaqueDepthTexture;
 uniform sampler2D peelDepthTexture;
 uniform bool shouldDepthPeel;
@@ -22,6 +24,7 @@ void main() {
         discard;
     } else {
         // gl_FragDepth must be clamped to [0, 1];
-        gl_FragDepth = fragDistance == 0.0 ? 0.0 : 1.0 / fragDistance;
+        float r = fragDistance == 0.0 ? 0.0 : 1.0 / fragDistance;
+        fragColor = vec4(r, 0, 0, 1);
     }
 }
