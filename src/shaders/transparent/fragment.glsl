@@ -3,6 +3,7 @@
 precision highp float;
 
 in float fragDepth;
+in highp vec3 fragNormal;
 
 out vec4 fragColor;
 
@@ -10,6 +11,12 @@ uniform sampler2D opaqueDepthTexture;
 uniform sampler2D peelDepthTexture;
 uniform highp vec3 color;
 uniform bool shouldDepthPeel;
+
+// Uniforms for Fresnel effect outline.
+uniform highp vec3 eye;
+uniform highp vec3 fresnelColor;
+uniform float fresnelExponent;
+
 
 void main() {
     // Use pre-computed fragment depth to eliminate variance between gl_FragCoord.z and depth texture
@@ -25,6 +32,8 @@ void main() {
     } else if (opaqueDepth < gl_FragDepth) {
         discard;
     } else {
-        fragColor = vec4(color, 0.8);
+        float dotProduct = abs(dot(normalize(fragNormal), normalize(eye)));
+        float fresnel = smoothstep(0.0, 1.0, pow(1.0 - dotProduct, fresnelExponent));
+        fragColor = vec4(fresnel * fresnelColor + vec3(0, 0.5, 1.0), fresnel);
     }
 }

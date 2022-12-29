@@ -1,10 +1,11 @@
-import { vec3 } from "gl-matrix";
+// import { vec3 } from "gl-matrix";
 import $ from "jquery";
 import WebGL2 from "./gl";
 import { Teapot } from "./renderables/teapot";
-import { BlinnPhongShader } from "./shaders/blinn_phong/shader";
-// import { TransparentShader } from "./shaders/transparent/shader";
+// import { BlinnPhongShader } from "./shaders/blinn_phong/shader";
+import { TransparentShader } from "./shaders/transparent/shader";
 import { FXAA } from "./shaders/fxaa/shader";
+import { vec3 } from "gl-matrix";
 
 $(() => {
   const $canvas: JQuery<HTMLCanvasElement> = $("canvas");
@@ -43,6 +44,7 @@ $(() => {
       0
     );
 
+    /*
     const lights = [
       {
         position: vec3.fromValues(-10, 10, -10),
@@ -55,13 +57,14 @@ $(() => {
         power: 40,
       },
     ];
+    */
 
-    const blinnPhongShader = new BlinnPhongShader(gl, lights);
-    /*
+    // const blinnPhongShader = new BlinnPhongShader(gl, lights);
     const transparentShader = new TransparentShader(gl, {
       opaqueDepthTexture: depthTexture,
+      fresnelColor: vec3.fromValues(1, 1, 1),
+      fresnelExponent: 1.5,
     });
-    */
     const fxaa = new FXAA(gl);
 
     const path =
@@ -73,8 +76,8 @@ $(() => {
       const render = (_: DOMHighResTimeStamp) => {
         gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
 
-        blinnPhongShader.render(framebuffer, new Teapot(gl, teapot));
-        // transparentShader.render(framebuffer, new Teapot(gl, teapot));
+        // blinnPhongShader.render(framebuffer, new Teapot(gl, teapot));
+        transparentShader.render(framebuffer, new Teapot(gl, teapot));
 
         gl.bindFramebuffer(gl.READ_FRAMEBUFFER, framebuffer);
         gl.bindFramebuffer(gl.DRAW_FRAMEBUFFER, null);
