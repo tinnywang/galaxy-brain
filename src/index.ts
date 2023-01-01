@@ -63,7 +63,7 @@ $(() => {
     const transparentShader = new TransparentShader(gl, {
       opaqueDepthTexture: depthTexture,
       fresnelColor: vec3.fromValues(1, 1, 1),
-      fresnelExponent: 1.5,
+      fresnelExponent: 2.0,
     });
     const fxaa = new FXAA(gl);
 
