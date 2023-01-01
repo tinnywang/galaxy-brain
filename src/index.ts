@@ -63,12 +63,12 @@ $(() => {
     const transparentShader = new TransparentShader(gl, {
       opaqueDepthTexture: depthTexture,
       fresnelColor: vec3.fromValues(1, 1, 1),
-      fresnelExponent: 2.0,
+      fresnelHueShift: -20,
+      fresnelExponent: 3.5,
     });
     const fxaa = new FXAA(gl);
 
-    const path =
-      "https://gist.githubusercontent.com/tinnywang/58bda00c65fd7b14d0d15ea1c7a022db/raw/2285fe9f55a815bc4856e73334b90c64128aedc5/teapot.json";
+    const path = "https://gist.githubusercontent.com/tinnywang/58bda00c65fd7b14d0d15ea1c7a022db/raw/e6147607586052300501fa6be58fc80c51ac6d15/teapot.json";
 
     $.get(path, (data: string) => {
       const teapot = JSON.parse(data)[0];

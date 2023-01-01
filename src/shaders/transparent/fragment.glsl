@@ -15,8 +15,16 @@ uniform bool shouldDepthPeel;
 // Uniforms for Fresnel effect outline.
 uniform highp vec3 eye;
 uniform highp vec3 fresnelColor;
+uniform float fresnelHueShift;
 uniform float fresnelExponent;
 
+// Shift the hue of an RGB color.
+// https://gist.github.com/mairod/a75e7b44f68110e1576d77419d608786?permalink_comment_id=3195243#gistcomment-3195243
+vec3 hueShift(vec3 color, float hue) {
+    const vec3 k = vec3(0.57735, 0.57735, 0.57735);
+    float cosAngle = cos(hue);
+    return vec3(color * cosAngle + cross(k, color) * sin(hue) + k * dot(k, color) * (1.0 - cosAngle));
+}
 
 void main() {
     // Use pre-computed fragment depth to eliminate variance between gl_FragCoord.z and depth texture
@@ -34,12 +42,13 @@ void main() {
     } else {
         float dotProduct = abs(dot(normalize(fragNormal), normalize(eye)));
         float fresnel = smoothstep(0.0, 1.0, pow(1.0 - dotProduct, fresnelExponent));
-        fragColor = fresnel * vec4(fresnelColor + color, 1);
+        vec3 gradientColor = hueShift(color, fresnelHueShift);
+        fragColor = fresnel * vec4(fresnelColor + gradientColor, 1);
 
         // Color the inner fragments, except for the top-most layer's so that nested objects aren't occluded.
         if (shouldDepthPeel) {
             fresnel = smoothstep(0.0, 1.0, dotProduct);
-            fragColor += fresnel * vec4(0, 0.15, 0.8, 1);
+            fragColor += fresnel * vec4(color, 1);
         }
     }
 }

@@ -12,6 +12,7 @@ const NUM_PASSES = 4;
 export interface TransparentShaderProps {
     opaqueDepthTexture: WebGLTexture;
     fresnelColor: vec3;
+    fresnelHueShift: number;
     fresnelExponent: number;
 }
 
@@ -47,6 +48,7 @@ export class TransparentShader extends Shader {
         // Uniforms for Fresnel effect outline.
         this.locations.setUniform('eye');
         this.locations.setUniform('fresnelColor');
+        this.locations.setUniform('fresnelHueShift');
         this.locations.setUniform('fresnelExponent');
     }
 
@@ -55,6 +57,7 @@ export class TransparentShader extends Shader {
 
         this.gl.uniform3fv(this.locations.getUniform('eye'), Matrix.EYE);
         this.gl.uniform3fv(this.locations.getUniform('fresnelColor'), this.props.fresnelColor);
+        this.gl.uniform1f(this.locations.getUniform('fresnelHueShift'), this.props.fresnelHueShift);
         this.gl.uniform1f(this.locations.getUniform('fresnelExponent'), this.props.fresnelExponent);
 
         // Texture units 0 and 1 are used for the depth peel read/write textures.
