@@ -54,6 +54,11 @@ export class BlinnPhongShader extends Shader {
             this.gl.vertexAttribPointer(vertexPosition, 3, this.gl.FLOAT, false, 0, 0);
             this.gl.enableVertexAttribArray(vertexPosition);
 
+            this.gl.bindBuffer(this.gl.ARRAY_BUFFER, r.buffer.normals);
+            const normal = this.locations.getAttribute('normal');
+            this.gl.vertexAttribPointer(normal, 3, this.gl.FLOAT, false, 0, 0);
+            this.gl.enableVertexAttribArray(normal);
+
             this.gl.uniformMatrix4fv(this.locations.getUniform('modelViewMatrix'), false, r.matrix.modelView);
             this.gl.uniformMatrix4fv(this.locations.getUniform('projectionMatrix'), false, r.matrix.projection);
 
@@ -64,11 +69,6 @@ export class BlinnPhongShader extends Shader {
                 this.gl.uniform3fv(this.locations.getUniform('material.diffuse'), f.material.diffuse);
                 this.gl.uniform3fv(this.locations.getUniform('material.specular'), f.material.specular);
                 this.gl.uniform1f(this.locations.getUniform('material.specularExponent'), f.material.specular_exponent);
-
-                this.gl.bindBuffer(this.gl.ARRAY_BUFFER, r.buffer.normals);
-                const normal = this.locations.getAttribute('normal');
-                this.gl.vertexAttribPointer(normal, 3, this.gl.FLOAT, false, 0, 0);
-                this.gl.enableVertexAttribArray(normal);
 
                 this.gl.drawElements(this.gl.TRIANGLES, f.vertex_indices.length, this.gl.UNSIGNED_SHORT, offset)
                 // Offset must be a multiple of 2 since an unsigned short is 2 bytes.

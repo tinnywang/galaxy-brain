@@ -1,7 +1,6 @@
 class WebGL2 {
   static renderingContext(canvas: HTMLCanvasElement) {
     const gl = canvas.getContext("webgl2", {
-      alpha: false,
       antialias: false,
     });
     if (gl === null) {
@@ -10,7 +9,6 @@ class WebGL2 {
       );
     }
 
-    gl.clearColor(1, 1, 1, 0);
     gl.clear(gl.COLOR_BUFFER_BIT);
 
     return gl;

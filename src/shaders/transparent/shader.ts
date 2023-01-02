@@ -4,11 +4,16 @@ import { Shader } from '../shader';
 import { PostProcessing } from '../post_processing/shader';
 import { Renderable } from '../../renderables/renderable';
 import WebGL2 from '../../gl';
+import Matrix from '../../matrix';
+import { vec3 } from 'gl-matrix';
 
 const NUM_PASSES = 4;
 
 export interface TransparentShaderProps {
     opaqueDepthTexture: WebGLTexture;
+    fresnelColor: vec3;
+    fresnelHueShift: number;
+    fresnelExponent: number;
 }
 
 export class TransparentShader extends Shader {
@@ -32,16 +37,28 @@ export class TransparentShader extends Shader {
         this.colorTextures = WebGL2.createColorTextures(this.gl, NUM_PASSES);
 
         this.locations.setAttribute('vertexPosition');
+        this.locations.setAttribute('normal');
         this.locations.setUniform('modelViewMatrix');
         this.locations.setUniform('projectionMatrix');
         this.locations.setUniform('color');
         this.locations.setUniform('opaqueDepthTexture');
         this.locations.setUniform('peelDepthTexture');
         this.locations.setUniform('shouldDepthPeel');
+
+        // Uniforms for Fresnel effect outline.
+        this.locations.setUniform('eye');
+        this.locations.setUniform('fresnelColor');
+        this.locations.setUniform('fresnelHueShift');
+        this.locations.setUniform('fresnelExponent');
     }
 
     render(drawFramebuffer: WebGLFramebuffer, ...renderables: Renderable[]) {
         super.render(drawFramebuffer, ...renderables);
+
+        this.gl.uniform3fv(this.locations.getUniform('eye'), Matrix.EYE);
+        this.gl.uniform3fv(this.locations.getUniform('fresnelColor'), this.props.fresnelColor);
+        this.gl.uniform1f(this.locations.getUniform('fresnelHueShift'), this.props.fresnelHueShift);
+        this.gl.uniform1f(this.locations.getUniform('fresnelExponent'), this.props.fresnelExponent);
 
         // Texture units 0 and 1 are used for the depth peel read/write textures.
         this.gl.activeTexture(this.gl.TEXTURE2);
@@ -56,6 +73,11 @@ export class TransparentShader extends Shader {
                 const vertexPosition = this.locations.getAttribute('vertexPosition');
                 this.gl.vertexAttribPointer(vertexPosition, 3, this.gl.FLOAT, false, 0, 0);
                 this.gl.enableVertexAttribArray(vertexPosition);
+
+                this.gl.bindBuffer(this.gl.ARRAY_BUFFER, r.buffer.normals);
+                const normal = this.locations.getAttribute('normal');
+                this.gl.vertexAttribPointer(normal, 3, this.gl.FLOAT, false, 0, 0);
+                this.gl.enableVertexAttribArray(normal);
 
                 this.gl.uniformMatrix4fv(this.locations.getUniform('modelViewMatrix'), false, r.matrix.modelView);
                 this.gl.uniformMatrix4fv(this.locations.getUniform('projectionMatrix'), false, r.matrix.projection);
