@@ -1,6 +1,11 @@
 import vertexSrc from './vertex.glsl';
-import identityFragmentSrc from './fragment.glsl';
+import fragmentSrc from './fragment.glsl';
 import { Shader } from '../shader';
+
+export interface PostProcessingProps {
+    vertexSrc?: string;
+    fragmentSrc?: string;
+}
 
 export class PostProcessing extends Shader {
     // These are already in normalized device coordinates and don't need to be
@@ -16,8 +21,8 @@ export class PostProcessing extends Shader {
 
     private verticesBuffer: WebGLBuffer | null;
 
-    constructor(gl: WebGL2RenderingContext, fragmentSrc?: string) {
-        super(gl, vertexSrc, fragmentSrc ?? identityFragmentSrc);
+    constructor(gl: WebGL2RenderingContext, props?: PostProcessingProps) {
+        super(gl, props?.vertexSrc ?? vertexSrc, props?.fragmentSrc ?? fragmentSrc);
 
         this.locations.setAttribute('vertexPosition');
         this.locations.setUniform('textureImage');
