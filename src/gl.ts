@@ -16,7 +16,9 @@ class WebGL2 {
 
   static createColorTextures(
     gl: WebGL2RenderingContext,
-    n: number
+    n: number,
+    width?: number,
+    height?: number,
   ): Array<WebGLTexture> {
     return WebGL2.createTextures(
       gl,
@@ -24,7 +26,9 @@ class WebGL2 {
       gl.RGBA,
       gl.RGBA,
       gl.UNSIGNED_BYTE,
-      gl.LINEAR
+      gl.LINEAR,
+      width,
+      height,
     );
   }
 
@@ -48,7 +52,9 @@ class WebGL2 {
     format: number,
     attachment: number,
     type: number,
-    filter: number
+    filter: number,
+    width?: number,
+    height?: number,
   ): Array<WebGLTexture> {
     const textures = new Array<WebGLTexture>();
 
@@ -63,8 +69,8 @@ class WebGL2 {
         gl.TEXTURE_2D,
         0,
         format,
-        gl.drawingBufferWidth,
-        gl.drawingBufferHeight,
+        width ?? gl.drawingBufferWidth,
+        height ?? gl.drawingBufferHeight,
         0,
         attachment,
         type,
