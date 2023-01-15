@@ -18,7 +18,7 @@ class WebGL2 {
     gl: WebGL2RenderingContext,
     n: number,
     width?: number,
-    height?: number,
+    height?: number
   ): Array<WebGLTexture> {
     return WebGL2.createTextures(
       gl,
@@ -28,7 +28,7 @@ class WebGL2 {
       gl.UNSIGNED_BYTE,
       gl.LINEAR,
       width,
-      height,
+      height
     );
   }
 
@@ -54,7 +54,7 @@ class WebGL2 {
     type: number,
     filter: number,
     width?: number,
-    height?: number,
+    height?: number
   ): Array<WebGLTexture> {
     const textures = new Array<WebGLTexture>();
 

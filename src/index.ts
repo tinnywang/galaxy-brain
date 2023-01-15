@@ -1,12 +1,12 @@
 // import { vec3 } from "gl-matrix";
 import $ from "jquery";
+import { vec3 } from "gl-matrix";
 import WebGL2 from "./gl";
 import { Teapot } from "./renderables/teapot";
-import { CrepuscularRay } from "./shaders/crepuscular_ray/shader"
+import { CrepuscularRay } from "./shaders/crepuscular_ray/shader";
 import { TransparentShader } from "./shaders/transparent/shader";
 import { FXAA } from "./shaders/fxaa/shader";
-import { vec3 } from "gl-matrix";
-import Matrix from "./matrix";
+import { Light } from "./light";
 
 $(() => {
   const $canvas: JQuery<HTMLCanvasElement> = $("canvas");
@@ -45,12 +45,7 @@ $(() => {
       0
     );
 
-    const light = {
-      position: vec3.fromValues(0, 10, -10),
-      color: vec3.fromValues(1, 1, 1),
-      power: 40,
-      matrix: new Matrix(gl),
-    }
+    const light = new Light(gl, { position: vec3.fromValues(0, 10, -10) });
 
     const transparentShader = new TransparentShader(gl, {
       opaqueDepthTexture: depthTexture,
@@ -67,9 +62,10 @@ $(() => {
       decay: 0.99,
       exposure: 0.0035,
     });
-   const fxaa = new FXAA(gl);
+    const fxaa = new FXAA(gl);
 
-    const path = "https://gist.githubusercontent.com/tinnywang/58bda00c65fd7b14d0d15ea1c7a022db/raw/e6147607586052300501fa6be58fc80c51ac6d15/teapot.json";
+    const path =
+      "https://gist.githubusercontent.com/tinnywang/58bda00c65fd7b14d0d15ea1c7a022db/raw/e6147607586052300501fa6be58fc80c51ac6d15/teapot.json";
 
     $.get(path, (data: string) => {
       const teapot = new Teapot(gl, JSON.parse(data)[0]);
