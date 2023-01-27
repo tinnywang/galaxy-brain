@@ -4,6 +4,7 @@ import { Shader } from '../shader';
 import { Model } from '../../models/model';
 import Matrix from '../../matrix';
 import { Light } from '../../light';
+import { Face } from '../../object';
 
 export class BlinnPhongShader extends Shader {
     private readonly lights: Light[];
@@ -48,32 +49,14 @@ export class BlinnPhongShader extends Shader {
             this.gl.uniform1f(this.locations.getUniform(`lights[${i}].power`), light.power);
         });
 
-        models.forEach((m) => {
-            this.gl.bindBuffer(this.gl.ARRAY_BUFFER, m.buffer.vertices);
-            const vertexPosition = this.locations.getAttribute('vertexPosition');
-            this.gl.vertexAttribPointer(vertexPosition, 3, this.gl.FLOAT, false, 0, 0);
-            this.gl.enableVertexAttribArray(vertexPosition);
-
-            this.gl.bindBuffer(this.gl.ARRAY_BUFFER, m.buffer.normals);
-            const normal = this.locations.getAttribute('normal');
-            this.gl.vertexAttribPointer(normal, 3, this.gl.FLOAT, false, 0, 0);
-            this.gl.enableVertexAttribArray(normal);
-
-            this.gl.uniformMatrix4fv(this.locations.getUniform('modelViewMatrix'), false, m.matrix.modelView);
-            this.gl.uniformMatrix4fv(this.locations.getUniform('projectionMatrix'), false, m.matrix.projection);
-
-            let offset = 0
-            this.gl.bindBuffer(this.gl.ELEMENT_ARRAY_BUFFER, m.buffer.faces);
-            m.object.faces.forEach((f) => {
+        models.forEach((model) => {
+            model.render(this.gl, this.locations, (f: Face) => {
                 this.gl.uniform3fv(this.locations.getUniform('material.ambient'), f.material.ambient);
                 this.gl.uniform3fv(this.locations.getUniform('material.diffuse'), f.material.diffuse);
                 this.gl.uniform3fv(this.locations.getUniform('material.specular'), f.material.specular);
                 this.gl.uniform1f(this.locations.getUniform('material.specularExponent'), f.material.specular_exponent);
-
-                this.gl.drawElements(this.gl.TRIANGLES, f.vertex_indices.length, this.gl.UNSIGNED_SHORT, offset)
-                // Offset must be a multiple of 2 since an unsigned short is 2 bytes.
-                offset += f.vertex_indices.length * 2
-            })
+            });
         });
     }
+
 }

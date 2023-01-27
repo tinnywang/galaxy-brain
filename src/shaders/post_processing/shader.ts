@@ -35,10 +35,12 @@ export class PostProcessing extends Shader {
     render(texture: WebGLTexture) {
         super.render(texture);
 
-        this.gl.bindBuffer(this.gl.ARRAY_BUFFER, this.verticesBuffer);
         const vertexPosition = this.locations.getAttribute('vertexPosition');
-        this.gl.vertexAttribPointer(vertexPosition, 2, this.gl.FLOAT, false, 0, 0);
-        this.gl.enableVertexAttribArray(vertexPosition);
+        if (vertexPosition !== null) {
+            this.gl.bindBuffer(this.gl.ARRAY_BUFFER, this.verticesBuffer);
+            this.gl.vertexAttribPointer(vertexPosition, 2, this.gl.FLOAT, false, 0, 0);
+            this.gl.enableVertexAttribArray(vertexPosition);
+        }
 
         this.gl.activeTexture(this.gl.TEXTURE0);
         this.gl.bindTexture(this.gl.TEXTURE_2D, texture);

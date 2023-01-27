@@ -47,23 +47,7 @@ export class OcclusionShader extends Shader {
         this.gl.disable(this.gl.DEPTH_TEST);
         this.gl.clear(this.gl.COLOR_BUFFER_BIT);
 
-        models.forEach((m) => {
-            this.gl.bindBuffer(this.gl.ARRAY_BUFFER, m.buffer.vertices);
-            const vertexPosition = this.locations.getAttribute('vertexPosition');
-            this.gl.vertexAttribPointer(vertexPosition, 3, this.gl.FLOAT, false, 0, 0);
-            this.gl.enableVertexAttribArray(vertexPosition);
-
-            this.gl.uniformMatrix4fv(this.locations.getUniform('modelViewMatrix'), false, m.matrix.modelView);
-            this.gl.uniformMatrix4fv(this.locations.getUniform('projectionMatrix'), false, m.matrix.projection);
-
-            let offset = 0;
-            this.gl.bindBuffer(this.gl.ELEMENT_ARRAY_BUFFER, m.buffer.faces);
-            m.object.faces.forEach((f) => {
-                this.gl.drawElements(this.gl.TRIANGLES, f.vertex_indices.length, this.gl.UNSIGNED_SHORT, offset);
-                // Offset must be a multiple of 2 since an unsigned short is 2 bytes.
-                offset += f.vertex_indices.length * 2;
-            })
-        });
+        models.forEach((m) => m.render(this.gl, this.locations));
 
         this.gl.viewport(x, y, width, height);
     }

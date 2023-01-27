@@ -6,6 +6,7 @@ import { Model } from '../../models/model';
 import WebGL2 from '../../gl';
 import Matrix from '../../matrix';
 import { vec3 } from 'gl-matrix';
+import { Face } from '../../object';
 
 const NUM_PASSES = 4;
 
@@ -69,28 +70,9 @@ export class TransparentShader extends Shader {
             this.depthPeel(i);
 
             models.forEach((m) => {
-                this.gl.bindBuffer(this.gl.ARRAY_BUFFER, m.buffer.vertices);
-                const vertexPosition = this.locations.getAttribute('vertexPosition');
-                this.gl.vertexAttribPointer(vertexPosition, 3, this.gl.FLOAT, false, 0, 0);
-                this.gl.enableVertexAttribArray(vertexPosition);
-
-                this.gl.bindBuffer(this.gl.ARRAY_BUFFER, m.buffer.normals);
-                const normal = this.locations.getAttribute('normal');
-                this.gl.vertexAttribPointer(normal, 3, this.gl.FLOAT, false, 0, 0);
-                this.gl.enableVertexAttribArray(normal);
-
-                this.gl.uniformMatrix4fv(this.locations.getUniform('modelViewMatrix'), false, m.matrix.modelView);
-                this.gl.uniformMatrix4fv(this.locations.getUniform('projectionMatrix'), false, m.matrix.projection);
-
-                let offset = 0;
-                this.gl.bindBuffer(this.gl.ELEMENT_ARRAY_BUFFER, m.buffer.faces);
-                m.object.faces.forEach((f) => {
+                m.render(this.gl, this.locations, (f: Face) => {
                     this.gl.uniform3fv(this.locations.getUniform('color'), f.material.diffuse);
-
-                    this.gl.drawElements(this.gl.TRIANGLES, f.vertex_indices.length, this.gl.UNSIGNED_SHORT, offset);
-                    // Offset must be a multiple of 2 since an unsigned short is 2 bytes.
-                    offset += f.vertex_indices.length * 2;
-                })
+                });
             });
         }
 
