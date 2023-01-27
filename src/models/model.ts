@@ -8,7 +8,7 @@ interface Buffer {
   normals: WebGLBuffer | null;
 }
 
-export abstract class Renderable {
+export abstract class Model {
   readonly buffer: Buffer;
 
   readonly gl: WebGL2RenderingContext;

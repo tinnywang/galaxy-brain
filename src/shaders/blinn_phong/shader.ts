@@ -1,9 +1,9 @@
-import vertexSrc from './vertex.glsl'
-import fragmentSrc from './fragment.glsl'
-import { Shader } from '../shader'
-import { Renderable } from '../../renderables/renderable'
-import Matrix from '../../matrix'
-import { Light } from '../../light'
+import vertexSrc from './vertex.glsl';
+import fragmentSrc from './fragment.glsl';
+import { Shader } from '../shader';
+import { Model } from '../../models/model';
+import Matrix from '../../matrix';
+import { Light } from '../../light';
 
 export class BlinnPhongShader extends Shader {
     private readonly lights: Light[];
@@ -30,8 +30,8 @@ export class BlinnPhongShader extends Shader {
         });
     }
 
-    render(drawFramebuffer: WebGLFramebuffer, ...renderables: Renderable[]) {
-        super.render(drawFramebuffer, ...renderables);
+    render(drawFramebuffer: WebGLFramebuffer, ...models: Model[]) {
+        super.render(drawFramebuffer, ...models);
 
         this.gl.enable(this.gl.DEPTH_TEST);
         this.gl.depthFunc(this.gl.LEQUAL)
@@ -48,23 +48,23 @@ export class BlinnPhongShader extends Shader {
             this.gl.uniform1f(this.locations.getUniform(`lights[${i}].power`), light.power);
         });
 
-        renderables.forEach((r) => {
-            this.gl.bindBuffer(this.gl.ARRAY_BUFFER, r.buffer.vertices);
+        models.forEach((m) => {
+            this.gl.bindBuffer(this.gl.ARRAY_BUFFER, m.buffer.vertices);
             const vertexPosition = this.locations.getAttribute('vertexPosition');
             this.gl.vertexAttribPointer(vertexPosition, 3, this.gl.FLOAT, false, 0, 0);
             this.gl.enableVertexAttribArray(vertexPosition);
 
-            this.gl.bindBuffer(this.gl.ARRAY_BUFFER, r.buffer.normals);
+            this.gl.bindBuffer(this.gl.ARRAY_BUFFER, m.buffer.normals);
             const normal = this.locations.getAttribute('normal');
             this.gl.vertexAttribPointer(normal, 3, this.gl.FLOAT, false, 0, 0);
             this.gl.enableVertexAttribArray(normal);
 
-            this.gl.uniformMatrix4fv(this.locations.getUniform('modelViewMatrix'), false, r.matrix.modelView);
-            this.gl.uniformMatrix4fv(this.locations.getUniform('projectionMatrix'), false, r.matrix.projection);
+            this.gl.uniformMatrix4fv(this.locations.getUniform('modelViewMatrix'), false, m.matrix.modelView);
+            this.gl.uniformMatrix4fv(this.locations.getUniform('projectionMatrix'), false, m.matrix.projection);
 
             let offset = 0
-            this.gl.bindBuffer(this.gl.ELEMENT_ARRAY_BUFFER, r.buffer.faces);
-            r.object.faces.forEach((f) => {
+            this.gl.bindBuffer(this.gl.ELEMENT_ARRAY_BUFFER, m.buffer.faces);
+            m.object.faces.forEach((f) => {
                 this.gl.uniform3fv(this.locations.getUniform('material.ambient'), f.material.ambient);
                 this.gl.uniform3fv(this.locations.getUniform('material.diffuse'), f.material.diffuse);
                 this.gl.uniform3fv(this.locations.getUniform('material.specular'), f.material.specular);

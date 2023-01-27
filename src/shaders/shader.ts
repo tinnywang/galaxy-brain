@@ -1,4 +1,4 @@
-import { Renderable } from '../renderables/renderable';
+import { Model } from '../models/model';
 import { ShaderLocations } from './shader_locations';
 
 export abstract class Shader {
@@ -47,7 +47,7 @@ export abstract class Shader {
       return shader
     }
 
-    render(_framebuffer: WebGLFramebuffer, ..._renderables: Renderable[]) {
+    render(_framebuffer: WebGLFramebuffer, ..._models: Model[]) {
       this.gl.useProgram(this.program);
     }
 }

@@ -2,7 +2,7 @@ import vertexSrc from './vertex.glsl';
 import fragmentSrc from './fragment.glsl';
 import { Shader } from '../shader';
 import { PostProcessing } from '../post_processing/shader';
-import { Renderable } from '../../renderables/renderable';
+import { Model } from '../../models/model';
 import WebGL2 from '../../gl';
 import Matrix from '../../matrix';
 import { vec3 } from 'gl-matrix';
@@ -52,8 +52,8 @@ export class TransparentShader extends Shader {
         this.locations.setUniform('fresnelExponent');
     }
 
-    render(drawFramebuffer: WebGLFramebuffer, ...renderables: Renderable[]) {
-        super.render(drawFramebuffer, ...renderables);
+    render(drawFramebuffer: WebGLFramebuffer, ...models: Model[]) {
+        super.render(drawFramebuffer, ...models);
 
         this.gl.uniform3fv(this.locations.getUniform('eye'), Matrix.EYE);
         this.gl.uniform3fv(this.locations.getUniform('fresnelColor'), this.props.fresnelColor);
@@ -68,23 +68,23 @@ export class TransparentShader extends Shader {
         for (let i = 0; i < NUM_PASSES; i++) {
             this.depthPeel(i);
 
-            renderables.forEach((r) => {
-                this.gl.bindBuffer(this.gl.ARRAY_BUFFER, r.buffer.vertices);
+            models.forEach((m) => {
+                this.gl.bindBuffer(this.gl.ARRAY_BUFFER, m.buffer.vertices);
                 const vertexPosition = this.locations.getAttribute('vertexPosition');
                 this.gl.vertexAttribPointer(vertexPosition, 3, this.gl.FLOAT, false, 0, 0);
                 this.gl.enableVertexAttribArray(vertexPosition);
 
-                this.gl.bindBuffer(this.gl.ARRAY_BUFFER, r.buffer.normals);
+                this.gl.bindBuffer(this.gl.ARRAY_BUFFER, m.buffer.normals);
                 const normal = this.locations.getAttribute('normal');
                 this.gl.vertexAttribPointer(normal, 3, this.gl.FLOAT, false, 0, 0);
                 this.gl.enableVertexAttribArray(normal);
 
-                this.gl.uniformMatrix4fv(this.locations.getUniform('modelViewMatrix'), false, r.matrix.modelView);
-                this.gl.uniformMatrix4fv(this.locations.getUniform('projectionMatrix'), false, r.matrix.projection);
+                this.gl.uniformMatrix4fv(this.locations.getUniform('modelViewMatrix'), false, m.matrix.modelView);
+                this.gl.uniformMatrix4fv(this.locations.getUniform('projectionMatrix'), false, m.matrix.projection);
 
                 let offset = 0;
-                this.gl.bindBuffer(this.gl.ELEMENT_ARRAY_BUFFER, r.buffer.faces);
-                r.object.faces.forEach((f) => {
+                this.gl.bindBuffer(this.gl.ELEMENT_ARRAY_BUFFER, m.buffer.faces);
+                m.object.faces.forEach((f) => {
                     this.gl.uniform3fv(this.locations.getUniform('color'), f.material.diffuse);
 
                     this.gl.drawElements(this.gl.TRIANGLES, f.vertex_indices.length, this.gl.UNSIGNED_SHORT, offset);

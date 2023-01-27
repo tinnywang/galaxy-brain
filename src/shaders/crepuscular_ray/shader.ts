@@ -2,7 +2,7 @@ import fragmentSrc from './fragment.glsl';
 import vertexSrc from './vertex.glsl';
 import { PostProcessing } from "../post_processing/shader";
 import { OcclusionShader } from "../occlusion/shader";
-import { Renderable } from '../../renderables/renderable';
+import { Model } from '../../models/model';
 import WebGL2 from '../../gl';
 import { Light } from '../../light';
 
@@ -42,9 +42,9 @@ export class CrepuscularRay extends PostProcessing {
         this.locations.setUniform('colorTexture');
     }
 
-    render(drawFramebuffer: WebGLFramebuffer, ...renderables: Renderable[]) {
+    render(drawFramebuffer: WebGLFramebuffer, ...models: Model[]) {
         // Render occluding objects black and untextured.
-        this.occlusion.render(drawFramebuffer, ...renderables);
+        this.occlusion.render(drawFramebuffer, ...models);
 
         // Render crepescular rays from the occluding texture.
         this.gl.useProgram(this.program);

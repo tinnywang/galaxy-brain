@@ -1,7 +1,7 @@
 import fragmentSrc from './fragment.glsl';
 import vertexSrc from './vertex.glsl';
 import { Shader } from '../shader';
-import { Renderable } from '../../renderables/renderable';
+import { Model } from '../../models/model';
 import WebGL2 from '../../gl';
 
 export interface OcclusionProps {
@@ -30,8 +30,8 @@ export class OcclusionShader extends Shader {
         this.locations.setUniform('projectionMatrix');
     }
 
-    render(drawFramebuffer: WebGLFramebuffer, ...renderables: Renderable[]) {
-        super.render(drawFramebuffer, ...renderables);
+    render(drawFramebuffer: WebGLFramebuffer, ...models: Model[]) {
+        super.render(drawFramebuffer, ...models);
 
         this.gl.bindFramebuffer(this.gl.DRAW_FRAMEBUFFER, drawFramebuffer);
         this.gl.framebufferTexture2D(this.gl.DRAW_FRAMEBUFFER, this.gl.COLOR_ATTACHMENT0, this.gl.TEXTURE_2D, this.texture, 0);
@@ -47,18 +47,18 @@ export class OcclusionShader extends Shader {
         this.gl.disable(this.gl.DEPTH_TEST);
         this.gl.clear(this.gl.COLOR_BUFFER_BIT);
 
-        renderables.forEach((r) => {
-            this.gl.bindBuffer(this.gl.ARRAY_BUFFER, r.buffer.vertices);
+        models.forEach((m) => {
+            this.gl.bindBuffer(this.gl.ARRAY_BUFFER, m.buffer.vertices);
             const vertexPosition = this.locations.getAttribute('vertexPosition');
             this.gl.vertexAttribPointer(vertexPosition, 3, this.gl.FLOAT, false, 0, 0);
             this.gl.enableVertexAttribArray(vertexPosition);
 
-            this.gl.uniformMatrix4fv(this.locations.getUniform('modelViewMatrix'), false, r.matrix.modelView);
-            this.gl.uniformMatrix4fv(this.locations.getUniform('projectionMatrix'), false, r.matrix.projection);
+            this.gl.uniformMatrix4fv(this.locations.getUniform('modelViewMatrix'), false, m.matrix.modelView);
+            this.gl.uniformMatrix4fv(this.locations.getUniform('projectionMatrix'), false, m.matrix.projection);
 
             let offset = 0;
-            this.gl.bindBuffer(this.gl.ELEMENT_ARRAY_BUFFER, r.buffer.faces);
-            r.object.faces.forEach((f) => {
+            this.gl.bindBuffer(this.gl.ELEMENT_ARRAY_BUFFER, m.buffer.faces);
+            m.object.faces.forEach((f) => {
                 this.gl.drawElements(this.gl.TRIANGLES, f.vertex_indices.length, this.gl.UNSIGNED_SHORT, offset);
                 // Offset must be a multiple of 2 since an unsigned short is 2 bytes.
                 offset += f.vertex_indices.length * 2;
