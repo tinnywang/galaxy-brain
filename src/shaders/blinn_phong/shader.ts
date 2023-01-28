@@ -1,15 +1,20 @@
-import vertexSrc from './vertex.glsl'
-import fragmentSrc from './fragment.glsl'
-import { Shader } from '../shader'
-import { Renderable } from '../../renderables/renderable'
-import Matrix from '../../matrix'
-import { Light } from '../../light'
+import vertexSrc from './vertex.glsl';
+import fragmentSrc from './fragment.glsl';
+import { Shader } from '../shader';
+import { Model } from '../../models/model';
+import Matrix from '../../matrix';
+import { Light } from '../../light';
+import { Face } from '../../object';
+
+export interface BlinnPhongProps {
+    lights: Light[];
+}
 
 export class BlinnPhongShader extends Shader {
     private readonly lights: Light[];
 
-    constructor(gl: WebGL2RenderingContext, lights: Light[]) {
-        super(gl, vertexSrc, fragmentSrc.replace('${numLights}', lights.length.toString()));
+    constructor(gl: WebGL2RenderingContext, props: BlinnPhongProps) {
+        super(gl, vertexSrc, fragmentSrc.replace('${numLights}', props.lights.length.toString()));
 
         this.locations.setAttribute('vertexPosition');
         this.locations.setUniform('modelViewMatrix');
@@ -22,7 +27,7 @@ export class BlinnPhongShader extends Shader {
         this.locations.setUniform('material.specular');
         this.locations.setUniform('material.specularExponent');
 
-        this.lights = lights;
+        this.lights = props.lights;
         this.lights.forEach((_, i) => {
             this.locations.setUniform(`lights[${i}].position`);
             this.locations.setUniform(`lights[${i}].color`);
@@ -30,8 +35,8 @@ export class BlinnPhongShader extends Shader {
         });
     }
 
-    render(drawFramebuffer: WebGLFramebuffer, ...renderables: Renderable[]) {
-        super.render(drawFramebuffer, ...renderables);
+    render(drawFramebuffer: WebGLFramebuffer, models?: Model[]) {
+        super.render(drawFramebuffer, models);
 
         this.gl.enable(this.gl.DEPTH_TEST);
         this.gl.depthFunc(this.gl.LEQUAL)
@@ -48,32 +53,14 @@ export class BlinnPhongShader extends Shader {
             this.gl.uniform1f(this.locations.getUniform(`lights[${i}].power`), light.power);
         });
 
-        renderables.forEach((r) => {
-            this.gl.bindBuffer(this.gl.ARRAY_BUFFER, r.buffer.vertices);
-            const vertexPosition = this.locations.getAttribute('vertexPosition');
-            this.gl.vertexAttribPointer(vertexPosition, 3, this.gl.FLOAT, false, 0, 0);
-            this.gl.enableVertexAttribArray(vertexPosition);
-
-            this.gl.bindBuffer(this.gl.ARRAY_BUFFER, r.buffer.normals);
-            const normal = this.locations.getAttribute('normal');
-            this.gl.vertexAttribPointer(normal, 3, this.gl.FLOAT, false, 0, 0);
-            this.gl.enableVertexAttribArray(normal);
-
-            this.gl.uniformMatrix4fv(this.locations.getUniform('modelViewMatrix'), false, r.matrix.modelView);
-            this.gl.uniformMatrix4fv(this.locations.getUniform('projectionMatrix'), false, r.matrix.projection);
-
-            let offset = 0
-            this.gl.bindBuffer(this.gl.ELEMENT_ARRAY_BUFFER, r.buffer.faces);
-            r.object.faces.forEach((f) => {
+        models?.forEach((m) => {
+            m.render(this.gl, this.locations, (f: Face) => {
                 this.gl.uniform3fv(this.locations.getUniform('material.ambient'), f.material.ambient);
                 this.gl.uniform3fv(this.locations.getUniform('material.diffuse'), f.material.diffuse);
                 this.gl.uniform3fv(this.locations.getUniform('material.specular'), f.material.specular);
                 this.gl.uniform1f(this.locations.getUniform('material.specularExponent'), f.material.specular_exponent);
-
-                this.gl.drawElements(this.gl.TRIANGLES, f.vertex_indices.length, this.gl.UNSIGNED_SHORT, offset)
-                // Offset must be a multiple of 2 since an unsigned short is 2 bytes.
-                offset += f.vertex_indices.length * 2
-            })
+            });
         });
     }
+
 }

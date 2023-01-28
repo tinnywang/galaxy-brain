@@ -2,7 +2,7 @@
 import $ from "jquery";
 import { vec3 } from "gl-matrix";
 import WebGL2 from "./gl";
-import { Teapot } from "./renderables/teapot";
+import { Teapot } from "./models/teapot";
 import { CrepuscularRay } from "./shaders/crepuscular_ray/shader";
 import { TransparentShader } from "./shaders/transparent/shader";
 import { FXAA } from "./shaders/fxaa/shader";
@@ -73,8 +73,8 @@ $(() => {
       const render = (_: DOMHighResTimeStamp) => {
         gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
 
-        transparentShader.render(framebuffer, teapot);
-        crepuscularRay.render(framebuffer, teapot);
+        transparentShader.render(framebuffer, [teapot]);
+        crepuscularRay.render(framebuffer, [teapot]);
 
         gl.bindFramebuffer(gl.READ_FRAMEBUFFER, framebuffer);
         gl.bindFramebuffer(gl.DRAW_FRAMEBUFFER, null);

@@ -9,7 +9,7 @@ interface Material {
   specular_exponent: number;
 }
 
-interface Face {
+export interface Face {
   material: Material;
   vertex_indices: Array<number>;
 }

@@ -21,8 +21,8 @@ export class ShaderLocations {
 		this.uniforms.set(name, locations);
 	}
 
-	getAttribute(name: string): GLint {
-		return this.attributes.get(name) ?? -1;
+	getAttribute(name: string): GLint | null {
+		return this.attributes.get(name) ?? null;
 	}
 
 	setAttribute(name: string) {

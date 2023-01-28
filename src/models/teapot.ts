@@ -1,8 +1,8 @@
 import { mat4, glMatrix } from "gl-matrix";
 import { Object } from "../object";
-import { Renderable } from "./renderable";
+import { Model } from "./model";
 
-export class Teapot extends Renderable {
+export class Teapot extends Model {
     constructor(gl: WebGL2RenderingContext, o: Object) {
         let model = mat4.rotateX(
             mat4.create(),
