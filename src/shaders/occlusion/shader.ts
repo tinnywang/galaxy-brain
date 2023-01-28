@@ -1,9 +1,10 @@
 import fragmentSrc from './fragment.glsl';
 import vertexSrc from './vertex.glsl';
-import { Renderable, Shader } from '../shader';
+import { Shader } from '../shader';
 import WebGL2 from '../../gl';
 import { vec3 } from 'gl-matrix';
 import { Light } from '../../light';
+import { Model } from '../../models/model';
 
 export interface OcclusionProps {
     scale: number;
@@ -34,8 +35,8 @@ export class OcclusionShader extends Shader {
         this.locations.setUniform('color');
     }
 
-    render(drawFramebuffer: WebGLFramebuffer, ...renderables: Renderable[]) {
-        super.render(drawFramebuffer, ...renderables);
+    render(drawFramebuffer: WebGLFramebuffer, models?: Model[], lights?: Light[]) {
+        super.render(drawFramebuffer, models, lights);
 
         this.gl.bindFramebuffer(this.gl.DRAW_FRAMEBUFFER, drawFramebuffer);
         this.gl.framebufferTexture2D(this.gl.DRAW_FRAMEBUFFER, this.gl.COLOR_ATTACHMENT0, this.gl.TEXTURE_2D, this.texture, 0);
@@ -51,12 +52,10 @@ export class OcclusionShader extends Shader {
         this.gl.disable(this.gl.DEPTH_TEST);
         this.gl.clear(this.gl.COLOR_BUFFER_BIT);
 
+        this.gl.uniform3fv(this.locations.getUniform('color'), OcclusionShader.Black);
+        models?.forEach((m) => m.render(this.gl, this.locations));
 
-        renderables.forEach((r) => {
-            const color = r instanceof Light ? r.color : OcclusionShader.Black;
-            this.gl.uniform3fv(this.locations.getUniform('color'), color);
-            r.render(this.gl, this.locations);
-        });
+        lights?.forEach((l) => l.render(this.gl, this.locations));
 
         this.gl.viewport(x, y, width, height);
     }

@@ -48,9 +48,7 @@ export abstract class Shader {
       return shader
     }
 
-    render(_framebuffer: WebGLFramebuffer, ..._renderables: Renderable[]) {
+    render(_data: WebGLFramebuffer | WebGLTexture, _models?: Model[], _lights?: Light[]) {
       this.gl.useProgram(this.program);
     }
 }
-
-export type Renderable = Model | Light;

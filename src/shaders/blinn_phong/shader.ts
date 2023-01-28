@@ -6,11 +6,15 @@ import Matrix from '../../matrix';
 import { Light } from '../../light';
 import { Face } from '../../object';
 
+export interface BlinnPhongProps {
+    lights: Light[];
+}
+
 export class BlinnPhongShader extends Shader {
     private readonly lights: Light[];
 
-    constructor(gl: WebGL2RenderingContext, lights: Light[]) {
-        super(gl, vertexSrc, fragmentSrc.replace('${numLights}', lights.length.toString()));
+    constructor(gl: WebGL2RenderingContext, props: BlinnPhongProps) {
+        super(gl, vertexSrc, fragmentSrc.replace('${numLights}', props.lights.length.toString()));
 
         this.locations.setAttribute('vertexPosition');
         this.locations.setUniform('modelViewMatrix');
@@ -23,7 +27,7 @@ export class BlinnPhongShader extends Shader {
         this.locations.setUniform('material.specular');
         this.locations.setUniform('material.specularExponent');
 
-        this.lights = lights;
+        this.lights = props.lights;
         this.lights.forEach((_, i) => {
             this.locations.setUniform(`lights[${i}].position`);
             this.locations.setUniform(`lights[${i}].color`);
@@ -31,8 +35,8 @@ export class BlinnPhongShader extends Shader {
         });
     }
 
-    render(drawFramebuffer: WebGLFramebuffer, ...models: Model[]) {
-        super.render(drawFramebuffer, ...models);
+    render(drawFramebuffer: WebGLFramebuffer, models?: Model[]) {
+        super.render(drawFramebuffer, models);
 
         this.gl.enable(this.gl.DEPTH_TEST);
         this.gl.depthFunc(this.gl.LEQUAL)
@@ -49,8 +53,8 @@ export class BlinnPhongShader extends Shader {
             this.gl.uniform1f(this.locations.getUniform(`lights[${i}].power`), light.power);
         });
 
-        models.forEach((model) => {
-            model.render(this.gl, this.locations, (f: Face) => {
+        models?.forEach((m) => {
+            m.render(this.gl, this.locations, (f: Face) => {
                 this.gl.uniform3fv(this.locations.getUniform('material.ambient'), f.material.ambient);
                 this.gl.uniform3fv(this.locations.getUniform('material.diffuse'), f.material.diffuse);
                 this.gl.uniform3fv(this.locations.getUniform('material.specular'), f.material.specular);

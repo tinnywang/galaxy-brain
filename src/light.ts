@@ -48,15 +48,25 @@ export class Light {
   }
 
   render(gl: WebGL2RenderingContext, locations: ShaderLocations) {
-    const vertexPosition = locations.getAttribute('vertexPosition');
+    const vertexPosition = locations.getAttribute("vertexPosition");
     if (vertexPosition !== null) {
       gl.bindBuffer(gl.ARRAY_BUFFER, this.verticesBuffer);
       gl.vertexAttribPointer(vertexPosition, 2, gl.FLOAT, false, 0, 0);
       gl.enableVertexAttribArray(vertexPosition);
     }
 
-    gl.uniformMatrix4fv(locations.getUniform('modelViewMatrix'), false, this.matrix.modelView);
-    gl.uniformMatrix4fv(locations.getUniform('projectionMatrix'), false, this.matrix.projection);
+    gl.uniformMatrix4fv(
+      locations.getUniform("modelViewMatrix"),
+      false,
+      this.matrix.modelView
+    );
+    gl.uniformMatrix4fv(
+      locations.getUniform("projectionMatrix"),
+      false,
+      this.matrix.projection
+    );
+
+    gl.uniform3fv(locations.getUniform("color"), this.color);
 
     gl.drawArrays(gl.TRIANGLE_FAN, 0, this.vertices.length);
   }
