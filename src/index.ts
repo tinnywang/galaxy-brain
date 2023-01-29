@@ -55,7 +55,6 @@ $(() => {
     });
     const crepuscularRay = new CrepuscularRay(gl, {
       colorTexture,
-      light,
       samples: 50,
       density: 0.35,
       weight: 5,

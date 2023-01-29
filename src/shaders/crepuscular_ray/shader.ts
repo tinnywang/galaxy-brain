@@ -8,7 +8,6 @@ import { Light } from '../../light';
 
 export interface CrepuscularRayProps {
     colorTexture: WebGLTexture;
-    light: Light;
     samples: number;
     density: number;
     weight: number;
@@ -25,8 +24,7 @@ export class CrepuscularRay extends PostProcessing<RenderProps> {
     private props: CrepuscularRayProps;
     private occlusion: OcclusionShader;
     private postProcessing: PostProcessing;
-
-    readonly texture: WebGLTexture;
+    private texture: WebGLTexture;
 
     constructor(gl: WebGL2RenderingContext, props: CrepuscularRayProps) {
         super(gl, { vertexSrc, fragmentSrc });
