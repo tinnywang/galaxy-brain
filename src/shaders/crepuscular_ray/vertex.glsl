@@ -16,7 +16,7 @@ void main(void) {
     // Texture coordinates are in the range [0, 1].
     texturePosition = vertexPosition * 0.5 + 0.5;
 
-    // Normalized-device coordinates (NDC) are in the rante [-1, 1].
+    // Normalized-device coordinates (NDC) are in the range [-1, 1].
     vec4 lightPositionNDC = projectionMatrix * modelViewMatrix * vec4(lightPosition, 1);
     lightPositionNDC /= lightPositionNDC.w;
 
