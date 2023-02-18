@@ -1,4 +1,4 @@
-import { glMatrix, mat4, vec3 } from "gl-matrix";
+import { mat4, vec3 } from "gl-matrix";
 import Matrix from "./matrix";
 import { ShaderLocations } from "./shaders/shader_locations";
 
@@ -35,8 +35,7 @@ export class Light {
       mat4.fromTranslation(mat4.create(), this.position)
     );
 
-    const degrees = props.degrees ?? 20;
-    this.vertices = this.getVertices(degrees);
+    this.vertices = [...this.position];
 
     this.verticesBuffer = gl.createBuffer();
     gl.bindBuffer(gl.ARRAY_BUFFER, this.verticesBuffer);
@@ -51,7 +50,7 @@ export class Light {
     const vertexPosition = locations.getAttribute("vertexPosition");
     if (vertexPosition !== null) {
       gl.bindBuffer(gl.ARRAY_BUFFER, this.verticesBuffer);
-      gl.vertexAttribPointer(vertexPosition, 2, gl.FLOAT, false, 0, 0);
+      gl.vertexAttribPointer(vertexPosition, 3, gl.FLOAT, false, 0, 0);
       gl.enableVertexAttribArray(vertexPosition);
     }
 
@@ -69,20 +68,6 @@ export class Light {
     gl.uniform1f(locations.getUniform("radius"), this.radius);
     gl.uniform3fv(locations.getUniform("color"), this.color);
 
-    gl.drawArrays(gl.TRIANGLE_FAN, 0, this.vertices.length);
-  }
-
-  // Points on a circle are given by the equation (x, y) = (rsin(θ), rcos(θ)).
-  // (0, 0) is the center of the circle and is the shared vertex in the triangle fan.
-  private getVertices(degrees: number): number[] {
-    const vertices = [0, 0];
-    for (let d = 0; d <= 360; d += degrees) {
-      vertices.push(
-        this.radius * Math.sin(glMatrix.toRadian(d)),
-        this.radius * Math.cos(glMatrix.toRadian(d))
-      );
-    }
-
-    return vertices;
+    gl.drawArrays(gl.POINTS, 0, this.vertices.length);
   }
 }
