@@ -66,6 +66,7 @@ export class Light {
       this.matrix.projection
     );
 
+    gl.uniform1f(locations.getUniform("radius"), this.radius);
     gl.uniform3fv(locations.getUniform("color"), this.color);
 
     gl.drawArrays(gl.TRIANGLE_FAN, 0, this.vertices.length);
