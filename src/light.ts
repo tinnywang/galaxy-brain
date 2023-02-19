@@ -1,4 +1,4 @@
-import { mat4, vec3 } from "gl-matrix";
+import { vec3 } from "gl-matrix";
 import Matrix from "./matrix";
 import { ShaderLocations } from "./shaders/shader_locations";
 
@@ -21,27 +21,20 @@ export class Light {
 
   readonly matrix: Matrix;
 
-  readonly vertices: number[];
-
-  readonly verticesBuffer: WebGLBuffer | null;
+  private verticesBuffer: WebGLBuffer | null;
 
   constructor(gl: WebGL2RenderingContext, props: LightProps) {
     this.position = props.position;
     this.color = props.color ?? vec3.fromValues(1, 1, 1);
     this.power = props.power ?? 1;
     this.radius = props.radius ?? 1;
-    this.matrix = new Matrix(
-      gl,
-      mat4.fromTranslation(mat4.create(), this.position)
-    );
-
-    this.vertices = [...this.position];
+    this.matrix = new Matrix(gl);
 
     this.verticesBuffer = gl.createBuffer();
     gl.bindBuffer(gl.ARRAY_BUFFER, this.verticesBuffer);
     gl.bufferData(
       gl.ARRAY_BUFFER,
-      new Float32Array(this.vertices),
+      new Float32Array(this.position),
       gl.STATIC_DRAW
     );
   }
@@ -68,6 +61,6 @@ export class Light {
     gl.uniform1f(locations.getUniform("radius"), this.radius);
     gl.uniform3fv(locations.getUniform("color"), this.color);
 
-    gl.drawArrays(gl.POINTS, 0, this.vertices.length);
+    gl.drawArrays(gl.POINTS, 0, 1);
   }
 }
