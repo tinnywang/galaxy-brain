@@ -1,13 +1,13 @@
 #version 300 es
 
 in vec2 vertexPosition;
-in vec3 lightPosition;
 
 out highp vec2 texturePosition;
 out highp vec2 lightRay;
 
 uniform mat4 modelViewMatrix;
 uniform mat4 projectionMatrix;
+uniform vec3 lightPosition;
 
 void main(void) {
     // gl_Position coordinates are in the range [-1, 1].
