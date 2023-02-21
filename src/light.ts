@@ -3,15 +3,14 @@ import Matrix from "./matrix";
 import { ShaderLocations } from "./shaders/shader_locations";
 
 export interface LightProps {
-  position: vec3;
+  positions: vec3[];
   color?: vec3;
   power?: number;
   radius?: number;
-  degrees?: number;
 }
 
 export class Light {
-  readonly position: vec3;
+  readonly positions: vec3[];
 
   readonly color: vec3;
 
@@ -24,7 +23,7 @@ export class Light {
   private verticesBuffer: WebGLBuffer | null;
 
   constructor(gl: WebGL2RenderingContext, props: LightProps) {
-    this.position = props.position;
+    this.positions = props.positions;
     this.color = props.color ?? vec3.fromValues(1, 1, 1);
     this.power = props.power ?? 1;
     this.radius = props.radius ?? 1;
@@ -34,7 +33,7 @@ export class Light {
     gl.bindBuffer(gl.ARRAY_BUFFER, this.verticesBuffer);
     gl.bufferData(
       gl.ARRAY_BUFFER,
-      new Float32Array(this.position),
+      new Float32Array(this.positions.flatMap((p) => [...p])),
       gl.STATIC_DRAW
     );
   }
@@ -61,6 +60,6 @@ export class Light {
     gl.uniform1f(locations.getUniform("radius"), this.radius);
     gl.uniform3fv(locations.getUniform("color"), this.color);
 
-    gl.drawArrays(gl.POINTS, 0, 1);
+    gl.drawArrays(gl.POINTS, 0, this.positions.length);
   }
 }

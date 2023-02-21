@@ -1,4 +1,3 @@
-// import { vec3 } from "gl-matrix";
 import $ from "jquery";
 import { vec3 } from "gl-matrix";
 import WebGL2 from "./gl";
@@ -7,6 +6,7 @@ import { CrepuscularRay } from "./shaders/crepuscular_ray/shader";
 import { TransparentShader } from "./shaders/transparent/shader";
 import { FXAA } from "./shaders/fxaa/shader";
 import { Light } from "./light";
+import { Glow } from "./shaders/glow/shader";
 
 $(() => {
   const $canvas: JQuery<HTMLCanvasElement> = $("canvas");
@@ -45,7 +45,22 @@ $(() => {
       0
     );
 
-    const light = new Light(gl, { position: vec3.fromValues(0, 10, -10) });
+    const light = new Light(gl, { positions: [vec3.fromValues(0, 10, -10)] });
+    const glowLights = [
+      new Light(gl, {
+        positions: [
+          vec3.fromValues(0, 1, 0),
+          vec3.fromValues(0.25, 0.35, 3.25),
+        ],
+        radius: 50,
+        color: vec3.fromValues(1, 0, 0.5),
+      }),
+      new Light(gl, {
+        positions: [vec3.fromValues(-0.35, 0.35, 0)],
+        radius: 25,
+        color: vec3.fromValues(1, 0, 0.5),
+      }),
+    ];
 
     const transparentShader = new TransparentShader(gl, {
       opaqueDepthTexture: depthTexture,
@@ -61,6 +76,7 @@ $(() => {
       decay: 0.99,
       exposure: 0.0035,
     });
+    const glow = new Glow(gl);
     const fxaa = new FXAA(gl);
 
     const path =
@@ -74,6 +90,7 @@ $(() => {
 
         transparentShader.render(framebuffer, teapot);
         crepuscularRay.render(framebuffer, { models: [teapot], light });
+        glow.render(framebuffer, ...glowLights);
 
         gl.bindFramebuffer(gl.READ_FRAMEBUFFER, framebuffer);
         gl.bindFramebuffer(gl.DRAW_FRAMEBUFFER, null);

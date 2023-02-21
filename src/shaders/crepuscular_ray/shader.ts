@@ -54,7 +54,7 @@ export class CrepuscularRay extends PostProcessing<RenderProps> {
 
         this.gl.uniformMatrix4fv(this.locations.getUniform('modelViewMatrix'), false, renderProps.light.matrix.modelView);
         this.gl.uniformMatrix4fv(this.locations.getUniform('projectionMatrix'), false, renderProps.light.matrix.projection);
-        this.gl.uniform3fv(this.locations.getUniform('lightPosition'), renderProps.light.position);
+        this.gl.uniform3fv(this.locations.getUniform('lightPosition'), renderProps.light.positions[0]);
         this.gl.uniform1i(this.locations.getUniform('samples'), this.props.samples);
         this.gl.uniform1f(this.locations.getUniform('density'), this.props.density);
         this.gl.uniform1f(this.locations.getUniform('weight'), this.props.weight);
