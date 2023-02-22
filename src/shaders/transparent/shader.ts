@@ -17,7 +17,7 @@ export interface TransparentShaderProps {
     fresnelExponent: number;
 }
 
-export class TransparentShader extends Shader {
+export class TransparentShader extends Shader<Model> {
     private props: TransparentShaderProps;
 
     private postProcessing: PostProcessing;
@@ -53,8 +53,8 @@ export class TransparentShader extends Shader {
         this.locations.setUniform('fresnelExponent');
     }
 
-    render(drawFramebuffer: WebGLFramebuffer, models?: Model[]) {
-        super.render(drawFramebuffer, models);
+    render(drawFramebuffer: WebGLFramebuffer, ...models: Model[]) {
+        super.render(drawFramebuffer, ...models);
 
         this.gl.uniform3fv(this.locations.getUniform('eye'), Matrix.EYE);
         this.gl.uniform3fv(this.locations.getUniform('fresnelColor'), this.props.fresnelColor);
