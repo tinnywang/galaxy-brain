@@ -3,14 +3,13 @@ import vertexSrc from './vertex.glsl';
 import { Shader } from '../shader';
 import WebGL2 from '../../gl';
 import { vec3 } from 'gl-matrix';
-import { Light } from '../../light';
 import { Model } from '../../models/model';
 
 export interface OcclusionProps {
     scale: number;
 }
 
-export class OcclusionShader extends Shader {
+export class OcclusionShader extends Shader<Model> {
     private static Black = vec3.fromValues(0, 0, 0);
 
     private props: OcclusionProps;
@@ -35,8 +34,8 @@ export class OcclusionShader extends Shader {
         this.locations.setUniform('color');
     }
 
-    render(drawFramebuffer: WebGLFramebuffer, models?: Model[], lights?: Light[]) {
-        super.render(drawFramebuffer, models, lights);
+    render(drawFramebuffer: WebGLFramebuffer, ...models: Model[]) {
+        super.render(drawFramebuffer, ...models);
 
         this.gl.bindFramebuffer(this.gl.DRAW_FRAMEBUFFER, drawFramebuffer);
         this.gl.framebufferTexture2D(this.gl.DRAW_FRAMEBUFFER, this.gl.COLOR_ATTACHMENT0, this.gl.TEXTURE_2D, this.texture, 0);
@@ -54,8 +53,6 @@ export class OcclusionShader extends Shader {
 
         this.gl.uniform3fv(this.locations.getUniform('color'), OcclusionShader.Black);
         models?.forEach((m) => m.render(this.gl, this.locations));
-
-        lights?.forEach((l) => l.render(this.gl, this.locations));
 
         this.gl.viewport(x, y, width, height);
     }

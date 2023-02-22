@@ -16,7 +16,12 @@ export interface CrepuscularRayProps {
     exposure: number;
 }
 
-export class CrepuscularRay extends PostProcessing {
+export interface RenderProps {
+    models: Model[];
+    light: Light;
+}
+
+export class CrepuscularRay extends PostProcessing<RenderProps> {
     private props: CrepuscularRayProps;
     private occlusion: OcclusionShader;
     private postProcessing: PostProcessing;
@@ -42,16 +47,16 @@ export class CrepuscularRay extends PostProcessing {
         this.locations.setUniform('colorTexture');
     }
 
-    render(drawFramebuffer: WebGLFramebuffer, models?: Model[]) {
+    render(drawFramebuffer: WebGLFramebuffer, renderProps: RenderProps) {
         // Render occluding objects black and untextured.
-        this.occlusion.render(drawFramebuffer, models);
+        this.occlusion.render(drawFramebuffer, ...renderProps.models);
 
         // Render crepescular rays from the occluding texture.
         this.gl.useProgram(this.program);
 
-        this.gl.uniformMatrix4fv(this.locations.getUniform('modelViewMatrix'), false, this.props.light.matrix.modelView);
-        this.gl.uniformMatrix4fv(this.locations.getUniform('projectionMatrix'), false, this.props.light.matrix.projection);
-        this.gl.uniform3fv(this.locations.getUniform('lightPosition'), this.props.light.position);
+        this.gl.uniformMatrix4fv(this.locations.getUniform('modelViewMatrix'), false, renderProps.light.matrix.modelView);
+        this.gl.uniformMatrix4fv(this.locations.getUniform('projectionMatrix'), false, renderProps.light.matrix.projection);
+        this.gl.uniform3fv(this.locations.getUniform('lightPosition'), renderProps.light.position);
         this.gl.uniform1i(this.locations.getUniform('samples'), this.props.samples);
         this.gl.uniform1f(this.locations.getUniform('density'), this.props.density);
         this.gl.uniform1f(this.locations.getUniform('weight'), this.props.weight);

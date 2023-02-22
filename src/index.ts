@@ -73,8 +73,8 @@ $(() => {
       const render = (_: DOMHighResTimeStamp) => {
         gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
 
-        transparentShader.render(framebuffer, [teapot]);
-        crepuscularRay.render(framebuffer, [teapot]);
+        transparentShader.render(framebuffer, teapot);
+        crepuscularRay.render(framebuffer, { models: [teapot], light });
 
         gl.bindFramebuffer(gl.READ_FRAMEBUFFER, framebuffer);
         gl.bindFramebuffer(gl.DRAW_FRAMEBUFFER, null);

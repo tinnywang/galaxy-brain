@@ -10,7 +10,7 @@ export interface BlinnPhongProps {
     lights: Light[];
 }
 
-export class BlinnPhongShader extends Shader {
+export class BlinnPhongShader extends Shader<Model> {
     private readonly lights: Light[];
 
     constructor(gl: WebGL2RenderingContext, props: BlinnPhongProps) {
@@ -35,8 +35,8 @@ export class BlinnPhongShader extends Shader {
         });
     }
 
-    render(drawFramebuffer: WebGLFramebuffer, models?: Model[]) {
-        super.render(drawFramebuffer, models);
+    render(drawFramebuffer: WebGLFramebuffer, ...models: Model[]) {
+        super.render(drawFramebuffer, ...models);
 
         this.gl.enable(this.gl.DEPTH_TEST);
         this.gl.depthFunc(this.gl.LEQUAL)

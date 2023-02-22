@@ -1,8 +1,6 @@
-import { Light } from '../light';
-import { Model } from '../models/model';
 import { ShaderLocations } from './shader_locations';
 
-export abstract class Shader {
+export abstract class Shader<T = void> {
     readonly gl: WebGL2RenderingContext;
     readonly program: WebGLProgram;
     readonly locations: ShaderLocations;
@@ -48,7 +46,7 @@ export abstract class Shader {
       return shader
     }
 
-    render(_data: WebGLFramebuffer | WebGLTexture, _models?: Model[], _lights?: Light[]) {
+    render(_data: WebGLFramebuffer | WebGLTexture, ..._renderables: T[]) {
       this.gl.useProgram(this.program);
     }
 }

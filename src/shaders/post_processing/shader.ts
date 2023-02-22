@@ -7,7 +7,7 @@ export interface PostProcessingProps {
     fragmentSrc?: string;
 }
 
-export class PostProcessing extends Shader {
+export class PostProcessing<T = void> extends Shader<T> {
     // These are already in normalized device coordinates and don't need to be
     // multiplied by the model-view-projection matrix.
     private static vertices = [
@@ -32,8 +32,8 @@ export class PostProcessing extends Shader {
         gl.bufferData(this.gl.ARRAY_BUFFER, new Float32Array(PostProcessing.vertices), gl.STATIC_DRAW);
     }
 
-    render(texture: WebGLTexture) {
-        super.render(texture);
+    render(texture: WebGLTexture, ...renderables: T[]) {
+        super.render(texture, ...renderables);
 
         const vertexPosition = this.locations.getAttribute('vertexPosition');
         if (vertexPosition !== null) {
