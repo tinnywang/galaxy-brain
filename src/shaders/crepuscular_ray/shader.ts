@@ -8,7 +8,6 @@ import { Light } from '../../light';
 
 export interface CrepuscularRayProps {
     colorTexture: WebGLTexture;
-    light: Light;
     samples: number;
     density: number;
     weight: number;
@@ -25,11 +24,10 @@ export class CrepuscularRay extends PostProcessing<RenderProps> {
     private props: CrepuscularRayProps;
     private occlusion: OcclusionShader;
     private postProcessing: PostProcessing;
-
-    readonly texture: WebGLTexture;
+    private texture: WebGLTexture;
 
     constructor(gl: WebGL2RenderingContext, props: CrepuscularRayProps) {
-        super(gl, { vertexSrc, fragmentSrc });
+        super(gl, vertexSrc, fragmentSrc);
 
         this.props = props;
         this.occlusion = new OcclusionShader(gl, { scale: 0.5 });
@@ -56,7 +54,6 @@ export class CrepuscularRay extends PostProcessing<RenderProps> {
 
         this.gl.uniformMatrix4fv(this.locations.getUniform('modelViewMatrix'), false, renderProps.light.matrix.modelView);
         this.gl.uniformMatrix4fv(this.locations.getUniform('projectionMatrix'), false, renderProps.light.matrix.projection);
-        this.gl.uniform3fv(this.locations.getUniform('lightPosition'), renderProps.light.position);
         this.gl.uniform1i(this.locations.getUniform('samples'), this.props.samples);
         this.gl.uniform1f(this.locations.getUniform('density'), this.props.density);
         this.gl.uniform1f(this.locations.getUniform('weight'), this.props.weight);
@@ -65,7 +62,11 @@ export class CrepuscularRay extends PostProcessing<RenderProps> {
 
         this.gl.framebufferTexture2D(this.gl.DRAW_FRAMEBUFFER, this.gl.COLOR_ATTACHMENT0, this.gl.TEXTURE_2D, this.texture, 0);
         this.gl.clear(this.gl.COLOR_BUFFER_BIT);
-        super.render(this.occlusion.texture);
+
+        renderProps.light.positions.forEach((position) => {
+            this.gl.uniform3fv(this.locations.getUniform('lightPosition'), position);
+            super.render(this.occlusion.texture);
+        });
 
         // Alpha-blend the crepuscular rays with the scene.
         this.gl.disable(this.gl.DEPTH_TEST);

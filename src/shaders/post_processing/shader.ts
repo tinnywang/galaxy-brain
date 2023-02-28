@@ -21,8 +21,8 @@ export class PostProcessing<T = void> extends Shader<T> {
 
     private verticesBuffer: WebGLBuffer | null;
 
-    constructor(gl: WebGL2RenderingContext, props?: PostProcessingProps) {
-        super(gl, props?.vertexSrc ?? vertexSrc, props?.fragmentSrc ?? fragmentSrc);
+    constructor(gl: WebGL2RenderingContext, _vertexSrc?: string, _fragmentSrc?: string) {
+        super(gl, _vertexSrc ?? vertexSrc, _fragmentSrc ?? fragmentSrc);
 
         this.locations.setAttribute('vertexPosition');
         this.locations.setUniform('textureImage');

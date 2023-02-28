@@ -48,7 +48,7 @@ export class BlinnPhongShader extends Shader<Model> {
         this.gl.uniform3fv(this.locations.getUniform('eye'), Matrix.EYE);
 
         this.lights.forEach((light, i) => {
-            this.gl.uniform3fv(this.locations.getUniform(`lights[${i}].position`), light.position);
+            this.gl.uniform3fv(this.locations.getUniform(`lights[${i}].position`), light.positions[0]);
             this.gl.uniform3fv(this.locations.getUniform(`lights[${i}].color`), light.color);
             this.gl.uniform1f(this.locations.getUniform(`lights[${i}].power`), light.power);
         });
