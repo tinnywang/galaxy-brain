@@ -4,7 +4,7 @@ import { PostProcessing } from '../post_processing/shader';
 export class FXAA extends PostProcessing {
 
     constructor(gl: WebGL2RenderingContext) {
-        super(gl, { fragmentSrc });
+        super(gl, undefined, fragmentSrc);
     }
 
     render(texture: WebGLTexture) {

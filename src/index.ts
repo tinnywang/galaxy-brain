@@ -45,7 +45,9 @@ $(() => {
       0
     );
 
-    const light = new Light(gl, { positions: [vec3.fromValues(0, 10, -10)] });
+    const light = new Light(gl, {
+      positions: [vec3.fromValues(-10, 10, -10), vec3.fromValues(10, 0, -10)],
+    });
     const glowLights = [
       new Light(gl, {
         positions: [
