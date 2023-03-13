@@ -74,7 +74,7 @@ $(() => {
       colorTexture,
       samples: 50,
       density: 0.35,
-      weight: 5,
+      weight: 5.65,
       decay: 0.99,
       exposure: 0.0035,
     });
@@ -88,6 +88,9 @@ $(() => {
       const teapot = new Teapot(gl, JSON.parse(data)[0]);
 
       const render = (_: DOMHighResTimeStamp) => {
+        gl.bindFramebuffer(gl.DRAW_FRAMEBUFFER, framebuffer);
+        gl.bindFramebuffer(gl.READ_FRAMEBUFFER, null);
+
         gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
 
         transparentShader.render(framebuffer, teapot);
