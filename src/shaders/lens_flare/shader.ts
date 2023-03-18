@@ -1,17 +1,20 @@
-import fragmentSrc from './fragment.glsl';
 import vertexSrc from './vertex.glsl';
 import { Light } from '../../light';
 import { Shader } from '../shader';
 import WebGL2 from '../../gl';
-import Image from "../../assets/glow.png";
+
+export interface LensFlareProps {
+    fragmentSrc: string;
+    imageSrc: string;
+}
 
 export class LensFlare extends Shader<Light> {
-    private lightTexture: WebGLTexture;
+    private texture: WebGLTexture;
 
-    constructor(gl: WebGL2RenderingContext) {
-        super(gl, vertexSrc, fragmentSrc);
+    constructor(gl: WebGL2RenderingContext, props: LensFlareProps) {
+        super(gl, vertexSrc, props.fragmentSrc);
 
-        this.lightTexture = WebGL2.createImageTexture(gl, Image);
+        this.texture = WebGL2.createImageTexture(gl, props.imageSrc);
 
         this.locations.setAttribute('vertexPosition');
         this.locations.setUniform('modelViewMatrix');
@@ -20,7 +23,7 @@ export class LensFlare extends Shader<Light> {
         this.locations.setUniform('radius');
         this.locations.setUniform('color');
 
-        this.locations.setUniform('lightTexture');
+        this.locations.setUniform('lensFlareTexture');
     }
 
     render(drawFramebuffer: WebGLFramebuffer, ...lights: Light[]) {
@@ -32,8 +35,8 @@ export class LensFlare extends Shader<Light> {
         this.gl.blendFunc(this.gl.SRC_ALPHA, this.gl.ONE_MINUS_SRC_ALPHA);
 
         this.gl.activeTexture(this.gl.TEXTURE0);
-        this.gl.bindTexture(this.gl.TEXTURE_2D, this.lightTexture);
-        this.gl.uniform1i(this.locations.getUniform('lightTexture'), 0);
+        this.gl.bindTexture(this.gl.TEXTURE_2D, this.texture);
+        this.gl.uniform1i(this.locations.getUniform('lensFlareTexture'), 0);
 
         lights?.forEach((l) => l.render(this.gl, this.locations));
     }
