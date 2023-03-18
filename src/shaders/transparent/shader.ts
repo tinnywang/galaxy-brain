@@ -53,8 +53,8 @@ export class TransparentShader extends Shader<Model> {
         this.locations.setUniform('fresnelExponent');
     }
 
-    render(drawFramebuffer: WebGLFramebuffer, ...models: Model[]) {
-        super.render(drawFramebuffer, ...models);
+    render(timestamp: DOMHighResTimeStamp, drawFramebuffer: WebGLFramebuffer, ...models: Model[]) {
+        super.render(timestamp, drawFramebuffer, ...models);
 
         this.gl.uniform3fv(this.locations.getUniform('eye'), Matrix.EYE);
         this.gl.uniform3fv(this.locations.getUniform('fresnelColor'), this.props.fresnelColor);
@@ -85,7 +85,7 @@ export class TransparentShader extends Shader<Model> {
         this.gl.blendFunc(this.gl.SRC_ALPHA, this.gl.ONE_MINUS_SRC_ALPHA);
 
         for (let i = NUM_PASSES - 1; i >= 0; i--) {
-            this.postProcessing.render(this.colorTextures[i]);
+            this.postProcessing.render(timestamp, this.colorTextures[i]);
         }
     }
 

@@ -32,8 +32,8 @@ export class PostProcessing<T = void> extends Shader<T> {
         gl.bufferData(this.gl.ARRAY_BUFFER, new Float32Array(PostProcessing.vertices), gl.STATIC_DRAW);
     }
 
-    render(texture: WebGLTexture, ...renderables: T[]) {
-        super.render(texture, ...renderables);
+    render(timestamp: DOMHighResTimeStamp, texture: WebGLTexture, ...renderables: T[]) {
+        super.render(timestamp, texture, ...renderables);
 
         const vertexPosition = this.locations.getAttribute('vertexPosition');
         if (vertexPosition !== null) {

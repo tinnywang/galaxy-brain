@@ -26,10 +26,10 @@ export class LensFlare extends Shader<Light> {
         this.locations.setUniform('lensFlareTexture');
     }
 
-    render(drawFramebuffer: WebGLFramebuffer, ...lights: Light[]) {
+    render(timestamp: DOMHighResTimeStamp, drawFramebuffer: WebGLFramebuffer, ...lights: Light[]) {
         this.gl.bindFramebuffer(this.gl.DRAW_FRAMEBUFFER, drawFramebuffer);
 
-        super.render(drawFramebuffer, ...lights);
+        super.render(timestamp, drawFramebuffer, ...lights);
 
         this.gl.enable(this.gl.BLEND);
         this.gl.blendFunc(this.gl.SRC_ALPHA, this.gl.ONE_MINUS_SRC_ALPHA);

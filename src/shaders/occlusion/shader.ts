@@ -34,8 +34,8 @@ export class OcclusionShader extends Shader<Model> {
         this.locations.setUniform('color');
     }
 
-    render(drawFramebuffer: WebGLFramebuffer, ...models: Model[]) {
-        super.render(drawFramebuffer, ...models);
+    render(timestamp: DOMHighResTimeStamp, drawFramebuffer: WebGLFramebuffer, ...models: Model[]) {
+        super.render(timestamp, drawFramebuffer, ...models);
 
         this.gl.bindFramebuffer(this.gl.DRAW_FRAMEBUFFER, drawFramebuffer);
         this.gl.framebufferTexture2D(this.gl.DRAW_FRAMEBUFFER, this.gl.COLOR_ATTACHMENT0, this.gl.TEXTURE_2D, this.texture, 0);

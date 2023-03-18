@@ -45,9 +45,9 @@ export class CrepuscularRay extends PostProcessing<RenderProps> {
         this.locations.setUniform('colorTexture');
     }
 
-    render(drawFramebuffer: WebGLFramebuffer, renderProps: RenderProps) {
+    render(timestamp: DOMHighResTimeStamp, drawFramebuffer: WebGLFramebuffer, renderProps: RenderProps) {
         // Render occluding objects black and untextured.
-        this.occlusion.render(drawFramebuffer, ...renderProps.models);
+        this.occlusion.render(timestamp, drawFramebuffer, ...renderProps.models);
 
         // Render crepescular rays from the occluding texture.
         this.gl.useProgram(this.program);
@@ -65,7 +65,7 @@ export class CrepuscularRay extends PostProcessing<RenderProps> {
 
         renderProps.light.positions.forEach((position) => {
             this.gl.uniform3fv(this.locations.getUniform('lightPosition'), position);
-            super.render(this.occlusion.texture);
+            super.render(timestamp, this.occlusion.texture);
         });
 
         // Alpha-blend the crepuscular rays with the scene.
@@ -74,6 +74,6 @@ export class CrepuscularRay extends PostProcessing<RenderProps> {
         this.gl.blendFunc(this.gl.SRC_ALPHA, this.gl.ONE_MINUS_SRC_ALPHA);
 
         this.gl.framebufferTexture2D(this.gl.DRAW_FRAMEBUFFER, this.gl.COLOR_ATTACHMENT0, this.gl.TEXTURE_2D, this.props.colorTexture, 0);
-        this.postProcessing.render(this.texture);
+        this.postProcessing.render(timestamp, this.texture);
     }
 }

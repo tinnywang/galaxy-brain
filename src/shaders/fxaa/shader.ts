@@ -7,7 +7,7 @@ export class FXAA extends PostProcessing {
         super(gl, undefined, fragmentSrc);
     }
 
-    render(texture: WebGLTexture) {
-        super.render(texture);
+    render(timestamp: DOMHighResTimeStamp, texture: WebGLTexture) {
+        super.render(timestamp, texture);
     }
 }

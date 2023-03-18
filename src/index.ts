@@ -99,22 +99,22 @@ $(() => {
     $.get(path, (data: string) => {
       const teapot = new Teapot(gl, JSON.parse(data)[0]);
 
-      const render = (_: DOMHighResTimeStamp) => {
+      const render = (timestamp: DOMHighResTimeStamp) => {
         gl.bindFramebuffer(gl.DRAW_FRAMEBUFFER, framebuffer);
         gl.bindFramebuffer(gl.READ_FRAMEBUFFER, null);
 
         gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
 
-        transparentShader.render(framebuffer, teapot);
-        crepuscularRay.render(framebuffer, { models: [teapot], light });
-        glow.render(framebuffer, ...glowLights);
-        star.render(framebuffer, ...starLights);
+        transparentShader.render(timestamp, framebuffer, teapot);
+        crepuscularRay.render(timestamp, framebuffer, { models: [teapot], light });
+        glow.render(timestamp, framebuffer, ...glowLights);
+        star.render(timestamp, framebuffer, ...starLights);
 
         gl.bindFramebuffer(gl.READ_FRAMEBUFFER, framebuffer);
         gl.bindFramebuffer(gl.DRAW_FRAMEBUFFER, null);
         gl.disable(gl.BLEND);
 
-        fxaa.render(colorTexture);
+        fxaa.render(timestamp, colorTexture);
 
         gl.flush();
         requestAnimationFrame(render);
