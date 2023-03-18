@@ -5,7 +5,7 @@ import { Shader } from '../shader';
 import WebGL2 from '../../gl';
 import Image from "../../assets/glow.png";
 
-export class Glow extends Shader<Light> {
+export class LensFlare extends Shader<Light> {
     private lightTexture: WebGLTexture;
 
     constructor(gl: WebGL2RenderingContext) {

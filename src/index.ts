@@ -6,7 +6,7 @@ import { CrepuscularRay } from "./shaders/crepuscular_ray/shader";
 import { TransparentShader } from "./shaders/transparent/shader";
 import { FXAA } from "./shaders/fxaa/shader";
 import { Light } from "./light";
-import { Glow } from "./shaders/glow/shader";
+import { LensFlare } from "./shaders/lens_flare/shader";
 
 $(() => {
   const $canvas: JQuery<HTMLCanvasElement> = $("canvas");
@@ -78,7 +78,7 @@ $(() => {
       decay: 0.99,
       exposure: 0.0035,
     });
-    const glow = new Glow(gl);
+    const lensFlare = new LensFlare(gl);
     const fxaa = new FXAA(gl);
 
     const path =
@@ -95,7 +95,7 @@ $(() => {
 
         transparentShader.render(framebuffer, teapot);
         crepuscularRay.render(framebuffer, { models: [teapot], light });
-        glow.render(framebuffer, ...glowLights);
+        lensFlare.render(framebuffer, ...glowLights);
 
         gl.bindFramebuffer(gl.READ_FRAMEBUFFER, framebuffer);
         gl.bindFramebuffer(gl.DRAW_FRAMEBUFFER, null);
