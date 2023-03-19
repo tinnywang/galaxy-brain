@@ -49,21 +49,15 @@ $(() => {
     const light = new Light(gl, {
       positions: [vec3.fromValues(-10, 10, -10), vec3.fromValues(10, 0, -10)],
     });
-    const glowLights = [
-      new Light(gl, {
-        positions: [
-          vec3.fromValues(0, 1, 0),
-          vec3.fromValues(0.25, 0.35, 3.25),
-        ],
-        radius: 50,
-        color: vec3.fromValues(1, 0, 0.5),
-      }),
-      new Light(gl, {
-        positions: [vec3.fromValues(-0.35, 0.35, 0)],
-        radius: 25,
-        color: vec3.fromValues(1, 0, 0.5),
-      }),
-    ];
+    const glowLight = new Light(gl, {
+      positions: [
+        vec3.fromValues(0, 1, 0),
+        vec3.fromValues(0.25, 0.35, 3.25),
+        vec3.fromValues(-0.35, 0.35, 0),
+      ],
+      radius: 50,
+      color: vec3.fromValues(1, 0, 0.5),
+    });
     const starLights = [
       new Light(gl, {
         positions: [
@@ -107,7 +101,7 @@ $(() => {
 
         transparentShader.render(timestamp, framebuffer, teapot);
         crepuscularRay.render(timestamp, framebuffer, { models: [teapot], light });
-        glow.render(timestamp, framebuffer, ...glowLights);
+        glow.render(timestamp, framebuffer, glowLight);
         star.render(timestamp, framebuffer, ...starLights);
 
         gl.bindFramebuffer(gl.READ_FRAMEBUFFER, framebuffer);

@@ -6,14 +6,17 @@ import WebGL2 from '../../gl';
 export interface LensFlareProps {
     fragmentSrc: string;
     imageSrc: string;
+    animationDuration?: number;
 }
 
 export class LensFlare extends Shader<Light> {
+    private props: LensFlareProps;
     private texture: WebGLTexture;
 
     constructor(gl: WebGL2RenderingContext, props: LensFlareProps) {
         super(gl, vertexSrc, props.fragmentSrc);
 
+        this.props = props;
         this.texture = WebGL2.createImageTexture(gl, props.imageSrc);
 
         this.locations.setAttribute('vertexPosition');
@@ -22,6 +25,8 @@ export class LensFlare extends Shader<Light> {
 
         this.locations.setUniform('radius');
         this.locations.setUniform('color');
+        this.locations.setUniform('timestamp');
+        this.locations.setUniform('animationDuration');
 
         this.locations.setUniform('lensFlareTexture');
     }
@@ -33,6 +38,9 @@ export class LensFlare extends Shader<Light> {
 
         this.gl.enable(this.gl.BLEND);
         this.gl.blendFunc(this.gl.SRC_ALPHA, this.gl.ONE_MINUS_SRC_ALPHA);
+
+        this.gl.uniform1f(this.locations.getUniform('animationDuration'), this.props.animationDuration ?? 0);
+        this.gl.uniform1f(this.locations.getUniform('timestamp'), timestamp);
 
         this.gl.activeTexture(this.gl.TEXTURE0);
         this.gl.bindTexture(this.gl.TEXTURE_2D, this.texture);
