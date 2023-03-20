@@ -4,6 +4,8 @@ precision highp float;
 
 in vec4 vertexPosition;
 
+out mat2 rotationMatrix;
+
 uniform mat4 modelViewMatrix;
 uniform mat4 projectionMatrix;
 uniform float radius;
@@ -20,6 +22,11 @@ void main(void) {
 
     float rand = random(gl_Position.xy);
     float theta = timestamp / (rand * animationDuration);
+
     float animationTwinkle = fract(cos(cos(theta * rand) + sin(theta)));
     gl_PointSize = radius + 0.1 * radius * animationTwinkle;
+
+    theta = 0.01 * theta + rand;
+    rotationMatrix[0] = vec2(cos(theta), sin(theta));
+    rotationMatrix[1] = vec2(sin(theta), -cos(theta));
 }
