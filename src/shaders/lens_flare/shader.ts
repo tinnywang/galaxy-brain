@@ -1,9 +1,9 @@
-import vertexSrc from './vertex.glsl';
 import { Light } from '../../light';
 import { Shader } from '../shader';
 import WebGL2 from '../../gl';
 
 export interface LensFlareProps {
+    vertexSrc: string;
     fragmentSrc: string;
     imageSrc: string;
     animationDuration?: number;
@@ -14,7 +14,7 @@ export class LensFlare extends Shader<Light> {
     private texture: WebGLTexture;
 
     constructor(gl: WebGL2RenderingContext, props: LensFlareProps) {
-        super(gl, vertexSrc, props.fragmentSrc);
+        super(gl, props.vertexSrc, props.fragmentSrc);
 
         this.props = props;
         this.texture = WebGL2.createImageTexture(gl, props.imageSrc);

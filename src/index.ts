@@ -64,7 +64,7 @@ $(() => {
           vec3.fromValues(3, 3, 0),
           vec3.fromValues(-3, -1, 0),
         ],
-        radius: 200,
+        radius: 100,
         color: vec3.fromValues(0, 0, 1),
       }),
     ];
