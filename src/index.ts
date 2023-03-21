@@ -60,10 +60,7 @@ $(() => {
     });
     const starLights = [
       new Light(gl, {
-        positions: [
-          vec3.fromValues(3, 3, 0),
-          vec3.fromValues(-3, -1, 0),
-        ],
+        positions: [vec3.fromValues(3, 3, 0), vec3.fromValues(-3, -1, 0)],
         radius: 100,
         color: vec3.fromValues(0, 0, 1),
       }),
@@ -100,7 +97,10 @@ $(() => {
         gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
 
         transparentShader.render(timestamp, framebuffer, teapot);
-        crepuscularRay.render(timestamp, framebuffer, { models: [teapot], light });
+        crepuscularRay.render(timestamp, framebuffer, {
+          models: [teapot],
+          light,
+        });
         glow.render(timestamp, framebuffer, glowLight);
         star.render(timestamp, framebuffer, ...starLights);
 
