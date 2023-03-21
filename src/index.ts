@@ -7,6 +7,7 @@ import { TransparentShader } from "./shaders/transparent/shader";
 import { FXAA } from "./shaders/fxaa/shader";
 import { Light } from "./light";
 import { Glow } from "./shaders/glow/shader";
+import { Star } from "./shaders/star/shader";
 
 $(() => {
   const $canvas: JQuery<HTMLCanvasElement> = $("canvas");
@@ -48,19 +49,20 @@ $(() => {
     const light = new Light(gl, {
       positions: [vec3.fromValues(-10, 10, -10), vec3.fromValues(10, 0, -10)],
     });
-    const glowLights = [
+    const glowLight = new Light(gl, {
+      positions: [
+        vec3.fromValues(0, 1, 0),
+        vec3.fromValues(0.25, 0.35, 3.25),
+        vec3.fromValues(-0.35, 0.35, 0),
+      ],
+      radius: 50,
+      color: vec3.fromValues(1, 0, 0.5),
+    });
+    const starLights = [
       new Light(gl, {
-        positions: [
-          vec3.fromValues(0, 1, 0),
-          vec3.fromValues(0.25, 0.35, 3.25),
-        ],
-        radius: 50,
-        color: vec3.fromValues(1, 0, 0.5),
-      }),
-      new Light(gl, {
-        positions: [vec3.fromValues(-0.35, 0.35, 0)],
-        radius: 25,
-        color: vec3.fromValues(1, 0, 0.5),
+        positions: [vec3.fromValues(3, 3, 0), vec3.fromValues(-3, -1, 0)],
+        radius: 100,
+        color: vec3.fromValues(0, 0, 1),
       }),
     ];
 
@@ -74,11 +76,12 @@ $(() => {
       colorTexture,
       samples: 50,
       density: 0.35,
-      weight: 5,
+      weight: 5.65,
       decay: 0.99,
       exposure: 0.0035,
     });
     const glow = new Glow(gl);
+    const star = new Star(gl);
     const fxaa = new FXAA(gl);
 
     const path =
@@ -87,18 +90,25 @@ $(() => {
     $.get(path, (data: string) => {
       const teapot = new Teapot(gl, JSON.parse(data)[0]);
 
-      const render = (_: DOMHighResTimeStamp) => {
+      const render = (timestamp: DOMHighResTimeStamp) => {
+        gl.bindFramebuffer(gl.DRAW_FRAMEBUFFER, framebuffer);
+        gl.bindFramebuffer(gl.READ_FRAMEBUFFER, null);
+
         gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
 
-        transparentShader.render(framebuffer, teapot);
-        crepuscularRay.render(framebuffer, { models: [teapot], light });
-        glow.render(framebuffer, ...glowLights);
+        transparentShader.render(timestamp, framebuffer, teapot);
+        crepuscularRay.render(timestamp, framebuffer, {
+          models: [teapot],
+          light,
+        });
+        glow.render(timestamp, framebuffer, glowLight);
+        star.render(timestamp, framebuffer, ...starLights);
 
         gl.bindFramebuffer(gl.READ_FRAMEBUFFER, framebuffer);
         gl.bindFramebuffer(gl.DRAW_FRAMEBUFFER, null);
         gl.disable(gl.BLEND);
 
-        fxaa.render(colorTexture);
+        fxaa.render(timestamp, colorTexture);
 
         gl.flush();
         requestAnimationFrame(render);

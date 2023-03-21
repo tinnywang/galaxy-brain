@@ -1,6 +1,9 @@
 import { ShaderLocations } from './shader_locations';
 
 export abstract class Shader<T = void> {
+  protected previousTimestamp?: DOMHighResTimeStamp;
+  protected elapsedTimestamp?: DOMHighResTimeStamp;
+
     readonly gl: WebGL2RenderingContext;
     readonly program: WebGLProgram;
     readonly locations: ShaderLocations;
@@ -46,7 +49,12 @@ export abstract class Shader<T = void> {
       return shader
     }
 
-    render(_data: WebGLFramebuffer | WebGLTexture, ..._renderables: T[]) {
+    render(timestamp: DOMHighResTimeStamp, _data: WebGLFramebuffer | WebGLTexture, ..._renderables: T[]) {
+      if (this.previousTimestamp !== timestamp) {
+        this.elapsedTimestamp = timestamp - (this.previousTimestamp ?? 0);
+        this.previousTimestamp = timestamp;
+      }
+
       this.gl.useProgram(this.program);
     }
 }

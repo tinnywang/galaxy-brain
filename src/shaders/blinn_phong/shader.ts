@@ -35,8 +35,8 @@ export class BlinnPhongShader extends Shader<Model> {
         });
     }
 
-    render(drawFramebuffer: WebGLFramebuffer, ...models: Model[]) {
-        super.render(drawFramebuffer, ...models);
+    render(timestamp: DOMHighResTimeStamp, drawFramebuffer: WebGLFramebuffer, ...models: Model[]) {
+        super.render(timestamp, drawFramebuffer, ...models);
 
         this.gl.enable(this.gl.DEPTH_TEST);
         this.gl.depthFunc(this.gl.LEQUAL)
