@@ -14,7 +14,7 @@ export class LensFlare extends Shader<Light> {
     private texture: WebGLTexture;
 
     constructor(gl: WebGL2RenderingContext, props: LensFlareProps) {
-        super(gl, props.vertexSrc, props.fragmentSrc);
+        super(gl, LensFlare.withRandom(props.vertexSrc), props.fragmentSrc);
 
         this.props = props;
         this.texture = WebGL2.createImageTexture(gl, props.imageSrc);
@@ -47,5 +47,21 @@ export class LensFlare extends Shader<Light> {
         this.gl.uniform1i(this.locations.getUniform('lensFlareTexture'), 0);
 
         lights?.forEach((l) => l.render(this.gl, this.locations));
+    }
+
+    private static withRandom(vertexSrc: string): string {
+        const random = `
+// Random function from https://thebookofshaders.com/10/.
+float random (vec2 xy) {
+    return fract(sin(dot(xy, vec2(12.9898,78.233))) * 43758.5453123);
+}
+`;
+
+        const i = vertexSrc.search(/void main\(void\)/);
+        if (i === -1) {
+            return vertexSrc;
+        }
+
+        return vertexSrc.slice(0, i) + random + vertexSrc.slice(i);
     }
 }
