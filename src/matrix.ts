@@ -1,43 +1,50 @@
 import { vec3, glMatrix, mat4 } from "gl-matrix";
 
-class Matrix {
-  private static readonly CENTER = vec3.fromValues(0, 0, 0);
+namespace Matrix {
+  const FOV = glMatrix.toRadian(90);
+  const NEAR = 1;
+  const FAR = 100;
+  const CENTER = vec3.fromValues(0, 0, 0);
+  const UP = vec3.fromValues(0, 1, 0);
 
-  private static readonly UP = vec3.fromValues(0, 1, 0);
+  let _eye = vec3.fromValues(0, 0, 10);
+  let _view: mat4 | null;
+  let _projection: mat4 | null;
 
-  private static readonly FOV = glMatrix.toRadian(90);
+  export function projection(gl: WebGL2RenderingContext) {
+    if (!_projection) {
+      _projection = mat4.perspective(
+        mat4.create(),
+        FOV,
+        gl.drawingBufferWidth / gl.drawingBufferHeight,
+        NEAR,
+        FAR
+      );
+    }
 
-  private static readonly NEAR = 1;
+    return _projection;
+  }
 
-  private static readonly FAR = 100;
+  export function view() {
+    if (!_view) {
+      _view = mat4.lookAt(mat4.create(), _eye, CENTER, UP);
+    }
 
-  static readonly EYE = vec3.fromValues(0, 0, 10);
+    return _view;
+  }
 
-  private readonly view: mat4;
+  export function modelView(model?: mat4) {
+    return mat4.multiply(mat4.create(), view(), model ?? mat4.create());
+  }
 
-  readonly projection: mat4;
+  export function eye() {
+    return _eye;
+  }
 
-  readonly modelView: mat4;
+  export function rotateY() {
+    _eye = vec3.rotateY(vec3.create(), _eye, CENTER, glMatrix.toRadian(0.01));
 
-  constructor(gl: WebGL2RenderingContext, model?: mat4) {
-    this.view = mat4.lookAt(
-      mat4.create(),
-      Matrix.EYE,
-      Matrix.CENTER,
-      Matrix.UP
-    );
-    this.projection = mat4.perspective(
-      mat4.create(),
-      Matrix.FOV,
-      gl.drawingBufferWidth / gl.drawingBufferHeight,
-      Matrix.NEAR,
-      Matrix.FAR
-    );
-    this.modelView = mat4.multiply(
-      mat4.create(),
-      this.view,
-      model || mat4.create()
-    );
+    _view = null;
   }
 }
 

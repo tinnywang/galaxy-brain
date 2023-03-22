@@ -8,6 +8,7 @@ import { FXAA } from "./shaders/fxaa/shader";
 import { Light } from "./light";
 import { Glow } from "./shaders/glow/shader";
 import { Star } from "./shaders/star/shader";
+import Matrix from "./matrix";
 
 $(() => {
   const $canvas: JQuery<HTMLCanvasElement> = $("canvas");
@@ -109,6 +110,8 @@ $(() => {
         gl.disable(gl.BLEND);
 
         fxaa.render(timestamp, colorTexture);
+
+        Matrix.rotateY();
 
         gl.flush();
         requestAnimationFrame(render);

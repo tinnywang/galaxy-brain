@@ -18,8 +18,6 @@ export class Light {
 
   readonly radius: number;
 
-  readonly matrix: Matrix;
-
   private verticesBuffer: WebGLBuffer | null;
 
   constructor(gl: WebGL2RenderingContext, props: LightProps) {
@@ -27,7 +25,6 @@ export class Light {
     this.color = props.color ?? vec3.fromValues(1, 1, 1);
     this.power = props.power ?? 1;
     this.radius = props.radius ?? 1;
-    this.matrix = new Matrix(gl);
 
     this.verticesBuffer = gl.createBuffer();
     gl.bindBuffer(gl.ARRAY_BUFFER, this.verticesBuffer);
@@ -49,12 +46,12 @@ export class Light {
     gl.uniformMatrix4fv(
       locations.getUniform("modelViewMatrix"),
       false,
-      this.matrix.modelView
+      Matrix.modelView()
     );
     gl.uniformMatrix4fv(
       locations.getUniform("projectionMatrix"),
       false,
-      this.matrix.projection
+      Matrix.projection(gl)
     );
 
     gl.uniform1f(locations.getUniform("radius"), this.radius);
