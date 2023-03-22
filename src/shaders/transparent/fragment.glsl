@@ -41,14 +41,12 @@ void main() {
         discard;
     } else {
         float dotProduct = abs(dot(normalize(fragNormal), normalize(eye)));
+
         float fresnel = smoothstep(0.0, 1.0, pow(1.0 - dotProduct, fresnelExponent));
         vec3 gradientColor = hueShift(color, fresnelHueShift);
         fragColor = fresnel * vec4(fresnelColor + gradientColor, 1);
 
-        // Color the inner fragments, except for the top-most layer's so that nested objects aren't occluded.
-        if (shouldDepthPeel) {
-            fresnel = smoothstep(0.0, 1.0, dotProduct);
-            fragColor += fresnel * vec4(color, 1);
-        }
+        fresnel = smoothstep(0.0, 1.0, dotProduct);
+        fragColor = mix(fragColor, fresnel * vec4(color, 1), dotProduct);
     }
 }
