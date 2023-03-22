@@ -97,13 +97,13 @@ $(() => {
 
         gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
 
+        star.render(timestamp, framebuffer, ...starLights);
         transparentShader.render(timestamp, framebuffer, teapot);
         crepuscularRay.render(timestamp, framebuffer, {
           models: [teapot],
           light,
         });
         glow.render(timestamp, framebuffer, glowLight);
-        star.render(timestamp, framebuffer, ...starLights);
 
         gl.bindFramebuffer(gl.READ_FRAMEBUFFER, framebuffer);
         gl.bindFramebuffer(gl.DRAW_FRAMEBUFFER, null);
