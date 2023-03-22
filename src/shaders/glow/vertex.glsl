@@ -13,7 +13,7 @@ uniform float animationDuration;
 void main(void) {
     gl_Position = projectionMatrix * modelViewMatrix * vertexPosition;
 
-    float rand = random(gl_Position.xy);
+    float rand = random(vertexPosition.xy);
     float periodOffset = rand * animationDuration;
     float animationScale = rand * sin(timestamp / animationDuration + periodOffset);
     gl_PointSize = radius * animationScale;
