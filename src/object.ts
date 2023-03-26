@@ -1,22 +1,20 @@
-import { vec3 } from "gl-matrix";
-
 /* eslint-disable camelcase */
 
 interface Material {
-  ambient: vec3;
-  diffuse: vec3;
-  specular: vec3;
+  ambient: number[];
+  diffuse: number[];
+  specular: number[];
   specular_exponent: number;
 }
 
 export interface Face {
   material: Material;
-  vertex_indices: Array<number>;
+  vertex_indices: number[];
 }
 
 export interface Object {
   name: string;
-  faces: Array<Face>;
-  normals: Array<number>;
-  vertices: Array<number>;
+  faces: Face[];
+  normals: number[];
+  vertices: number[];
 }

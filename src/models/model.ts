@@ -34,18 +34,28 @@ export abstract class Model {
     gl.bindBuffer(gl.ARRAY_BUFFER, normals);
     gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(o.normals), gl.STATIC_DRAW);
 
+    /*
     const buffer: number[] = [];
     o.faces.forEach((f) => {
       buffer.push(...f.vertex_indices);
     });
+    */
+
 
     const faces = gl.createBuffer();
     gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, faces);
     gl.bufferData(
       gl.ELEMENT_ARRAY_BUFFER,
-      new Uint16Array(buffer),
-      gl.STATIC_DRAW
+      o.faces.reduce((accumulator, f) => accumulator + f.vertex_indices.length * 8, 0),
+      gl.STATIC_DRAW,
     );
+
+    let offset = 0;
+    o.faces.forEach((f) => {
+      gl.bufferSubData(gl.ELEMENT_ARRAY_BUFFER, offset, new Uint32Array(f.vertex_indices), offset);
+      // Offset must be a multiple of 8 since an unsigned int is 8 bytes.
+      offset += f.vertex_indices.length * 8;
+    });
 
     this.buffer = {
       vertices,
@@ -80,9 +90,9 @@ export abstract class Model {
     this.object.faces.forEach((f) => {
       perFace?.(f);
 
-      this.gl.drawElements(this.gl.TRIANGLES, f.vertex_indices.length, this.gl.UNSIGNED_SHORT, offset)
-      // Offset must be a multiple of 2 since an unsigned short is 2 bytes.
-      offset += f.vertex_indices.length * 2
+      this.gl.drawElements(this.gl.TRIANGLES, f.vertex_indices.length, this.gl.UNSIGNED_INT, offset);
+      // Offset must be a multiple of 8 since an unsigned int is 8 bytes.
+      offset += f.vertex_indices.length * 8;
     })
   }
 }
