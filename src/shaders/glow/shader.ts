@@ -1,7 +1,7 @@
 import vertexSrc from "./vertex.glsl";
 import fragmentSrc from "./fragment.glsl";
 import { LensFlare } from "../lens_flare/shader";
-import glow from "../../assets/glow.png";
+import glow from "../../assets/textures/glow.png";
 
 export class Glow extends LensFlare {
     private static readonly ANIMATION_DURATION = 2500;

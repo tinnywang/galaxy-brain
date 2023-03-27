@@ -1,7 +1,7 @@
 import vertexSrc from "./vertex.glsl"
 import fragmentSrc from './fragment.glsl';
 import { LensFlare } from "../lens_flare/shader";
-import star from "../../assets/star.png";
+import star from "../../assets/textures/star.png";
 import { Light } from "../../light";
 
 export class Star extends LensFlare {
