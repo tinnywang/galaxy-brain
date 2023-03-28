@@ -34,14 +34,6 @@ export abstract class Model {
     gl.bindBuffer(gl.ARRAY_BUFFER, normals);
     gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(o.normals), gl.STATIC_DRAW);
 
-    /*
-    const buffer: number[] = [];
-    o.faces.forEach((f) => {
-      buffer.push(...f.vertex_indices);
-    });
-    */
-
-
     const faces = gl.createBuffer();
     gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, faces);
     gl.bufferData(
