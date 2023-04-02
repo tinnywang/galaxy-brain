@@ -6,7 +6,6 @@ import { TransparentShader } from "./shaders/transparent/shader";
 import { FXAA } from "./shaders/fxaa/shader";
 import { Light } from "./light";
 import { Glow } from "./shaders/glow/shader";
-import { Star } from "./shaders/star/shader";
 import Controls from "./controls";
 import { GalaxyBrain } from "./galaxy_brain";
 
@@ -52,23 +51,6 @@ $(() => {
     const light = new Light(gl, {
       positions: [vec3.fromValues(-10, 10, -10), vec3.fromValues(10, 0, -10)],
     });
-    const glowLight = new Light(gl, {
-      positions: [
-        vec3.fromValues(0, 1, 0),
-        vec3.fromValues(0.25, 0.35, 3.25),
-        vec3.fromValues(-0.35, 0.35, 0),
-      ],
-      radius: 50,
-      color: vec3.fromValues(1, 0, 0.5),
-    });
-    const starLights = [
-      new Light(gl, {
-        positions: [vec3.fromValues(3, 3, 0), vec3.fromValues(-3, -1, 0)],
-        radius: 100,
-        color: vec3.fromValues(0, 0, 1),
-      }),
-    ];
-
     const transparentShader = new TransparentShader(gl, {
       opaqueDepthTexture: depthTexture,
       fresnelColor: vec3.fromValues(1, 1, 1),
@@ -84,9 +66,7 @@ $(() => {
       exposure: 0.0035,
     });
     const glow = new Glow(gl);
-    const star = new Star(gl);
     const fxaa = new FXAA(gl);
-
     const galaxyBrain = new GalaxyBrain(gl);
 
     const render = (timestamp: DOMHighResTimeStamp) => {
@@ -95,13 +75,13 @@ $(() => {
 
       gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
 
-      star.render(timestamp, framebuffer, ...starLights);
       transparentShader.render(timestamp, framebuffer, galaxyBrain.head, galaxyBrain.brain);
       crepuscularRay.render(timestamp, framebuffer, {
         models: [galaxyBrain.brain],
         light,
       });
-      glow.render(timestamp, framebuffer, glowLight);
+
+      glow.render(timestamp, framebuffer, galaxyBrain.brain.neurons);
 
       gl.bindFramebuffer(gl.READ_FRAMEBUFFER, framebuffer);
       gl.bindFramebuffer(gl.DRAW_FRAMEBUFFER, null);
