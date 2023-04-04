@@ -7,9 +7,12 @@ namespace Matrix {
   const CENTER = vec3.fromValues(0, 0, 0);
   const UP = vec3.fromValues(0, 1, 0);
 
-  let _eye = vec3.fromValues(0, 0, 10);
+  const _eye = vec3.fromValues(0, 0, 10);
   let _view: mat4 | null;
   let _projection: mat4 | null;
+
+  let _previousTimestamp: DOMHighResTimeStamp | null;
+  let _elapsedTimestamp: DOMHighResTimeStamp | null;
 
   export function projection(gl: WebGL2RenderingContext) {
     if (!_projection) {
@@ -41,10 +44,20 @@ namespace Matrix {
     return _eye;
   }
 
-  export function rotateY() {
-    _eye = vec3.rotateY(vec3.create(), _eye, CENTER, glMatrix.toRadian(0.01));
+  export function rotateView(
+    timestamp: DOMHighResTimeStamp,
+    axis?: vec3,
+    angle?: number
+  ) {
+    if (_previousTimestamp !== timestamp) {
+      _elapsedTimestamp = timestamp - (_previousTimestamp ?? 0);
+      _previousTimestamp = timestamp;
+    }
 
-    _view = null;
+    if (_view && axis && angle) {
+      const radians = glMatrix.toRadian(angle * (_elapsedTimestamp ?? 0));
+      _view = mat4.rotate(mat4.create(), _view, radians, axis);
+    }
   }
 }
 

@@ -8,6 +8,7 @@ import { FXAA } from "./shaders/fxaa/shader";
 import { Light } from "./light";
 import { Glow } from "./shaders/glow/shader";
 import { Star } from "./shaders/star/shader";
+import Controls from "./controls";
 import Matrix from "./matrix";
 
 $(() => {
@@ -18,6 +19,7 @@ $(() => {
 
   try {
     const gl = WebGL2.renderingContext(canvas);
+    const controls = new Controls($canvas, gl);
 
     const framebuffer = gl.createFramebuffer();
     if (framebuffer === null) {
@@ -111,7 +113,8 @@ $(() => {
 
         fxaa.render(timestamp, colorTexture);
 
-        Matrix.rotateY();
+        const { axis, angle } = controls.rotation();
+        Matrix.rotateView(timestamp, axis, angle);
 
         gl.flush();
         requestAnimationFrame(render);
