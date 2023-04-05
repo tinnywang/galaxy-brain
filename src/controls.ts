@@ -1,30 +1,27 @@
 import { glMatrix, vec2, vec3 } from "gl-matrix";
 
 class Controls {
-  private mouseDown?: vec2;
-
-  private mouseUp?: vec2;
+  private mousePosition?: vec2;
 
   private axis?: vec3;
 
-  private angle?: number;
+  private angle = 0;
 
-  constructor(canvas: JQuery<HTMLCanvasElement>, gl: WebGL2RenderingContext) {
+  constructor(canvas: JQuery<HTMLCanvasElement>) {
     canvas.on("mousedown", (event) => {
-      this.mouseDown = vec2.fromValues(event.pageX, event.pageY);
+      this.mousePosition = vec2.fromValues(event.pageX, event.pageY);
     });
 
-    canvas.on("mouseup", (event) => {
-      if (!this.mouseDown) {
+    canvas.on("mousemove", (event) => {
+      if (!this.mousePosition) {
         return;
       }
 
-      this.mouseUp = vec2.fromValues(event.pageX, event.pageY);
-
+      const currentMousePosition = vec2.fromValues(event.pageX, event.pageY);
       const mouseMovement = vec2.subtract(
         vec2.create(),
-        this.mouseDown,
-        this.mouseUp
+        this.mousePosition,
+        currentMousePosition
       );
 
       let axis = vec2.rotate(
@@ -36,11 +33,14 @@ class Controls {
       axis = vec2.normalize(axis, axis);
 
       this.axis = vec3.fromValues(axis[0], axis[1], 0);
-      this.angle =
-        vec2.length(mouseMovement) /
-        vec2.length(
-          vec2.fromValues(gl.drawingBufferWidth, gl.drawingBufferHeight)
-        );
+      this.angle = vec2.length(mouseMovement);
+      this.mousePosition = currentMousePosition;
+    });
+
+    canvas.on("mouseup", () => {
+      this.mousePosition = undefined;
+      this.axis = undefined;
+      this.angle = 0;
     });
   }
 

@@ -46,16 +46,16 @@ namespace Matrix {
 
   export function rotateView(
     timestamp: DOMHighResTimeStamp,
+    angle: number,
     axis?: vec3,
-    angle?: number
   ) {
     if (_previousTimestamp !== timestamp) {
       _elapsedTimestamp = timestamp - (_previousTimestamp ?? 0);
       _previousTimestamp = timestamp;
     }
 
-    if (_view && axis && angle) {
-      const radians = glMatrix.toRadian(angle * (_elapsedTimestamp ?? 0));
+    if (axis && _elapsedTimestamp && _view) {
+      const radians = glMatrix.toRadian(angle / _elapsedTimestamp);
       _view = mat4.rotate(mat4.create(), _view, radians, axis);
     }
   }

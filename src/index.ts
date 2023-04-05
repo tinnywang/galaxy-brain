@@ -13,13 +13,14 @@ import Matrix from "./matrix";
 
 $(() => {
   const $canvas: JQuery<HTMLCanvasElement> = $("canvas");
+  const controls = new Controls($canvas);
+
   const canvas = $canvas[0];
   canvas.width = canvas.clientWidth;
   canvas.height = canvas.clientHeight;
 
   try {
     const gl = WebGL2.renderingContext(canvas);
-    const controls = new Controls($canvas, gl);
 
     const framebuffer = gl.createFramebuffer();
     if (framebuffer === null) {
@@ -114,7 +115,7 @@ $(() => {
         fxaa.render(timestamp, colorTexture);
 
         const { axis, angle } = controls.rotation();
-        Matrix.rotateView(timestamp, axis, angle);
+        Matrix.rotateView(timestamp, angle, axis);
 
         gl.flush();
         requestAnimationFrame(render);
