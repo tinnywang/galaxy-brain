@@ -20,8 +20,8 @@ class Controls {
       const currentMousePosition = vec2.fromValues(event.pageX, event.pageY);
       const mouseMovement = vec2.subtract(
         vec2.create(),
+        currentMousePosition,
         this.mousePosition,
-        currentMousePosition
       );
 
       let axis = vec2.rotate(
@@ -32,7 +32,7 @@ class Controls {
       );
       axis = vec2.normalize(axis, axis);
 
-      this.axis = vec3.fromValues(axis[0], axis[1], 0);
+      this.axis = vec3.fromValues(axis[0], -axis[1], 0);
       this.angle = vec2.length(mouseMovement);
       this.mousePosition = currentMousePosition;
     });
