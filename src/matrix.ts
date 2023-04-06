@@ -11,9 +11,6 @@ namespace Matrix {
   let _view: mat4 | null;
   let _projection: mat4 | null;
 
-  let _previousTimestamp: DOMHighResTimeStamp | null;
-  let _elapsedTimestamp: DOMHighResTimeStamp | null;
-
   export function projection(gl: WebGL2RenderingContext) {
     if (!_projection) {
       _projection = mat4.perspective(
@@ -44,19 +41,9 @@ namespace Matrix {
     return _eye;
   }
 
-  export function rotateView(
-    timestamp: DOMHighResTimeStamp,
-    angle: number,
-    axis?: vec3,
-  ) {
-    if (_previousTimestamp !== timestamp) {
-      _elapsedTimestamp = timestamp - (_previousTimestamp ?? 0);
-      _previousTimestamp = timestamp;
-    }
-
-    if (axis && _elapsedTimestamp && _view) {
-      const radians = glMatrix.toRadian(angle / _elapsedTimestamp);
-      _view = mat4.rotate(mat4.create(), _view, radians, axis);
+  export function rotateView(angle: number, axis?: vec3) {
+    if (axis && _view) {
+      _view = mat4.rotate(mat4.create(), _view, glMatrix.toRadian(angle), axis);
     }
   }
 }

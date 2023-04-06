@@ -9,11 +9,10 @@ import { Light } from "./light";
 import { Glow } from "./shaders/glow/shader";
 import { Star } from "./shaders/star/shader";
 import Controls from "./controls";
-import Matrix from "./matrix";
 
 $(() => {
   const $canvas: JQuery<HTMLCanvasElement> = $("canvas");
-  const controls = new Controls($canvas);
+  Controls($canvas);
 
   const canvas = $canvas[0];
   canvas.width = canvas.clientWidth;
@@ -113,9 +112,6 @@ $(() => {
         gl.disable(gl.BLEND);
 
         fxaa.render(timestamp, colorTexture);
-
-        const { axis, angle } = controls.rotation();
-        Matrix.rotateView(timestamp, angle, axis);
 
         gl.flush();
         requestAnimationFrame(render);

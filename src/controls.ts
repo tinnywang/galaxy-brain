@@ -1,55 +1,50 @@
 import { glMatrix, vec2, vec3 } from "gl-matrix";
+import Matrix from "./matrix";
 
-class Controls {
-  private mousePosition?: vec2;
+const Controls = (canvas: JQuery<HTMLCanvasElement>) => {
+  let mousePosition: vec2 | undefined;
 
-  private axis?: vec3;
+  let previousTimestamp: DOMHighResTimeStamp | undefined;
 
-  private angle = 0;
+  canvas.on("mousedown", (event) => {
+    mousePosition = vec2.fromValues(event.pageX, event.pageY);
+  });
 
-  constructor(canvas: JQuery<HTMLCanvasElement>) {
-    canvas.on("mousedown", (event) => {
-      this.mousePosition = vec2.fromValues(event.pageX, event.pageY);
-    });
+  canvas.on("mousemove", (event) => {
+    if (!mousePosition) {
+      return;
+    }
 
-    canvas.on("mousemove", (event) => {
-      if (!this.mousePosition) {
-        return;
-      }
+    const currentMousePosition = vec2.fromValues(event.pageX, event.pageY);
+    const mouseMovement = vec2.subtract(
+      vec2.create(),
+      currentMousePosition,
+      mousePosition
+    );
+    mousePosition = currentMousePosition;
 
-      const currentMousePosition = vec2.fromValues(event.pageX, event.pageY);
-      const mouseMovement = vec2.subtract(
-        vec2.create(),
-        currentMousePosition,
-        this.mousePosition,
-      );
+    let axis = vec2.rotate(
+      vec2.create(),
+      mouseMovement,
+      vec2.create(),
+      glMatrix.toRadian(90)
+    );
+    axis = vec2.normalize(axis, axis);
 
-      let axis = vec2.rotate(
-        vec2.create(),
-        mouseMovement,
-        vec2.create(),
-        glMatrix.toRadian(90)
-      );
-      axis = vec2.normalize(axis, axis);
+    const rotationAxis = vec3.fromValues(axis[0], -axis[1], 0);
 
-      this.axis = vec3.fromValues(axis[0], -axis[1], 0);
-      this.angle = vec2.length(mouseMovement);
-      this.mousePosition = currentMousePosition;
-    });
+    if (previousTimestamp !== event.timeStamp) {
+      const elapsedTimestamp = event.timeStamp - (previousTimestamp ?? 0);
+      previousTimestamp = event.timeStamp;
 
-    canvas.on("mouseup", () => {
-      this.mousePosition = undefined;
-      this.axis = undefined;
-      this.angle = 0;
-    });
-  }
+      const angle = vec2.length(mouseMovement) / elapsedTimestamp;
+      Matrix.rotateView(angle, rotationAxis);
+    }
+  });
 
-  rotation() {
-    return {
-      axis: this.axis,
-      angle: this.angle,
-    };
-  }
-}
+  canvas.on("mouseup", () => {
+    mousePosition = undefined;
+  });
+};
 
 export default Controls;
