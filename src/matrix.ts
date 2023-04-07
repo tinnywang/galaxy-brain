@@ -19,12 +19,7 @@ class Matrix {
 
   private static projectionMatrix: mat4 | null;
 
-  private static viewMatrix = mat4.lookAt(
-    mat4.create(),
-    Matrix.EYE,
-    Matrix.CENTER,
-    Matrix.UP
-  );
+  private static viewMatrix: mat4 | null;
 
   static projection(gl: WebGL2RenderingContext) {
     if (!Matrix.projectionMatrix) {
@@ -40,18 +35,27 @@ class Matrix {
     return Matrix.projectionMatrix;
   }
 
+  static view() {
+    if (!Matrix.viewMatrix) {
+      Matrix.viewMatrix = mat4.lookAt(
+        mat4.create(),
+        Matrix.EYE,
+        Matrix.CENTER,
+        Matrix.UP
+      );
+    }
+
+    return Matrix.viewMatrix;
+  }
+
   static modelView(model?: mat4) {
-    return mat4.multiply(
-      mat4.create(),
-      Matrix.viewMatrix,
-      model ?? mat4.create()
-    );
+    return mat4.multiply(mat4.create(), Matrix.view(), model ?? mat4.create());
   }
 
   static rotateView(angle: number, axis: vec3) {
     Matrix.viewMatrix = mat4.rotate(
       mat4.create(),
-      Matrix.viewMatrix,
+      Matrix.view(),
       glMatrix.toRadian(angle),
       axis
     );
