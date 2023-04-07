@@ -4,7 +4,9 @@ import Matrix from "./matrix";
 const Controls = (canvas: JQuery<HTMLCanvasElement>) => {
   let mousePosition: vec2 | undefined;
 
-  let previousTimestamp: DOMHighResTimeStamp | undefined;
+  let mouseMoveTimestamp: DOMHighResTimeStamp | undefined;
+
+  let wheelTimestamp: DOMHighResTimeStamp | undefined;
 
   canvas.on("mousedown", (event) => {
     mousePosition = vec2.fromValues(event.pageX, event.pageY);
@@ -33,9 +35,9 @@ const Controls = (canvas: JQuery<HTMLCanvasElement>) => {
 
     const rotationAxis = vec3.fromValues(axis[0], -axis[1], 0);
 
-    if (previousTimestamp !== event.timeStamp) {
-      const elapsedTimestamp = event.timeStamp - (previousTimestamp ?? 0);
-      previousTimestamp = event.timeStamp;
+    if (mouseMoveTimestamp !== event.timeStamp) {
+      const elapsedTimestamp = event.timeStamp - (mouseMoveTimestamp ?? 0);
+      mouseMoveTimestamp = event.timeStamp;
 
       const angle = vec2.length(mouseMovement) / elapsedTimestamp;
       Matrix.rotateView(angle, rotationAxis);
@@ -44,6 +46,16 @@ const Controls = (canvas: JQuery<HTMLCanvasElement>) => {
 
   canvas.on("mouseup", () => {
     mousePosition = undefined;
+  });
+
+  canvas.on("wheel", (event) => {
+    if (wheelTimestamp !== event.timeStamp) {
+      const elapsedTimestamp = event.timeStamp - (wheelTimestamp ?? 0);
+      wheelTimestamp = event.timeStamp;
+
+      const delta = (<WheelEvent>event.originalEvent).deltaY / elapsedTimestamp;
+      Matrix.zoom(glMatrix.toRadian(delta));
+    }
   });
 };
 

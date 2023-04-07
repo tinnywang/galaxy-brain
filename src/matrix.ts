@@ -3,6 +3,10 @@ import { vec3, glMatrix, mat4 } from "gl-matrix";
 class Matrix {
   static EYE = vec3.fromValues(0, 0, 10);
 
+  private static MINIMUM_FOV = glMatrix.toRadian(60);
+
+  private static MAXIMUM_FOV = glMatrix.toRadian(120);
+
   private static FOV = glMatrix.toRadian(90);
 
   private static NEAR = 1;
@@ -37,7 +41,11 @@ class Matrix {
   }
 
   static modelView(model?: mat4) {
-    return mat4.multiply(mat4.create(), Matrix.viewMatrix, model ?? mat4.create());
+    return mat4.multiply(
+      mat4.create(),
+      Matrix.viewMatrix,
+      model ?? mat4.create()
+    );
   }
 
   static rotateView(angle: number, axis: vec3) {
@@ -47,6 +55,14 @@ class Matrix {
       glMatrix.toRadian(angle),
       axis
     );
+  }
+
+  static zoom(delta: number) {
+    Matrix.FOV = Math.max(
+      Matrix.MINIMUM_FOV,
+      Math.min(Matrix.MAXIMUM_FOV, Matrix.FOV + delta)
+    );
+    Matrix.projectionMatrix = null;
   }
 }
 
