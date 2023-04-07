@@ -56,7 +56,7 @@ export class TransparentShader extends Shader<Model> {
     render(timestamp: DOMHighResTimeStamp, drawFramebuffer: WebGLFramebuffer, ...models: Model[]) {
         super.render(timestamp, drawFramebuffer, ...models);
 
-        this.gl.uniform3fv(this.locations.getUniform('eye'), Matrix.eye());
+        this.gl.uniform3fv(this.locations.getUniform('eye'), Matrix.EYE);
         this.gl.uniform3fv(this.locations.getUniform('fresnelColor'), this.props.fresnelColor);
         this.gl.uniform1f(this.locations.getUniform('fresnelHueShift'), this.props.fresnelHueShift);
         this.gl.uniform1f(this.locations.getUniform('fresnelExponent'), this.props.fresnelExponent);

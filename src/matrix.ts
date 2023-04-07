@@ -1,50 +1,52 @@
 import { vec3, glMatrix, mat4 } from "gl-matrix";
 
-namespace Matrix {
-  const FOV = glMatrix.toRadian(90);
-  const NEAR = 1;
-  const FAR = 100;
-  const CENTER = vec3.fromValues(0, 0, 0);
-  const UP = vec3.fromValues(0, 1, 0);
+class Matrix {
+  static EYE = vec3.fromValues(0, 0, 10);
 
-  const _eye = vec3.fromValues(0, 0, 10);
-  let _view: mat4 | null;
-  let _projection: mat4 | null;
+  private static FOV = glMatrix.toRadian(90);
 
-  export function projection(gl: WebGL2RenderingContext) {
-    if (!_projection) {
-      _projection = mat4.perspective(
+  private static NEAR = 1;
+
+  private static FAR = 100;
+
+  private static CENTER = vec3.fromValues(0, 0, 0);
+
+  private static UP = vec3.fromValues(0, 1, 0);
+
+  private static projectionMatrix: mat4 | null;
+
+  private static viewMatrix = mat4.lookAt(
+    mat4.create(),
+    Matrix.EYE,
+    Matrix.CENTER,
+    Matrix.UP
+  );
+
+  static projection(gl: WebGL2RenderingContext) {
+    if (!Matrix.projectionMatrix) {
+      Matrix.projectionMatrix = mat4.perspective(
         mat4.create(),
-        FOV,
+        Matrix.FOV,
         gl.drawingBufferWidth / gl.drawingBufferHeight,
-        NEAR,
-        FAR
+        Matrix.NEAR,
+        Matrix.FAR
       );
     }
 
-    return _projection;
+    return Matrix.projectionMatrix;
   }
 
-  export function view() {
-    if (!_view) {
-      _view = mat4.lookAt(mat4.create(), _eye, CENTER, UP);
-    }
-
-    return _view;
+  static modelView(model?: mat4) {
+    return mat4.multiply(mat4.create(), Matrix.viewMatrix, model ?? mat4.create());
   }
 
-  export function modelView(model?: mat4) {
-    return mat4.multiply(mat4.create(), view(), model ?? mat4.create());
-  }
-
-  export function eye() {
-    return _eye;
-  }
-
-  export function rotateView(angle: number, axis?: vec3) {
-    if (axis && _view) {
-      _view = mat4.rotate(mat4.create(), _view, glMatrix.toRadian(angle), axis);
-    }
+  static rotateView(angle: number, axis: vec3) {
+    Matrix.viewMatrix = mat4.rotate(
+      mat4.create(),
+      Matrix.viewMatrix,
+      glMatrix.toRadian(angle),
+      axis
+    );
   }
 }
 
