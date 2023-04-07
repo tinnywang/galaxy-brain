@@ -5,6 +5,7 @@ import { OcclusionShader } from "../occlusion/shader";
 import { Model } from '../../models/model';
 import WebGL2 from '../../gl';
 import { Light } from '../../light';
+import Matrix from '../../matrix';
 
 export interface CrepuscularRayProps {
     colorTexture: WebGLTexture;
@@ -52,8 +53,8 @@ export class CrepuscularRay extends PostProcessing<RenderProps> {
         // Render crepescular rays from the occluding texture.
         this.gl.useProgram(this.program);
 
-        this.gl.uniformMatrix4fv(this.locations.getUniform('modelViewMatrix'), false, renderProps.light.matrix.modelView);
-        this.gl.uniformMatrix4fv(this.locations.getUniform('projectionMatrix'), false, renderProps.light.matrix.projection);
+        this.gl.uniformMatrix4fv(this.locations.getUniform('modelViewMatrix'), false, Matrix.modelView());
+        this.gl.uniformMatrix4fv(this.locations.getUniform('projectionMatrix'), false, Matrix.projection(this.gl));
         this.gl.uniform1i(this.locations.getUniform('samples'), this.props.samples);
         this.gl.uniform1f(this.locations.getUniform('density'), this.props.density);
         this.gl.uniform1f(this.locations.getUniform('weight'), this.props.weight);

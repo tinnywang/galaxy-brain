@@ -8,9 +8,12 @@ import { FXAA } from "./shaders/fxaa/shader";
 import { Light } from "./light";
 import { Glow } from "./shaders/glow/shader";
 import { Star } from "./shaders/star/shader";
+import Controls from "./controls";
 
 $(() => {
   const $canvas: JQuery<HTMLCanvasElement> = $("canvas");
+  Controls($canvas);
+
   const canvas = $canvas[0];
   canvas.width = canvas.clientWidth;
   canvas.height = canvas.clientHeight;
@@ -96,13 +99,13 @@ $(() => {
 
         gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
 
+        star.render(timestamp, framebuffer, ...starLights);
         transparentShader.render(timestamp, framebuffer, teapot);
         crepuscularRay.render(timestamp, framebuffer, {
           models: [teapot],
           light,
         });
         glow.render(timestamp, framebuffer, glowLight);
-        star.render(timestamp, framebuffer, ...starLights);
 
         gl.bindFramebuffer(gl.READ_FRAMEBUFFER, framebuffer);
         gl.bindFramebuffer(gl.DRAW_FRAMEBUFFER, null);

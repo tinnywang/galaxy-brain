@@ -13,8 +13,7 @@ export abstract class Model {
   readonly buffer: Buffer;
 
   readonly gl: WebGL2RenderingContext;
-
-  readonly matrix: Matrix;
+  readonly model?: mat4;
 
   readonly object: Object;
 
@@ -54,7 +53,7 @@ export abstract class Model {
       faces,
     };
     this.gl = gl;
-    this.matrix = new Matrix(gl, model);
+    this.model = model;
     this.object = o;
   }
 
@@ -73,8 +72,8 @@ export abstract class Model {
       this.gl.enableVertexAttribArray(normal);
     }
 
-    gl.uniformMatrix4fv(locations.getUniform('modelViewMatrix'), false, this.matrix.modelView);
-    gl.uniformMatrix4fv(locations.getUniform('projectionMatrix'), false, this.matrix.projection);
+    gl.uniformMatrix4fv(locations.getUniform('modelViewMatrix'), false, Matrix.modelView(this.model));
+    gl.uniformMatrix4fv(locations.getUniform('projectionMatrix'), false, Matrix.projection(gl));
 
     let offset = 0;
     gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, this.buffer.faces);

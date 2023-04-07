@@ -1,43 +1,72 @@
 import { vec3, glMatrix, mat4 } from "gl-matrix";
 
 class Matrix {
-  private static readonly CENTER = vec3.fromValues(0, 0, 0);
+  static EYE = vec3.fromValues(0, 0, 10);
 
-  private static readonly UP = vec3.fromValues(0, 1, 0);
+  private static MINIMUM_FOV = glMatrix.toRadian(60);
 
-  private static readonly FOV = glMatrix.toRadian(90);
+  private static MAXIMUM_FOV = glMatrix.toRadian(120);
 
-  private static readonly NEAR = 1;
+  private static FOV = glMatrix.toRadian(90);
 
-  private static readonly FAR = 100;
+  private static NEAR = 1;
 
-  static readonly EYE = vec3.fromValues(0, 0, 10);
+  private static FAR = 100;
 
-  private readonly view: mat4;
+  private static CENTER = vec3.fromValues(0, 0, 0);
 
-  readonly projection: mat4;
+  private static UP = vec3.fromValues(0, 1, 0);
 
-  readonly modelView: mat4;
+  private static projectionMatrix: mat4 | null;
 
-  constructor(gl: WebGL2RenderingContext, model?: mat4) {
-    this.view = mat4.lookAt(
+  private static viewMatrix: mat4 | null;
+
+  static projection(gl: WebGL2RenderingContext) {
+    if (!Matrix.projectionMatrix) {
+      Matrix.projectionMatrix = mat4.perspective(
+        mat4.create(),
+        Matrix.FOV,
+        gl.drawingBufferWidth / gl.drawingBufferHeight,
+        Matrix.NEAR,
+        Matrix.FAR
+      );
+    }
+
+    return Matrix.projectionMatrix;
+  }
+
+  static view() {
+    if (!Matrix.viewMatrix) {
+      Matrix.viewMatrix = mat4.lookAt(
+        mat4.create(),
+        Matrix.EYE,
+        Matrix.CENTER,
+        Matrix.UP
+      );
+    }
+
+    return Matrix.viewMatrix;
+  }
+
+  static modelView(model?: mat4) {
+    return mat4.multiply(mat4.create(), Matrix.view(), model ?? mat4.create());
+  }
+
+  static rotateView(angle: number, axis: vec3) {
+    Matrix.viewMatrix = mat4.rotate(
       mat4.create(),
-      Matrix.EYE,
-      Matrix.CENTER,
-      Matrix.UP
+      Matrix.view(),
+      glMatrix.toRadian(angle),
+      axis
     );
-    this.projection = mat4.perspective(
-      mat4.create(),
-      Matrix.FOV,
-      gl.drawingBufferWidth / gl.drawingBufferHeight,
-      Matrix.NEAR,
-      Matrix.FAR
+  }
+
+  static zoom(delta: number) {
+    Matrix.FOV = Math.max(
+      Matrix.MINIMUM_FOV,
+      Math.min(Matrix.MAXIMUM_FOV, Matrix.FOV + delta)
     );
-    this.modelView = mat4.multiply(
-      mat4.create(),
-      this.view,
-      model || mat4.create()
-    );
+    Matrix.projectionMatrix = null;
   }
 }
 

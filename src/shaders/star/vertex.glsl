@@ -16,7 +16,7 @@ uniform float rotationDuration;
 void main(void) {
     gl_Position = projectionMatrix * modelViewMatrix * vertexPosition;
 
-    float rand = random(gl_Position.xy);
+    float rand = random(vertexPosition.xy);
     float theta = timestamp / (rand * animationDuration);
 
     float animationTwinkle = fract(cos(cos(theta * rand) + sin(theta)));
