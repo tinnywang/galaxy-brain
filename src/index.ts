@@ -1,14 +1,13 @@
 import $ from "jquery";
 import { vec3 } from "gl-matrix";
 import WebGL2 from "./gl";
-import { Teapot } from "./models/teapot";
 import { CrepuscularRay } from "./shaders/crepuscular_ray/shader";
 import { TransparentShader } from "./shaders/transparent/shader";
 import { FXAA } from "./shaders/fxaa/shader";
 import { Light } from "./light";
 import { Glow } from "./shaders/glow/shader";
-import { Star } from "./shaders/star/shader";
 import Controls from "./controls";
+import { GalaxyBrain } from "./galaxy_brain";
 
 $(() => {
   const $canvas: JQuery<HTMLCanvasElement> = $("canvas");
@@ -52,23 +51,6 @@ $(() => {
     const light = new Light(gl, {
       positions: [vec3.fromValues(-10, 10, -10), vec3.fromValues(10, 0, -10)],
     });
-    const glowLight = new Light(gl, {
-      positions: [
-        vec3.fromValues(0, 1, 0),
-        vec3.fromValues(0.25, 0.35, 3.25),
-        vec3.fromValues(-0.35, 0.35, 0),
-      ],
-      radius: 50,
-      color: vec3.fromValues(1, 0, 0.5),
-    });
-    const starLights = [
-      new Light(gl, {
-        positions: [vec3.fromValues(3, 3, 0), vec3.fromValues(-3, -1, 0)],
-        radius: 100,
-        color: vec3.fromValues(0, 0, 1),
-      }),
-    ];
-
     const transparentShader = new TransparentShader(gl, {
       opaqueDepthTexture: depthTexture,
       fresnelColor: vec3.fromValues(1, 1, 1),
@@ -84,41 +66,34 @@ $(() => {
       exposure: 0.0035,
     });
     const glow = new Glow(gl);
-    const star = new Star(gl);
     const fxaa = new FXAA(gl);
+    const galaxyBrain = new GalaxyBrain(gl);
 
-    const path =
-      "https://gist.githubusercontent.com/tinnywang/58bda00c65fd7b14d0d15ea1c7a022db/raw/e6147607586052300501fa6be58fc80c51ac6d15/teapot.json";
+    const render = (timestamp: DOMHighResTimeStamp) => {
+      gl.bindFramebuffer(gl.DRAW_FRAMEBUFFER, framebuffer);
+      gl.bindFramebuffer(gl.READ_FRAMEBUFFER, null);
 
-    $.get(path, (data: string) => {
-      const teapot = new Teapot(gl, JSON.parse(data)[0]);
+      gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
 
-      const render = (timestamp: DOMHighResTimeStamp) => {
-        gl.bindFramebuffer(gl.DRAW_FRAMEBUFFER, framebuffer);
-        gl.bindFramebuffer(gl.READ_FRAMEBUFFER, null);
+      transparentShader.render(timestamp, framebuffer, galaxyBrain.head, galaxyBrain.brain);
+      crepuscularRay.render(timestamp, framebuffer, {
+        models: [galaxyBrain.brain],
+        light,
+      });
 
-        gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
+      glow.render(timestamp, framebuffer, galaxyBrain.brain.neurons);
 
-        star.render(timestamp, framebuffer, ...starLights);
-        transparentShader.render(timestamp, framebuffer, teapot);
-        crepuscularRay.render(timestamp, framebuffer, {
-          models: [teapot],
-          light,
-        });
-        glow.render(timestamp, framebuffer, glowLight);
+      gl.bindFramebuffer(gl.READ_FRAMEBUFFER, framebuffer);
+      gl.bindFramebuffer(gl.DRAW_FRAMEBUFFER, null);
+      gl.disable(gl.BLEND);
 
-        gl.bindFramebuffer(gl.READ_FRAMEBUFFER, framebuffer);
-        gl.bindFramebuffer(gl.DRAW_FRAMEBUFFER, null);
-        gl.disable(gl.BLEND);
+      fxaa.render(timestamp, colorTexture);
 
-        fxaa.render(timestamp, colorTexture);
+      gl.flush();
+      requestAnimationFrame(render);
+    };
 
-        gl.flush();
-        requestAnimationFrame(render);
-      };
-
-      render(performance.now());
-    });
+    render(performance.now());
   } catch (e) {
     console.error(e);
   }
