@@ -39,7 +39,7 @@ const Controls = (canvas: JQuery<HTMLCanvasElement>) => {
     );
     axis = vec2.normalize(axis, axis);
 
-    const rotationAxis = vec3.fromValues(axis[0], -axis[1], 0);
+    const rotationAxis = vec3.fromValues(-axis[0], axis[1], 0);
 
     if (mouseMoveTimestamp !== event.timeStamp) {
       const elapsedTimestamp = event.timeStamp - (mouseMoveTimestamp ?? 0);
