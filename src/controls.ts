@@ -2,6 +2,8 @@ import { glMatrix, vec2, vec3 } from "gl-matrix";
 import Matrix from "./matrix";
 
 const Controls = (canvas: JQuery<HTMLCanvasElement>) => {
+    const LEFT_MOUSE = 0;
+
   let mousePosition: vec2 | undefined;
 
   let mouseMoveTimestamp: DOMHighResTimeStamp | undefined;
@@ -9,11 +11,15 @@ const Controls = (canvas: JQuery<HTMLCanvasElement>) => {
   let wheelTimestamp: DOMHighResTimeStamp | undefined;
 
   canvas.on("mousedown", (event) => {
+    if (event.button !== LEFT_MOUSE) {
+        return;
+    }
+
     mousePosition = vec2.fromValues(event.pageX, event.pageY);
   });
 
   canvas.on("mousemove", (event) => {
-    if (!mousePosition) {
+    if (event.button !== LEFT_MOUSE || !mousePosition) {
       return;
     }
 
@@ -44,7 +50,11 @@ const Controls = (canvas: JQuery<HTMLCanvasElement>) => {
     }
   });
 
-  canvas.on("mouseup", () => {
+  canvas.on("mouseup", (event) => {
+    if (event.button !== LEFT_MOUSE) {
+        return;
+    }
+
     mousePosition = undefined;
   });
 
