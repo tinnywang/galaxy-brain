@@ -39,11 +39,10 @@ const Controls = (canvas: JQuery<HTMLCanvasElement>) => {
     mousePosition = currentMousePosition;
 
     const [x, y] = mouseMovement;
-    const axis = vec3.normalize(vec3.create(), vec3.fromValues(y, x, 0));
-
+    const axis = vec3.normalize(vec3.create(), vec3.fromValues(-y, -x, 0));
     const angle = vec2.length(mouseMovement) / elapsedTimestamp;
 
-    Matrix.rotateView(angle, axis);
+    Matrix.rotateView(axis, angle);
   });
 
   canvas.on("mouseup", (event) => {

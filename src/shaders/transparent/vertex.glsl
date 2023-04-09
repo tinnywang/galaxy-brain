@@ -12,5 +12,5 @@ uniform mat4 projectionMatrix;
 void main() {
     gl_Position = projectionMatrix * modelViewMatrix * vertexPosition;
     fragDepth = gl_Position.z / gl_Position.w;
-    fragNormal = (modelViewMatrix * vec4(normal, 0)).xyz;
+    fragNormal = normal;
 }

@@ -1,8 +1,6 @@
-import { vec3, glMatrix, mat4 } from "gl-matrix";
+import { vec3, glMatrix, mat4, quat } from "gl-matrix";
 
 class Matrix {
-  static readonly EYE = vec3.fromValues(0, 0, 10);
-
   private static MINIMUM_FOV = glMatrix.toRadian(60);
 
   private static MAXIMUM_FOV = glMatrix.toRadian(120);
@@ -16,6 +14,8 @@ class Matrix {
   private static CENTER = vec3.fromValues(0, 0, 0);
 
   private static UP = vec3.fromValues(0, 1, 0);
+
+  private static EYE = vec3.fromValues(0, 0, 10);
 
   private static projectionMatrix: mat4 | null;
 
@@ -52,13 +52,15 @@ class Matrix {
     return mat4.multiply(mat4.create(), Matrix.view(), model ?? mat4.create());
   }
 
-  static rotateView(angle: number, axis: vec3) {
-    Matrix.viewMatrix = mat4.rotate(
-      mat4.create(),
-      Matrix.view(),
-      glMatrix.toRadian(angle),
-      axis
-    );
+  static eye() {
+    return Matrix.EYE;
+  }
+
+  static rotateView(axis: vec3, angle: number) {
+    const q = quat.setAxisAngle(quat.create(), axis, glMatrix.toRadian(angle));
+    Matrix.EYE = vec3.transformQuat(Matrix.EYE, Matrix.EYE, q);
+
+    Matrix.viewMatrix = null;
   }
 
   static zoom(delta: number) {
