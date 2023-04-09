@@ -2,7 +2,7 @@ import { glMatrix, vec2, vec3 } from "gl-matrix";
 import Matrix from "./matrix";
 
 const Controls = (canvas: JQuery<HTMLCanvasElement>) => {
-    const LEFT_MOUSE = 0;
+  const LEFT_MOUSE = 0;
 
   let mousePosition: vec2 | undefined;
 
@@ -12,16 +12,23 @@ const Controls = (canvas: JQuery<HTMLCanvasElement>) => {
 
   canvas.on("mousedown", (event) => {
     if (event.button !== LEFT_MOUSE) {
-        return;
+      return;
     }
 
     mousePosition = vec2.fromValues(event.pageX, event.pageY);
   });
 
   canvas.on("mousemove", (event) => {
-    if (event.button !== LEFT_MOUSE || !mousePosition) {
+    if (
+      event.button !== LEFT_MOUSE ||
+      !mousePosition ||
+      mouseMoveTimestamp === event.timeStamp
+    ) {
       return;
     }
+
+    const elapsedTimestamp = event.timeStamp - (mouseMoveTimestamp ?? 0);
+    mouseMoveTimestamp = event.timeStamp;
 
     const currentMousePosition = vec2.fromValues(event.pageX, event.pageY);
     const mouseMovement = vec2.subtract(
@@ -31,28 +38,17 @@ const Controls = (canvas: JQuery<HTMLCanvasElement>) => {
     );
     mousePosition = currentMousePosition;
 
-    let axis = vec2.rotate(
-      vec2.create(),
-      mouseMovement,
-      vec2.create(),
-      glMatrix.toRadian(90)
-    );
-    axis = vec2.normalize(axis, axis);
+    const [x, y] = mouseMovement;
+    const axis = vec3.normalize(vec3.create(), vec3.fromValues(y, x, 0));
 
-    const rotationAxis = vec3.fromValues(-axis[0], axis[1], 0);
+    const angle = vec2.length(mouseMovement) / elapsedTimestamp;
 
-    if (mouseMoveTimestamp !== event.timeStamp) {
-      const elapsedTimestamp = event.timeStamp - (mouseMoveTimestamp ?? 0);
-      mouseMoveTimestamp = event.timeStamp;
-
-      const angle = vec2.length(mouseMovement) / elapsedTimestamp;
-      Matrix.rotateView(angle, rotationAxis);
-    }
+    Matrix.rotateView(angle, axis);
   });
 
   canvas.on("mouseup", (event) => {
     if (event.button !== LEFT_MOUSE) {
-        return;
+      return;
     }
 
     mousePosition = undefined;

@@ -1,7 +1,7 @@
 import { vec3, glMatrix, mat4 } from "gl-matrix";
 
 class Matrix {
-  static EYE = vec3.fromValues(0, 0, 10);
+  static readonly EYE = vec3.fromValues(0, 0, 10);
 
   private static MINIMUM_FOV = glMatrix.toRadian(60);
 
