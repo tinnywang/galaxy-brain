@@ -52,15 +52,19 @@ class Matrix {
     return mat4.multiply(mat4.create(), Matrix.view(), model ?? mat4.create());
   }
 
-  static eye() {
-    return Matrix.EYE;
-  }
-
   static rotateView(axis: vec3, angle: number) {
-    const q = quat.setAxisAngle(quat.create(), axis, glMatrix.toRadian(angle));
+    const q = quat.setAxisAngle(
+      quat.create(),
+      vec3.normalize(axis, axis),
+      glMatrix.toRadian(angle)
+    );
+
     Matrix.EYE = vec3.transformQuat(Matrix.EYE, Matrix.EYE, q);
+    Matrix.UP = vec3.transformQuat(Matrix.UP, Matrix.UP, q);
 
     Matrix.viewMatrix = null;
+
+    return q;
   }
 
   static zoom(delta: number) {
