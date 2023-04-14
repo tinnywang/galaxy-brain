@@ -52,10 +52,6 @@ class Matrix {
     return mat4.multiply(mat4.create(), Matrix.view(), model ?? mat4.create());
   }
 
-  static eye() {
-    return Matrix.EYE;
-  }
-
   static rotateView(axis: vec3, angle: number) {
     const q = quat.setAxisAngle(
       quat.create(),

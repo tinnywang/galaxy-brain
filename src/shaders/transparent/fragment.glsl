@@ -13,10 +13,11 @@ uniform highp vec3 color;
 uniform bool shouldDepthPeel;
 
 // Uniforms for Fresnel effect outline.
-uniform highp vec3 eye;
 uniform highp vec3 fresnelColor;
 uniform float fresnelHueShift;
 uniform float fresnelExponent;
+
+const vec3 Z_AXIS = vec3(0, 0, 1);
 
 // Shift the hue of an RGB color.
 // https://gist.github.com/mairod/a75e7b44f68110e1576d77419d608786?permalink_comment_id=3195243#gistcomment-3195243
@@ -40,7 +41,7 @@ void main() {
     } else if (opaqueDepth < gl_FragDepth) {
         discard;
     } else {
-        float dotProduct = abs(dot(normalize(fragNormal), normalize(eye)));
+        float dotProduct = abs(dot(normalize(fragNormal), Z_AXIS));
 
         float fresnel = smoothstep(0.0, 1.0, pow(1.0 - dotProduct, fresnelExponent));
         vec3 gradientColor = hueShift(color, fresnelHueShift);
