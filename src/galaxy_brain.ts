@@ -12,7 +12,7 @@ export class GalaxyBrain {
         const model = mat4.fromRotationTranslationScale(
             mat4.create(),
             quat.rotateY(quat.create(), quat.create(), glMatrix.toRadian(90)),
-            vec3.fromValues(0, 0, 0),
+            vec3.fromValues(0, 2, 0),
             vec3.fromValues(1, 1, 1),
         );
 
