@@ -8,6 +8,8 @@ import { Light } from "./light";
 import { Glow } from "./shaders/glow/shader";
 import Controls from "./controls";
 import { GalaxyBrain } from "./galaxy_brain";
+import { Star } from "./shaders/star/shader";
+import { SpotLight } from "./shaders/spotlight/shader";
 
 $(() => {
   const $canvas: JQuery<HTMLCanvasElement> = $("canvas");
@@ -65,6 +67,8 @@ $(() => {
       decay: 0.99,
       exposure: 0.0035,
     });
+    const star = new Star(gl);
+    const spotLight = new SpotLight(gl);
     const glow = new Glow(gl);
     const fxaa = new FXAA(gl);
     const galaxyBrain = new GalaxyBrain(gl);
@@ -75,12 +79,13 @@ $(() => {
 
       gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
 
+      star.render(timestamp, framebuffer, galaxyBrain.brain.stars);
+      spotLight.render(timestamp, framebuffer, ...galaxyBrain.brain.lightBeams);
       transparentShader.render(timestamp, framebuffer, galaxyBrain.head, galaxyBrain.brain);
       crepuscularRay.render(timestamp, framebuffer, {
         models: [galaxyBrain.brain],
         light,
       });
-
       glow.render(timestamp, framebuffer, galaxyBrain.brain.neurons);
 
       gl.bindFramebuffer(gl.READ_FRAMEBUFFER, framebuffer);
