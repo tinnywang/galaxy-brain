@@ -79,8 +79,8 @@ $(() => {
 
       gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
 
-      star.render(timestamp, framebuffer, galaxyBrain.brain.stars);
-      spotLight.render(timestamp, framebuffer, ...galaxyBrain.brain.lightBeams);
+      star.render(timestamp, framebuffer, galaxyBrain.lightBeams.stars);
+      spotLight.render(timestamp, framebuffer, galaxyBrain.lightBeams);
       transparentShader.render(timestamp, framebuffer, galaxyBrain.head, galaxyBrain.brain);
       crepuscularRay.render(timestamp, framebuffer, {
         models: [galaxyBrain.brain],

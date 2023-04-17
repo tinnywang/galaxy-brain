@@ -1,9 +1,9 @@
 import vertexSrc from "./vertex.glsl"
 import fragmentSrc from './fragment.glsl';
-import { LightBeam } from '../../light_beam';
+import { LightBeams } from '../../light_beams';
 import { Shader } from '../shader';
 
-export class SpotLight extends Shader<LightBeam> {
+export class SpotLight extends Shader<LightBeams> {
 
     constructor(gl: WebGL2RenderingContext) {
         super(gl, vertexSrc, fragmentSrc);
@@ -16,7 +16,7 @@ export class SpotLight extends Shader<LightBeam> {
         this.locations.setUniform('color');
     }
 
-    render(timestamp: DOMHighResTimeStamp, drawFramebuffer: WebGLFramebuffer, ...lights: LightBeam[]) {
+    render(timestamp: DOMHighResTimeStamp, drawFramebuffer: WebGLFramebuffer, ...lights: LightBeams[]) {
         this.gl.bindFramebuffer(this.gl.DRAW_FRAMEBUFFER, drawFramebuffer);
 
         super.render(timestamp, drawFramebuffer, ...lights);
