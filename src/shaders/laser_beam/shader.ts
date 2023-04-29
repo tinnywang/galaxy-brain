@@ -1,10 +1,9 @@
 import vertexSrc from "./vertex.glsl"
 import fragmentSrc from './fragment.glsl';
-import { LightBeams } from '../../light_beams';
-import { Shader } from '../shader';
+import { Shader } from "../shader";
+import { LaserBeams } from "../../laser_beams"
 
-export class SpotLight extends Shader<LightBeams> {
-
+export class LaserBeam extends Shader<LaserBeams> {
     constructor(gl: WebGL2RenderingContext) {
         super(gl, vertexSrc, fragmentSrc);
 
@@ -12,18 +11,17 @@ export class SpotLight extends Shader<LightBeams> {
         this.locations.setUniform('modelViewMatrix');
         this.locations.setUniform('projectionMatrix');
 
-        this.locations.setUniform('width');
         this.locations.setUniform('color');
     }
 
-    render(timestamp: DOMHighResTimeStamp, drawFramebuffer: WebGLFramebuffer, ...lights: LightBeams[]) {
+    render(timestamp: DOMHighResTimeStamp, drawFramebuffer: WebGLFramebuffer, lasers: LaserBeams) {
         this.gl.bindFramebuffer(this.gl.DRAW_FRAMEBUFFER, drawFramebuffer);
 
-        super.render(timestamp, drawFramebuffer, ...lights);
+        super.render(timestamp, drawFramebuffer, lasers);
 
         this.gl.enable(this.gl.BLEND);
         this.gl.blendFunc(this.gl.SRC_ALPHA, this.gl.ONE_MINUS_SRC_ALPHA);
 
-        lights?.forEach((l) => l.render(this.gl, this.locations));
+        lasers.render(this.gl, this.locations);
     }
 }
