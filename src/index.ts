@@ -9,7 +9,6 @@ import { Glow } from "./shaders/glow/shader";
 import Controls from "./controls";
 import { GalaxyBrain } from "./galaxy_brain";
 import { Star } from "./shaders/star/shader";
-import { LaserBeam } from "./shaders/laser_beam/shader"
 
 $(() => {
   const $canvas: JQuery<HTMLCanvasElement> = $("canvas");
@@ -51,7 +50,7 @@ $(() => {
     );
 
     const light = new Light(gl, {
-      positions: [vec3.fromValues(-10, 10, -10), vec3.fromValues(10, 0, -10)],
+      positions: [vec3.fromValues(0, 0, 0)],
     });
     const transparentShader = new TransparentShader(gl, {
       opaqueDepthTexture: depthTexture,
@@ -68,7 +67,6 @@ $(() => {
       exposure: 0.0035,
     });
     const star = new Star(gl);
-    const laserBeam = new LaserBeam(gl);
     const glow = new Glow(gl);
     const fxaa = new FXAA(gl);
     const galaxyBrain = new GalaxyBrain(gl);
@@ -80,12 +78,15 @@ $(() => {
       gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
 
       // Render the laser beams behind the stars.
-      laserBeam.render(timestamp, framebuffer, galaxyBrain.lasers);
       star.render(timestamp, framebuffer, galaxyBrain.stars);
 
       transparentShader.render(timestamp, framebuffer, galaxyBrain.head, galaxyBrain.brain);
       crepuscularRay.render(timestamp, framebuffer, {
         models: [galaxyBrain.brain],
+        light,
+      });
+      crepuscularRay.render(timestamp, framebuffer, {
+        models: galaxyBrain.lasers.apertures,
         light,
       });
       glow.render(timestamp, framebuffer, galaxyBrain.brain.neurons);

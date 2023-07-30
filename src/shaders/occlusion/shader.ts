@@ -10,7 +10,7 @@ export interface OcclusionProps {
 }
 
 export class OcclusionShader extends Shader<Model> {
-    private static Black = vec3.fromValues(0, 0, 0);
+    private static White = vec3.fromValues(1, 1, 1);
 
     private props: OcclusionProps;
 
@@ -48,10 +48,12 @@ export class OcclusionShader extends Shader<Model> {
             width * this.props.scale,
             height * this.props.scale,
         );
+
         this.gl.disable(this.gl.DEPTH_TEST);
         this.gl.clear(this.gl.COLOR_BUFFER_BIT);
 
-        this.gl.uniform3fv(this.locations.getUniform('color'), OcclusionShader.Black);
+        // Render occluding objects in white.
+        this.gl.uniform3fv(this.locations.getUniform('color'), OcclusionShader.White);
         models?.forEach((m) => m.render(this.gl, this.locations));
 
         this.gl.viewport(x, y, width, height);

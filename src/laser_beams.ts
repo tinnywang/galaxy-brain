@@ -1,13 +1,14 @@
-import { glMatrix, mat4, vec3, quat } from "gl-matrix";
+import { mat4, vec3, quat } from "gl-matrix";
+import { Cylinder } from "./models/cylinder";
+import { Model } from "./models/model";
 import Matrix from "./matrix";
-import { ShaderLocations } from "./shaders/shader_locations";
 
 export interface LaserBeamsProps {
     model?: mat4,
     color?: vec3,
 }
 
-export class LaserBeams {
+export class LaserBeams{
     private static GoldenRatio = 0.61803398875;
 
     private static Coordinates = [
@@ -17,60 +18,25 @@ export class LaserBeams {
         [LaserBeams.GoldenRatio, 1 / LaserBeams.GoldenRatio, 0],
     ];
 
-    readonly color: vec3;
-
-    private model?: mat4;
-
-    private verticesBuffer: WebGLBuffer | null;
-
-    private vertices: vec3[];
+    readonly apertures: Model[];
 
     constructor(gl: WebGL2RenderingContext, props: LaserBeamsProps) {
-        this.model = props.model;
-        this.color = props.color ?? vec3.fromValues(1, 1, 1);
-
         // Generate the coordinates of a regular dodecahedron.
         // https://en.wikipedia.org/wiki/Regular_dodecahedron#Cartesian_coordinates
         const dodecahedronVertices = LaserBeams.Coordinates.flatMap((c) => {
-            return this.permutate(c).map((p) => vec3.fromValues(10 * p[0], 10 * p[1], 10 * p[2]));
+            return this.permutate(c).map((p) => vec3.fromValues(p[0], p[1], p[2]));
         });
-        const coneVertices = this.cone(glMatrix.toRadian(45), 10, 1000);
-        this.vertices = dodecahedronVertices.flatMap((d) => {
+
+        this.apertures = dodecahedronVertices.map((d) => {
             const q = quat.rotationTo(quat.create(), Matrix.UP, vec3.normalize(vec3.create(), d));
-            return coneVertices.map((c) => vec3.transformQuat(vec3.create(), c, q));
+            const model = mat4.fromRotationTranslationScale(
+                mat4.create(),
+                q,
+                vec3.scale(vec3.create(), d, 3.5),
+                vec3.fromValues(0.15, 5, 0.15),
+            );
+            return new Cylinder(gl, model);
         });
-  
-        this.verticesBuffer = gl.createBuffer();
-        gl.bindBuffer(gl.ARRAY_BUFFER, this.verticesBuffer);
-        gl.bufferData(
-            gl.ARRAY_BUFFER,
-            new Float32Array(this.vertices.flatMap((v) => [v[0], v[1], v[2]])),
-            gl.STATIC_DRAW
-        );
-    }
-
-    render(gl: WebGL2RenderingContext, locations: ShaderLocations) {
-        const vertexPosition = locations.getAttribute("vertexPosition");
-        if (vertexPosition !== null) {
-            gl.bindBuffer(gl.ARRAY_BUFFER, this.verticesBuffer);
-            gl.vertexAttribPointer(vertexPosition, 3, gl.FLOAT, false, 0, 0);
-            gl.enableVertexAttribArray(vertexPosition);
-        }
-
-        gl.uniformMatrix4fv(
-            locations.getUniform("projectionMatrix"),
-            false,
-            Matrix.projection(gl)
-        );
-        gl.uniformMatrix4fv(
-            locations.getUniform("modelViewMatrix"),
-            false,
-            Matrix.modelView(this.model)
-        );
-
-        gl.uniform3fv(locations.getUniform("color"), vec3.fromValues(1, 1, 1));
-
-        gl.drawArrays(gl.TRIANGLE_FAN, 0, this.vertices.length);
     }
 
     permutate(vertex: number[]): number[][] {
@@ -86,14 +52,5 @@ export class LaserBeams {
 
             return permutations;
         });
-    }
-
-    cone(radians: number, radius: number, height: number): vec3[] {
-        const vertices: vec3[] = [vec3.fromValues(0, 0, 0)];
-        for (let rad = 0; rad <= glMatrix.toRadian(360); rad += radians) {
-            vertices.push(vec3.fromValues(radius * Math.cos(rad), height, radius * Math.sin(rad)));
-        }
-
-        return vertices;
     }
 }
