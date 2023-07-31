@@ -3,20 +3,26 @@ import { Brain } from "./models/brain";
 import { Head } from "./models/head";
 import { Skull } from "./models/skull";
 import { Laser } from "./laser";
+import { Light } from "./light";
 
 export class GalaxyBrain {
+    readonly light: Light;
     readonly head: Head;
     readonly skull: Skull;
     readonly brain: Brain;
     readonly lasers: Laser;
 
     constructor(gl: WebGL2RenderingContext) {
-        const model = mat4.fromRotationTranslationScale(
+        const center = vec3.fromValues(0, 2, 0);
+        const model = mat4.fromRotationTranslation(
             mat4.create(),
             quat.rotateY(quat.create(), quat.create(), glMatrix.toRadian(90)),
-            vec3.fromValues(0, 2, 0),
-            vec3.fromValues(1, 1, 1),
+            center,
         );
+
+        this.light = new Light(gl, {
+            positions: [center],
+        });
 
         this.head = new Head(gl, model);
 
@@ -24,6 +30,6 @@ export class GalaxyBrain {
 
         this.brain = new Brain(gl, model);
 
-        this.lasers = new Laser(gl);
+        this.lasers = new Laser(gl, model);
     }
 }

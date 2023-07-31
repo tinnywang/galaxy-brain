@@ -4,7 +4,6 @@ import WebGL2 from "./gl";
 import { CrepuscularRay } from "./shaders/crepuscular_ray/shader";
 import { TransparentShader } from "./shaders/transparent/shader";
 import { FXAA } from "./shaders/fxaa/shader";
-import { Light } from "./light";
 import { Glow } from "./shaders/glow/shader";
 import Controls from "./controls";
 import { GalaxyBrain } from "./galaxy_brain";
@@ -49,9 +48,6 @@ $(() => {
       0
     );
 
-    const light = new Light(gl, {
-      positions: [vec3.fromValues(0, 0, 0)],
-    });
     const transparentShader = new TransparentShader(gl, {
       opaqueDepthTexture: depthTexture,
       fresnelColor: vec3.fromValues(1, 1, 1),
@@ -81,8 +77,8 @@ $(() => {
       star.render(timestamp, framebuffer, galaxyBrain.lasers.stars);
       transparentShader.render(timestamp, framebuffer, galaxyBrain.head, galaxyBrain.brain);
       crepuscularRay.render(timestamp, framebuffer, {
-        models: [galaxyBrain.brain, ...galaxyBrain.lasers.beams],
-        light,
+        models: galaxyBrain.lasers.beams,
+        light: galaxyBrain.light,
       });
       glow.render(timestamp, framebuffer, galaxyBrain.brain.neurons);
 
