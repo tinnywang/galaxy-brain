@@ -78,15 +78,10 @@ $(() => {
       gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
 
       // Render the laser beams behind the stars.
-      star.render(timestamp, framebuffer, galaxyBrain.stars);
-
+      star.render(timestamp, framebuffer, galaxyBrain.lasers.stars);
       transparentShader.render(timestamp, framebuffer, galaxyBrain.head, galaxyBrain.brain);
       crepuscularRay.render(timestamp, framebuffer, {
-        models: [galaxyBrain.brain],
-        light,
-      });
-      crepuscularRay.render(timestamp, framebuffer, {
-        models: galaxyBrain.lasers.apertures,
+        models: [galaxyBrain.brain, ...galaxyBrain.lasers.beams],
         light,
       });
       glow.render(timestamp, framebuffer, galaxyBrain.brain.neurons);
