@@ -6,7 +6,7 @@ import { TransparentShader } from "./shaders/transparent/shader";
 import { FXAA } from "./shaders/fxaa/shader";
 import { Glow } from "./shaders/glow/shader";
 import Controls from "./controls";
-import { GalaxyBrain } from "./galaxy_brain";
+import GalaxyBrain from "./galaxy_brain";
 import { Star } from "./shaders/star/shader";
 
 $(() => {
@@ -75,7 +75,12 @@ $(() => {
 
       // Render the laser beams behind the stars.
       star.render(timestamp, framebuffer, galaxyBrain.lasers.stars);
-      transparentShader.render(timestamp, framebuffer, galaxyBrain.head, galaxyBrain.brain);
+      transparentShader.render(
+        timestamp,
+        framebuffer,
+        galaxyBrain.head,
+        galaxyBrain.brain
+      );
       crepuscularRay.render(timestamp, framebuffer, {
         models: galaxyBrain.lasers.beams,
         light: galaxyBrain.light,
