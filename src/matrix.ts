@@ -1,6 +1,8 @@
 import { vec3, glMatrix, mat4, quat } from "gl-matrix";
 
 class Matrix {
+  static UP = vec3.fromValues(0, 1, 0);
+
   private static MINIMUM_FOV = glMatrix.toRadian(60);
 
   private static MAXIMUM_FOV = glMatrix.toRadian(120);
@@ -12,8 +14,6 @@ class Matrix {
   private static FAR = 100;
 
   private static CENTER = vec3.fromValues(0, 0, 0);
-
-  private static UP = vec3.fromValues(0, 1, 0);
 
   private static EYE = vec3.fromValues(0, 0, 10);
 
