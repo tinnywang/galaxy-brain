@@ -48,7 +48,7 @@ $(() => {
       0
     );
 
-    const transparentShader = new TransparentShader(gl, {
+    const transparent = new TransparentShader(gl, {
       opaqueDepthTexture: depthTexture,
       fresnelColor: vec3.fromValues(1, 1, 1),
       fresnelHueShift: -20,
@@ -65,7 +65,12 @@ $(() => {
     const star = new Star(gl);
     const glow = new Glow(gl);
     const fxaa = new FXAA(gl);
-    const galaxyBrain = new GalaxyBrain(gl);
+    const galaxyBrain = new GalaxyBrain(gl, {
+      transparent,
+      crepuscularRay,
+      star,
+      glow,
+    });
 
     const render = (timestamp: DOMHighResTimeStamp) => {
       gl.bindFramebuffer(gl.DRAW_FRAMEBUFFER, framebuffer);
@@ -73,19 +78,7 @@ $(() => {
 
       gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
 
-      // Render the laser beams behind the stars.
-      star.render(timestamp, framebuffer, galaxyBrain.lasers.stars);
-      transparentShader.render(
-        timestamp,
-        framebuffer,
-        galaxyBrain.head,
-        galaxyBrain.brain
-      );
-      crepuscularRay.render(timestamp, framebuffer, {
-        models: galaxyBrain.lasers.beams,
-        light: galaxyBrain.light,
-      });
-      glow.render(timestamp, framebuffer, galaxyBrain.brain.neurons);
+      galaxyBrain.render(timestamp, framebuffer);
 
       gl.bindFramebuffer(gl.READ_FRAMEBUFFER, framebuffer);
       gl.bindFramebuffer(gl.DRAW_FRAMEBUFFER, null);
