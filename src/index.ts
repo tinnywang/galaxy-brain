@@ -11,7 +11,7 @@ import { Star } from "./shaders/star/shader";
 
 $(() => {
   const $canvas: JQuery<HTMLCanvasElement> = $("canvas");
-  Controls($canvas);
+  const $slider: JQuery<HTMLInputElement> = $("input");
 
   const canvas = $canvas[0];
   canvas.width = canvas.clientWidth;
@@ -71,6 +71,8 @@ $(() => {
       star,
       glow,
     });
+
+    Controls($canvas, $slider, galaxyBrain);
 
     const render = (timestamp: DOMHighResTimeStamp) => {
       gl.bindFramebuffer(gl.DRAW_FRAMEBUFFER, framebuffer);

@@ -29,6 +29,8 @@ class GalaxyBrain {
 
   private shaders: Shaders;
 
+  private stage = 0;
+
   constructor(gl: WebGL2RenderingContext, shaders: Shaders) {
     this.shaders = shaders;
 
@@ -66,6 +68,11 @@ class GalaxyBrain {
       light: this.light,
     });
     this.shaders.glow.render(timestamp, framebuffer, this.brain.neurons);
+  }
+
+  evolve(stage: number) {
+    this.stage = stage;
+    console.log(this.stage);
   }
 }
 

@@ -6,6 +6,14 @@
   </head>
   <body style="height: 100%; margin: 0">
     <script src="bundle.js"></script>
-    <canvas style="height: 100%; width: 100%; background: rgb(0,212,255); background: radial-gradient(circle, rgba(0,212,255,1) 0%, rgba(9,9,121,1) 85%, rgba(2,0,36,1) 100%)"></canvas>
+        <input style="position: absolute" type="range" min="0" max="3" value="0" step="1" list="stages">
+        <datalist id="stages">
+          <option>0</option>
+          <option>1</option>
+          <option>2</option>
+          <option>3</option>
+        </datalist>
+      <canvas style="height: 100%; width: 100%; background: rgb(0,212,255); background: radial-gradient(circle, rgba(0,212,255,1) 0%, rgba(9,9,121,1) 85%, rgba(2,0,36,1) 100%)"></canvas>
+    </div>
   </body>
 </html>
