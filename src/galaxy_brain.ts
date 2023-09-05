@@ -8,6 +8,7 @@ import { Glow } from "./shaders/glow/shader";
 import { Star } from "./shaders/star/shader";
 import { TransparentShader } from "./shaders/transparent/shader";
 import { CrepuscularRay } from "./shaders/crepuscular_ray/shader";
+import { Scale } from "./animations/scale";
 
 interface Shaders {
   transparent: TransparentShader
@@ -50,29 +51,45 @@ class GalaxyBrain {
     this.skull = new Skull(gl, model);
 
     this.brain = new Brain(gl, model);
+    this.brain.scale(0.5);
 
     this.lasers = new Laser(gl, model);
   }
 
   render(timestamp: DOMHighResTimeStamp, framebuffer: WebGLFramebuffer) {
     // Render the laser beams behind the stars.
-    this.shaders.star.render(timestamp, framebuffer, this.lasers.stars);
+    // this.shaders.star.render(timestamp, framebuffer, this.lasers.stars);
+
     this.shaders.transparent.render(
       timestamp,
       framebuffer,
-      this.head,
-      this.brain
+      // this.head,
+      this.skull,
+      this.brain,
     );
+
+    /*
     this.shaders.crepuscularRay.render(timestamp, framebuffer, {
       models: this.lasers.beams,
       light: this.light,
     });
+
     this.shaders.glow.render(timestamp, framebuffer, this.brain.neurons);
+    */
   }
 
   evolve(stage: number) {
+    switch (stage) {
+      case 0:
+        new Scale(this.brain, 0.5, 500);
+        break;
+      default:
+        if (this.stage == 0) {
+          new Scale(this.brain, 2, 500);
+        }
+    }
+
     this.stage = stage;
-    console.log(this.stage);
   }
 }
 
