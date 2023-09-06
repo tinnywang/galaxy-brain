@@ -1,11 +1,11 @@
 import { Model } from "../models/model";
 
 export abstract class Animation {
-    protected model: Model;
+    protected readonly model: Model;
 
-    protected value: number;
+    protected readonly value: number;
 
-    protected duration: DOMHighResTimeStamp;
+    protected readonly duration: DOMHighResTimeStamp;
 
     protected elapsedTimestamp: DOMHighResTimeStamp | undefined; 
 

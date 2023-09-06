@@ -29,7 +29,7 @@ class GalaxyBrain {
 
   readonly lasers: Laser;
 
-  private shaders: Shaders;
+  private readonly shaders: Shaders;
 
   private stage = 0;
 

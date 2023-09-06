@@ -2,9 +2,9 @@ import { Model } from "../models/model";
 import { Animation } from "./animation";
 
 export class Scale extends Animation {
-    private scale: number;
+    private readonly scale: number;
 
-    private delta: number;
+    private readonly delta: number;
 
     private readonly scaleUp: boolean;
 
