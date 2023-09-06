@@ -1,7 +1,12 @@
 import { glMatrix, vec3, quat } from "gl-matrix";
 import Matrix from "./matrix";
+import GalaxyBrain from "./galaxy_brain";
 
-const Controls = (canvas: JQuery<HTMLCanvasElement>) => {
+const Controls = (
+  canvas: JQuery<HTMLCanvasElement>,
+  slider: JQuery<HTMLInputElement>,
+  galaxyBrain: GalaxyBrain
+) => {
   const LEFT_MOUSE = 0;
 
   const Z_AXIS = vec3.fromValues(0, 0, 1);
@@ -69,6 +74,13 @@ const Controls = (canvas: JQuery<HTMLCanvasElement>) => {
 
       const delta = (<WheelEvent>event.originalEvent).deltaY / elapsedTimestamp;
       Matrix.zoom(glMatrix.toRadian(delta));
+    }
+  });
+
+  slider.on("change", (event) => {
+    const stage = parseInt(event.target.value, 10);
+    if (!Number.isNaN(stage)) {
+      galaxyBrain.evolve(stage);
     }
   });
 };

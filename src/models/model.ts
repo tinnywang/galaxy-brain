@@ -1,4 +1,4 @@
-import { mat4 } from "gl-matrix";
+import { mat4, vec3 } from "gl-matrix";
 import { Face, Object } from "../object";
 import Matrix from "../matrix";
 import { ShaderLocations } from "../shaders/shader_locations";
@@ -13,9 +13,10 @@ export abstract class Model {
   readonly buffer: Buffer;
 
   readonly gl: WebGL2RenderingContext;
-  readonly model?: mat4;
 
   readonly object: Object;
+
+  private model: mat4;
 
   constructor(
     gl: WebGL2RenderingContext,
@@ -55,7 +56,7 @@ export abstract class Model {
       faces,
     };
     this.gl = gl;
-    this.model = model;
+    this.model = model ?? mat4.create();
     this.object = o;
   }
 
@@ -87,5 +88,13 @@ export abstract class Model {
       offset += f.vertex_indices.length * 8;
     })
   }
-}
 
+  scale(n: number) {
+    this.model = mat4.scale(mat4.create(), this.model, vec3.fromValues(n, n, n));
+  }
+
+  getScale(): number {
+    const v = mat4.getScaling(vec3.create(), this.model);
+    return v[0]
+  }
+}
