@@ -9,8 +9,7 @@ import { Star } from "./shaders/star/shader";
 import { TransparentShader } from "./shaders/transparent/shader";
 import { CrepuscularRay } from "./shaders/crepuscular_ray/shader";
 import { Animation } from "./animations/animation";
-import { FadeIn } from "./animations/fade_in";
-import { FadeOut } from "./animations/fade_out";
+import { FadeIn, FadeOut } from "./animations/fade";
 import { Scale } from "./animations/scale";
 
 interface Shaders {

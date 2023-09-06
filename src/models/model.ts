@@ -63,7 +63,7 @@ export abstract class Model {
   }
 
   render(gl: WebGL2RenderingContext, locations: ShaderLocations, perFace?: (f: Face) => void) {
-    if (this.alpha <= 0) {
+    if (this.alpha == 0) {
       return;
     }
 
