@@ -3,8 +3,6 @@ import { Model } from "../models/model";
 export abstract class Animation {
     protected readonly model: Model;
 
-    protected readonly value: number;
-
     protected readonly duration: DOMHighResTimeStamp;
 
     protected elapsedTimestamp: DOMHighResTimeStamp | undefined; 
@@ -13,9 +11,8 @@ export abstract class Animation {
 
     private requestID: number;
 
-    constructor(model: Model, value: number, duration: DOMHighResTimeStamp) {
+    constructor(model: Model, duration: DOMHighResTimeStamp) {
         this.model = model;
-        this.value = value;
         this.duration = duration;
 
         this.requestID = requestAnimationFrame(this.render.bind(this));

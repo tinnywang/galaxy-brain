@@ -69,7 +69,7 @@ export class TransparentShader extends Shader<Model> {
 
             models?.forEach((m) => {
                 m.render(this.gl, this.locations, (f: Face) => {
-                    this.gl.uniform3fv(this.locations.getUniform('color'), f.material.diffuse);
+                    this.gl.uniform4fv(this.locations.getUniform('color'), [...f.material.diffuse, m.alpha]);
                 });
             });
         }

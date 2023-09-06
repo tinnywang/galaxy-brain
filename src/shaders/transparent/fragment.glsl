@@ -9,7 +9,7 @@ out vec4 fragColor;
 
 uniform sampler2D opaqueDepthTexture;
 uniform sampler2D peelDepthTexture;
-uniform highp vec3 color;
+uniform highp vec4 color;
 uniform bool shouldDepthPeel;
 
 // Uniforms for Fresnel effect outline.
@@ -44,10 +44,10 @@ void main() {
         float dotProduct = abs(dot(normalize(fragNormal), Z_AXIS));
 
         float fresnel = smoothstep(0.0, 1.0, pow(1.0 - dotProduct, fresnelExponent));
-        vec3 gradientColor = hueShift(color, fresnelHueShift);
-        fragColor = fresnel * vec4(fresnelColor + gradientColor, 1);
+        vec3 gradientColor = hueShift(color.rgb, fresnelHueShift);
+        fragColor = fresnel * vec4(fresnelColor + gradientColor, color.a);
 
         fresnel = smoothstep(0.0, 1.0, dotProduct);
-        fragColor = mix(fragColor, fresnel * vec4(color, 1), dotProduct);
+        fragColor = mix(fragColor, fresnel * color, dotProduct);
     }
 }
