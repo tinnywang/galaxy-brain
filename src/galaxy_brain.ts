@@ -91,7 +91,9 @@ class GalaxyBrain {
         break;
       default:
         if (this.stage === 0) {
-          this.animations.push(new Scale(this.brain, 1 / this.brain.getScale(), 1000));
+          this.animations.push(
+            new Scale(this.brain, 1 / this.brain.getScale(), 1000)
+          );
         }
     }
 
