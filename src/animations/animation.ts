@@ -7,8 +7,6 @@ export abstract class Animation {
 
     protected duration: DOMHighResTimeStamp;
 
-    protected isDone: boolean;
-
     protected elapsedTimestamp: DOMHighResTimeStamp | undefined; 
 
     private previousTimestamp: DOMHighResTimeStamp | undefined;
@@ -19,7 +17,6 @@ export abstract class Animation {
         this.model = model;
         this.value = value;
         this.duration = duration;
-        this.isDone = false;
 
         this.requestID = requestAnimationFrame(this.render.bind(this));
     }
@@ -30,10 +27,16 @@ export abstract class Animation {
         }
         this.previousTimestamp = timestamp;
 
-        if (this.isDone) {
-            cancelAnimationFrame(this.requestID);
+        if (this.isDone()) {
+            this.cancel();
         } else {
             this.requestID = requestAnimationFrame(this.render.bind(this))
         }
     }
+
+    cancel() {
+        cancelAnimationFrame(this.requestID);
+    }
+
+    abstract isDone(): boolean;
 }

@@ -8,13 +8,14 @@ import { Glow } from "./shaders/glow/shader";
 import { Star } from "./shaders/star/shader";
 import { TransparentShader } from "./shaders/transparent/shader";
 import { CrepuscularRay } from "./shaders/crepuscular_ray/shader";
+import { Animation } from "./animations/animation";
 import { Scale } from "./animations/scale";
 
 interface Shaders {
-  transparent: TransparentShader
-  crepuscularRay: CrepuscularRay
-  star: Star
-  glow: Glow
+  transparent: TransparentShader;
+  crepuscularRay: CrepuscularRay;
+  star: Star;
+  glow: Glow;
 }
 
 class GalaxyBrain {
@@ -31,6 +32,8 @@ class GalaxyBrain {
   private shaders: Shaders;
 
   private stage = 0;
+
+  private animations: Animation[] = [];
 
   constructor(gl: WebGL2RenderingContext, shaders: Shaders) {
     this.shaders = shaders;
@@ -65,7 +68,7 @@ class GalaxyBrain {
       framebuffer,
       // this.head,
       this.skull,
-      this.brain,
+      this.brain
     );
 
     /*
@@ -79,13 +82,16 @@ class GalaxyBrain {
   }
 
   evolve(stage: number) {
+    this.animations.forEach((a) => a.cancel());
+    this.animations = [];
+
     switch (stage) {
       case 0:
-        new Scale(this.brain, 0.5, 500);
+        this.animations.push(new Scale(this.brain, 0.5, 1000));
         break;
       default:
-        if (this.stage == 0) {
-          new Scale(this.brain, 2, 500);
+        if (this.stage === 0) {
+          this.animations.push(new Scale(this.brain, 1 / this.brain.getScale(), 1000));
         }
     }
 

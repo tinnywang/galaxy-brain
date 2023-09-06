@@ -24,17 +24,19 @@ export class Scale extends Animation {
     render(timestamp: DOMHighResTimeStamp) {
         super.render(timestamp);
 
-        const s = this.model.getScale();
-        this.isDone = this.scaleUp ? s >= this.scale : s <= this.scale;
-
         // Scale the model linearly over time.
         // If the model were scaled by delta every frame, it would be scaled exponentially (delta^n).
-        if (!this.isDone) {
+        if (!this.isDone()) {
            let delta = this.elapsedTimestamp ? this.delta * this.elapsedTimestamp : 0;
             if (!this.scaleUp) {
                 delta *= -1
             }
-            this.model.scale(1 + delta / s);
+            this.model.scale(1 + delta / this.model.getScale());
         }
+    }
+
+    isDone() {
+        const s = this.model.getScale();
+        return this.scaleUp ? s >= this.scale : s <= this.scale;
     }
 }
