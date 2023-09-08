@@ -11,6 +11,7 @@ import { CrepuscularRay } from "./shaders/crepuscular_ray/shader";
 import { Animation } from "./animations/animation";
 import { FadeIn, FadeOut } from "./animations/fade";
 import { Scale } from "./animations/scale";
+import { Model } from "./models/model";
 
 interface Shaders {
   transparent: TransparentShader;
@@ -34,7 +35,7 @@ class GalaxyBrain {
 
   private stage = 0;
 
-  private animations: Animation[] = [];
+  private animations: Animation<Model | Light>[] = [];
 
   constructor(gl: WebGL2RenderingContext, shaders: Shaders) {
     this.shaders = shaders;

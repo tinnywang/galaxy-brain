@@ -4,7 +4,7 @@ precision highp float;
 
 out vec4 fragColor;
 
-uniform vec3 color;
+uniform vec4 color;
 uniform sampler2D lensFlareTexture;
 
 void main(void) {
@@ -12,7 +12,7 @@ void main(void) {
     dist = smoothstep(0.0, 0.5, dist);
 
     float alpha = texture(lensFlareTexture, gl_PointCoord).a;
-    vec3 gradient = mix(vec3(1), color, dist);
+    vec3 gradient = mix(vec3(1), color.rgb, dist);
 
-    fragColor = vec4(gradient, alpha);
+    fragColor = vec4(gradient, min(alpha, color.a));
 }

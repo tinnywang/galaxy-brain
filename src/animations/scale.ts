@@ -1,7 +1,7 @@
 import { Model } from "../models/model";
 import { Animation } from "./animation";
 
-export class Scale extends Animation {
+export class Scale extends Animation<Model> {
     private readonly scale: number;
 
     private readonly delta: number;

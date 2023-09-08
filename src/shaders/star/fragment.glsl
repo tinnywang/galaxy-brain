@@ -6,7 +6,7 @@ in mat2 rotationMatrix;
 
 out vec4 fragColor;
 
-uniform vec3 color;
+uniform vec4 color;
 uniform sampler2D lensFlareTexture;
 
 const vec2 center = vec2(0.5);
@@ -20,7 +20,7 @@ void main(void) {
     textureCoord += center;
 
     float alpha = texture(lensFlareTexture, textureCoord).a;
-    vec3 gradient = mix(vec3(1), color, dist);
+    vec3 gradient = mix(vec3(1), color.rgb, dist);
 
-    fragColor = vec4(gradient, alpha);
+    fragColor = vec4(gradient.rgb, min(alpha, color.a));
 }
