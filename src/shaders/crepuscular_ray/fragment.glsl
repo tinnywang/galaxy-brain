@@ -11,13 +11,14 @@ uniform sampler2D textureImage;
 uniform int samples;
 uniform float density;
 uniform float weight;
+uniform float alpha;
 uniform float decay;
 uniform float exposure;
 
 void main(void) {
     vec2 delta = lightRay / float(samples) * density;
     vec2 samplePosition = texturePosition;
-    float illuminationDecay = 1.0;
+    float illuminationDecay = alpha;
     fragColor = texture(textureImage, texturePosition);
 
     for (int i = 0; i < samples; i++) {

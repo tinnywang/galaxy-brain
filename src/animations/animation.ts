@@ -1,7 +1,5 @@
-import { Model } from "../models/model";
-
-export abstract class Animation {
-    protected readonly model: Model;
+export abstract class Animation<T> {
+    protected readonly model: T;
 
     protected readonly duration: DOMHighResTimeStamp;
 
@@ -11,7 +9,7 @@ export abstract class Animation {
 
     private requestID: number;
 
-    constructor(model: Model, duration: DOMHighResTimeStamp) {
+    constructor(model: T, duration: DOMHighResTimeStamp) {
         this.model = model;
         this.duration = duration;
 

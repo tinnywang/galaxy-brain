@@ -23,6 +23,8 @@ export class Light {
 
   private verticesBuffer: WebGLBuffer | null;
 
+  alpha = 1;
+
   constructor(gl: WebGL2RenderingContext, props: LightProps) {
     this.positions = props.positions;
     this.color = props.color ?? vec3.fromValues(1, 1, 1);
@@ -40,6 +42,10 @@ export class Light {
   }
 
   render(gl: WebGL2RenderingContext, locations: ShaderLocations) {
+    if (this.alpha === 0) {
+      return;
+    }
+
     const vertexPosition = locations.getAttribute("vertexPosition");
     if (vertexPosition !== null) {
       gl.bindBuffer(gl.ARRAY_BUFFER, this.verticesBuffer);
@@ -59,7 +65,7 @@ export class Light {
     );
 
     gl.uniform1f(locations.getUniform("radius"), this.radius);
-    gl.uniform3fv(locations.getUniform("color"), this.color);
+    gl.uniform4fv(locations.getUniform("color"), [...this.color, this.alpha]);
 
     gl.drawArrays(gl.POINTS, 0, this.positions.length);
   }

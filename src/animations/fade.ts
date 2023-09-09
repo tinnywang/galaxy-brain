@@ -1,10 +1,11 @@
+import { Light } from "../light";
 import { Model } from "../models/model";
 import { Animation } from "./animation";
 
-abstract class Fade extends Animation {
+abstract class Fade extends Animation<Model | Light> {
     private delta: number;
 
-    constructor(model: Model, alphaDelta: number, duration: DOMHighResTimeStamp) {
+    constructor(model: Model | Light, alphaDelta: number, duration: DOMHighResTimeStamp) {
         super(model, duration);
 
         this.delta = alphaDelta / this.duration;
@@ -21,7 +22,7 @@ abstract class Fade extends Animation {
 }
 
 export class FadeIn extends Fade {
-    constructor(model: Model, duration: DOMHighResTimeStamp) {
+    constructor(model: Model | Light, duration: DOMHighResTimeStamp) {
         super(model, 1 - model.alpha, duration);
     }
 
@@ -32,7 +33,7 @@ export class FadeIn extends Fade {
 }
 
 export class FadeOut extends Fade {
-    constructor(model: Model, duration: DOMHighResTimeStamp) {
+    constructor(model: Model | Light, duration: DOMHighResTimeStamp) {
         super(model, -model.alpha, duration);
     }
 
