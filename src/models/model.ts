@@ -18,6 +18,8 @@ export abstract class Model {
 
   private model: mat4;
 
+  alpha = 1;
+
   constructor(
     gl: WebGL2RenderingContext,
     o: Object,
@@ -61,6 +63,10 @@ export abstract class Model {
   }
 
   render(gl: WebGL2RenderingContext, locations: ShaderLocations, perFace?: (f: Face) => void) {
+    if (this.alpha == 0) {
+      return;
+    }
+
     const vertexPosition = locations.getAttribute('vertexPosition');
     if (vertexPosition !== null) {
       gl.bindBuffer(gl.ARRAY_BUFFER, this.buffer.vertices);

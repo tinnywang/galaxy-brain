@@ -9,16 +9,16 @@ export class Scale extends Animation {
     private readonly scaleUp: boolean;
 
     constructor(model: Model, n: number, duration: DOMHighResTimeStamp) {
-        super(model, n, duration);
+        super(model, duration);
 
         // If the model was previously scaled by 0.5 and is now being scaled by 2,
         // its final scale should be 0.5 * 2 = 1.
         const s = this.model.getScale();
-        this.scale = s * this.value;
+        this.scale = s * n;
 
         this.delta = Math.abs(s - this.scale) / this.duration;
 
-        this.scaleUp = this.value > 1;
+        this.scaleUp = n > 1;
     }
 
     render(timestamp: DOMHighResTimeStamp) {
