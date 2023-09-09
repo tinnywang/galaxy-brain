@@ -47,10 +47,6 @@ class GalaxyBrain {
       center
     );
 
-    this.light = new Light(gl, {
-      positions: [center],
-    });
-
     this.head = new Head(gl, model);
     this.head.alpha = 0;
 
@@ -58,13 +54,20 @@ class GalaxyBrain {
 
     this.brain = new Brain(gl, model);
     this.brain.scale(0.5);
+    this.brain.neurons.alpha = 0;
 
     this.lasers = new Laser(gl, model);
+    this.lasers.stars.alpha = 0;
+
+    this.light = new Light(gl, {
+      positions: [center],
+    });
+    this.light.alpha = 0;
   }
 
   render(timestamp: DOMHighResTimeStamp, framebuffer: WebGLFramebuffer) {
     // Render the laser beams behind the stars.
-    // this.shaders.star.render(timestamp, framebuffer, this.lasers.stars);
+    this.shaders.star.render(timestamp, framebuffer, this.lasers.stars);
 
     this.shaders.transparent.render(
       timestamp,
@@ -74,14 +77,12 @@ class GalaxyBrain {
       this.brain
     );
 
-    /*
     this.shaders.crepuscularRay.render(timestamp, framebuffer, {
       models: this.lasers.beams,
       light: this.light,
     });
 
     this.shaders.glow.render(timestamp, framebuffer, this.brain.neurons);
-    */
   }
 
   evolve(stage: number) {
@@ -93,7 +94,10 @@ class GalaxyBrain {
         this.animations.push(
           new Scale(this.brain, 0.5, 500),
           new FadeIn(this.skull, 2500),
-          new FadeOut(this.head, 2500)
+          new FadeOut(this.head, 2500),
+          new FadeOut(this.brain.neurons, 2500),
+          new FadeOut(this.lasers.stars, 2500),
+          new FadeOut(this.light, 1000),
         );
         break;
       default:
@@ -101,7 +105,10 @@ class GalaxyBrain {
           this.animations.push(
             new Scale(this.brain, 1 / this.brain.getScale(), 500),
             new FadeIn(this.head, 2500),
-            new FadeOut(this.skull, 2500)
+            new FadeIn(this.brain.neurons, 2500),
+            new FadeOut(this.skull, 2500),
+            new FadeIn(this.lasers.stars, 2500),
+            new FadeIn(this.light, 1000),
           );
         }
     }

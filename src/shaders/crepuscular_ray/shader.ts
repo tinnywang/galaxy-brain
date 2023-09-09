@@ -41,12 +41,17 @@ export class CrepuscularRay extends PostProcessing<RenderProps> {
         this.locations.setUniform('samples');
         this.locations.setUniform('density');
         this.locations.setUniform('weight');
+        this.locations.setUniform('alpha');
         this.locations.setUniform('decay');
         this.locations.setUniform('exposure');
         this.locations.setUniform('colorTexture');
     }
 
     render(timestamp: DOMHighResTimeStamp, drawFramebuffer: WebGLFramebuffer, renderProps: RenderProps) {
+        if (renderProps.light.alpha === 0) {
+            return;
+        }
+
         // Render occluding objects black and untextured.
         this.occlusion.render(timestamp, drawFramebuffer, ...renderProps.models);
 
@@ -58,6 +63,7 @@ export class CrepuscularRay extends PostProcessing<RenderProps> {
         this.gl.uniform1i(this.locations.getUniform('samples'), this.props.samples);
         this.gl.uniform1f(this.locations.getUniform('density'), this.props.density);
         this.gl.uniform1f(this.locations.getUniform('weight'), this.props.weight);
+        this.gl.uniform1f(this.locations.getUniform('alpha'), renderProps.light.alpha);
         this.gl.uniform1f(this.locations.getUniform('decay'), this.props.decay);
         this.gl.uniform1f(this.locations.getUniform('exposure'), this.props.exposure);
 
