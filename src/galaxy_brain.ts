@@ -11,7 +11,6 @@ import { CrepuscularRay } from "./shaders/crepuscular_ray/shader";
 import { Animation } from "./animations/animation";
 import { FadeIn, FadeOut } from "./animations/fade";
 import { Scale } from "./animations/scale";
-import { Model } from "./models/model";
 
 interface Shaders {
   transparent: TransparentShader;
@@ -34,8 +33,6 @@ class GalaxyBrain {
   private readonly shaders: Shaders;
 
   private stage = 0;
-
-  private animations: Animation<Model | Light>[] = [];
 
   constructor(gl: WebGL2RenderingContext, shaders: Shaders) {
     this.shaders = shaders;
@@ -86,12 +83,9 @@ class GalaxyBrain {
   }
 
   evolve(stage: number) {
-    this.animations.forEach((a) => a.cancel());
-    this.animations = [];
-
     switch (stage) {
       case 0:
-        this.animations.push(
+        Animation.run(
           new Scale(this.brain, 0.5, 500),
           new FadeIn(this.skull, 2500),
           new FadeOut(this.head, 2500),
@@ -102,7 +96,7 @@ class GalaxyBrain {
         break;
       default:
         if (this.stage === 0) {
-          this.animations.push(
+          Animation.run(
             new Scale(this.brain, 1 / this.brain.getScale(), 500),
             new FadeIn(this.head, 2500),
             new FadeIn(this.brain.neurons, 2500),
