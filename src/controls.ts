@@ -1,4 +1,4 @@
-import { glMatrix, vec3, quat } from "gl-matrix";
+import { glMatrix, vec3 } from "gl-matrix";
 import Matrix from "./matrix";
 import GalaxyBrain from "./galaxy_brain";
 
@@ -16,8 +16,6 @@ const Controls = (
   let mouseMoveTimestamp: DOMHighResTimeStamp | undefined;
 
   let wheelTimestamp: DOMHighResTimeStamp | undefined;
-
-  let orientationQuat = quat.create();
 
   canvas.on("mousedown", (event) => {
     if (event.button !== LEFT_MOUSE) {
@@ -46,16 +44,10 @@ const Controls = (
       currentMousePosition
     );
 
-    let axis = vec3.cross(vec3.create(), mouseMovement, Z_AXIS);
-    axis = vec3.transformQuat(axis, axis, orientationQuat);
-
+    const axis = vec3.cross(vec3.create(), mouseMovement, Z_AXIS);
     const angle = vec3.length(mouseMovement) / elapsedTimestamp;
+    Matrix.rotateView(axis, angle);
 
-    orientationQuat = quat.multiply(
-      orientationQuat,
-      Matrix.rotateView(axis, angle),
-      orientationQuat
-    );
     mousePosition = currentMousePosition;
   });
 
@@ -79,9 +71,11 @@ const Controls = (
 
   slider.on("change", (event) => {
     const stage = parseInt(event.target.value, 10);
-    if (!Number.isNaN(stage)) {
-      galaxyBrain.evolve(stage);
+    if (Number.isNaN(stage)) {
+      return;
     }
+
+    galaxyBrain.evolve(stage);
   });
 };
 
