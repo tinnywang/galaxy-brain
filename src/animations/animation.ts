@@ -1,6 +1,4 @@
-export abstract class Animation<T> {
-    protected readonly model: T;
-
+export abstract class Animation {
     protected readonly duration: DOMHighResTimeStamp;
 
     protected elapsedTimestamp: DOMHighResTimeStamp | undefined; 
@@ -9,10 +7,9 @@ export abstract class Animation<T> {
 
     private requestID: number;
 
-    private static queue: Animation<any>[] = [];
+    private static queue: Animation[] = [];
 
-    constructor(model: T, duration: DOMHighResTimeStamp) {
-        this.model = model;
+    constructor(duration: DOMHighResTimeStamp) {
         this.duration = duration;
 
         this.requestID = requestAnimationFrame(this.render.bind(this));
@@ -37,7 +34,7 @@ export abstract class Animation<T> {
 
     abstract isDone(): boolean;
 
-    static run<T>(...animations: Animation<T>[]) {
+    static run(...animations: Animation[]) {
         // Cancel in-progress animations and clear the queue.
         Animation.queue.forEach((a) => a.cancel());
         Animation.queue = [];

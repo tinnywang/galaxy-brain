@@ -1,7 +1,9 @@
 import { Model } from "../models/model";
 import { Animation } from "./animation";
 
-export class Scale extends Animation<Model> {
+export class Scale extends Animation {
+    private readonly model: Model;
+
     private readonly scale: number;
 
     private readonly delta: number;
@@ -9,7 +11,9 @@ export class Scale extends Animation<Model> {
     private readonly scaleUp: boolean;
 
     constructor(model: Model, n: number, duration: DOMHighResTimeStamp) {
-        super(model, duration);
+        super(duration);
+
+        this.model = model;
 
         // If the model was previously scaled by 0.5 and is now being scaled by 2,
         // its final scale should be 0.5 * 2 = 1.

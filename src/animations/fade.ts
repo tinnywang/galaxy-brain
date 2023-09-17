@@ -2,12 +2,15 @@ import { Light } from "../light";
 import { Model } from "../models/model";
 import { Animation } from "./animation";
 
-abstract class Fade extends Animation<Model | Light> {
+abstract class Fade extends Animation {
+    protected model: Model | Light;
+
     private delta: number;
 
     constructor(model: Model | Light, alphaDelta: number, duration: DOMHighResTimeStamp) {
-        super(model, duration);
+        super(duration);
 
+        this.model = model;
         this.delta = alphaDelta / this.duration;
     }
 
