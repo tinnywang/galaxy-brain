@@ -1,7 +1,7 @@
 import { vec3, glMatrix, mat4, quat } from "gl-matrix";
 
 class Matrix {
-  static UP = vec3.fromValues(0, 1, 0);
+  static Y_AXIS = vec3.fromValues(0, 1, 0);
 
   private static MINIMUM_FOV = glMatrix.toRadian(60);
 
@@ -16,6 +16,8 @@ class Matrix {
   private static CENTER = vec3.fromValues(0, 0, 0);
 
   private static EYE = vec3.fromValues(0, 0, 10);
+
+  private static UP = vec3.fromValues(0, 1, 0);
 
   private static projectionMatrix: mat4 | null;
 
