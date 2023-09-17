@@ -1,17 +1,19 @@
-import { Light } from "../light";
-import { Model } from "../models/model";
 import { Animation } from "./animation";
 
+interface Fadeable {
+    alpha: number;
+}
+
 abstract class Fade extends Animation {
-    protected model: Model | Light;
+    protected object: Fadeable;
 
     private delta: number;
 
-    constructor(model: Model | Light, alphaDelta: number, duration: DOMHighResTimeStamp) {
+    constructor(object: Fadeable, delta: number, duration: DOMHighResTimeStamp) {
         super(duration);
 
-        this.model = model;
-        this.delta = alphaDelta / this.duration;
+        this.object = object;
+        this.delta = delta / this.duration;
     }
 
     render(timestamp: DOMHighResTimeStamp) {
@@ -19,29 +21,29 @@ abstract class Fade extends Animation {
 
         if (!this.isDone()) {
             const delta = this.elapsedTimestamp ? this.delta * this.elapsedTimestamp : 0;
-            this.model.alpha += delta;
+            this.object.alpha += delta;
         }
     }
 }
 
 export class FadeIn extends Fade {
-    constructor(model: Model | Light, duration: DOMHighResTimeStamp) {
-        super(model, 1 - model.alpha, duration);
+    constructor(object: Fadeable, duration: DOMHighResTimeStamp) {
+        super(object, 1 - object.alpha, duration);
     }
 
     isDone() {
-        this.model.alpha = Math.min(this.model.alpha, 1);
-        return this.model.alpha === 1;
+        this.object.alpha = Math.min(this.object.alpha, 1);
+        return this.object.alpha === 1;
     }
 }
 
 export class FadeOut extends Fade {
-    constructor(model: Model | Light, duration: DOMHighResTimeStamp) {
-        super(model, -model.alpha, duration);
+    constructor(object: Fadeable, duration: DOMHighResTimeStamp) {
+        super(object, -object.alpha, duration);
     }
 
     isDone() {
-        this.model.alpha = Math.max(this.model.alpha, 0);
-        return this.model.alpha === 0;
+        this.object.alpha = Math.max(this.object.alpha, 0);
+        return this.object.alpha === 0;
     }
 }
