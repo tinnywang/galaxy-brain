@@ -11,7 +11,6 @@ import { CrepuscularRay } from "./shaders/crepuscular_ray/shader";
 import { Animation } from "./animations/animation";
 import { FadeIn, FadeOut } from "./animations/fade";
 import { Scale } from "./animations/scale";
-import { Model } from "./models/model";
 
 interface Shaders {
   transparent: TransparentShader;
@@ -35,8 +34,6 @@ class GalaxyBrain {
 
   private stage = 0;
 
-  private animations: Animation<Model | Light>[] = [];
-
   constructor(gl: WebGL2RenderingContext, shaders: Shaders) {
     this.shaders = shaders;
 
@@ -52,8 +49,10 @@ class GalaxyBrain {
 
     this.skull = new Skull(gl, model);
 
-    this.brain = new Brain(gl, model);
-    this.brain.scale(0.5);
+    this.brain = new Brain(
+      gl,
+      mat4.scale(mat4.create(), model, vec3.fromValues(0.5, 0.5, 0.5))
+    );
     this.brain.neurons.alpha = 0;
 
     this.lasers = new Laser(gl, model);
@@ -86,29 +85,26 @@ class GalaxyBrain {
   }
 
   evolve(stage: number) {
-    this.animations.forEach((a) => a.cancel());
-    this.animations = [];
-
     switch (stage) {
       case 0:
-        this.animations.push(
-          new Scale(this.brain, 0.5, 500),
+        Animation.run(
+          new Scale(this.brain.model, 0.5, 500),
           new FadeIn(this.skull, 2500),
           new FadeOut(this.head, 2500),
           new FadeOut(this.brain.neurons, 2500),
           new FadeOut(this.lasers.stars, 2500),
-          new FadeOut(this.light, 1000),
+          new FadeOut(this.light, 1000)
         );
         break;
       default:
         if (this.stage === 0) {
-          this.animations.push(
-            new Scale(this.brain, 1 / this.brain.getScale(), 500),
+          Animation.run(
+            new Scale(this.brain.model, 2, 500),
             new FadeIn(this.head, 2500),
             new FadeIn(this.brain.neurons, 2500),
             new FadeOut(this.skull, 2500),
             new FadeIn(this.lasers.stars, 2500),
-            new FadeIn(this.light, 1000),
+            new FadeIn(this.light, 1000)
           );
         }
     }
