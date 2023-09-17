@@ -49,7 +49,10 @@ class GalaxyBrain {
 
     this.skull = new Skull(gl, model);
 
-    this.brain = new Brain(gl, mat4.scale(mat4.create(), model, vec3.fromValues(0.5, 0.5, 0.5)));
+    this.brain = new Brain(
+      gl,
+      mat4.scale(mat4.create(), model, vec3.fromValues(0.5, 0.5, 0.5))
+    );
     this.brain.neurons.alpha = 0;
 
     this.lasers = new Laser(gl, model);
@@ -90,7 +93,7 @@ class GalaxyBrain {
           new FadeOut(this.head, 2500),
           new FadeOut(this.brain.neurons, 2500),
           new FadeOut(this.lasers.stars, 2500),
-          new FadeOut(this.light, 1000),
+          new FadeOut(this.light, 1000)
         );
         break;
       default:
@@ -101,7 +104,7 @@ class GalaxyBrain {
             new FadeIn(this.brain.neurons, 2500),
             new FadeOut(this.skull, 2500),
             new FadeIn(this.lasers.stars, 2500),
-            new FadeIn(this.light, 1000),
+            new FadeIn(this.light, 1000)
           );
         }
     }
