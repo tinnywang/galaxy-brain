@@ -49,8 +49,7 @@ class GalaxyBrain {
 
     this.skull = new Skull(gl, model);
 
-    this.brain = new Brain(gl, model);
-    this.brain.scale(0.5);
+    this.brain = new Brain(gl, mat4.scale(mat4.create(), model, vec3.fromValues(0.5, 0.5, 0.5)));
     this.brain.neurons.alpha = 0;
 
     this.lasers = new Laser(gl, model);
@@ -86,7 +85,7 @@ class GalaxyBrain {
     switch (stage) {
       case 0:
         Animation.run(
-          new Scale(this.brain, 0.5, 500),
+          new Scale(this.brain.model, 0.5, 500),
           new FadeIn(this.skull, 2500),
           new FadeOut(this.head, 2500),
           new FadeOut(this.brain.neurons, 2500),
@@ -97,7 +96,7 @@ class GalaxyBrain {
       default:
         if (this.stage === 0) {
           Animation.run(
-            new Scale(this.brain, 1 / this.brain.getScale(), 500),
+            new Scale(this.brain.model, 2, 500),
             new FadeIn(this.head, 2500),
             new FadeIn(this.brain.neurons, 2500),
             new FadeOut(this.skull, 2500),

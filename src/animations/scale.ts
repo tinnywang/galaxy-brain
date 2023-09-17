@@ -1,8 +1,8 @@
-import { Model } from "../models/model";
+import { mat4, vec3 } from "gl-matrix";
 import { Animation } from "./animation";
 
 export class Scale extends Animation {
-    private readonly model: Model;
+    private readonly matrix: mat4;
 
     private readonly scale: number;
 
@@ -10,14 +10,14 @@ export class Scale extends Animation {
 
     private readonly scaleUp: boolean;
 
-    constructor(model: Model, n: number, duration: DOMHighResTimeStamp) {
+    constructor(matrix: mat4, n: number, duration: DOMHighResTimeStamp) {
         super(duration);
 
-        this.model = model;
+        this.matrix = matrix;
 
         // If the model was previously scaled by 0.5 and is now being scaled by 2,
         // its final scale should be 0.5 * 2 = 1.
-        const s = this.model.getScale();
+        const s = this.scaling();
         this.scale = s * n;
 
         this.delta = Math.abs(s - this.scale) / this.duration;
@@ -35,12 +35,17 @@ export class Scale extends Animation {
             if (!this.scaleUp) {
                 delta *= -1
             }
-            this.model.scale(1 + delta / this.model.getScale());
+            const s = 1 + delta / this.scaling();
+            mat4.scale(this.matrix, this.matrix, vec3.fromValues(s, s, s));
         }
     }
 
     isDone() {
-        const s = this.model.getScale();
+        const s = this.scaling();
         return this.scaleUp ? s >= this.scale : s <= this.scale;
+    }
+
+    private scaling() {
+        return mat4.getScaling(vec3.create(), this.matrix)[0];
     }
 }
