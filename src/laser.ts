@@ -1,7 +1,7 @@
 import { glMatrix, mat4, vec3, quat } from "gl-matrix";
 import { Cylinder } from "./models/cylinder";
-import Matrix from "./matrix";
 import { Light } from "./light";
+import Matrix from "./matrix";
 
 class Laser {
   private static GoldenRatio = 0.61803398875;
@@ -25,12 +25,12 @@ class Laser {
         const v = vec3.fromValues(p[0], p[1], p[2]);
         return vec3.scale(v, v, 5);
       })
-    ).filter((v) => vec3.angle(v, Matrix.UP) < glMatrix.toRadian(135));
+    ).filter((v) => vec3.angle(v, Matrix.Y_AXIS) < glMatrix.toRadian(135));
 
     this.beams = vertices.map((v) => {
       const q = quat.rotationTo(
         quat.create(),
-        Matrix.UP,
+        Matrix.Y_AXIS,
         vec3.normalize(vec3.create(), v)
       );
       let m = mat4.fromRotationTranslationScale(

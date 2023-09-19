@@ -1,7 +1,7 @@
 import { vec3, glMatrix, mat4, quat } from "gl-matrix";
 
 class Matrix {
-  static UP = vec3.fromValues(0, 1, 0);
+  static Y_AXIS = vec3.fromValues(0, 1, 0);
 
   private static MINIMUM_FOV = glMatrix.toRadian(60);
 
@@ -17,9 +17,13 @@ class Matrix {
 
   private static EYE = vec3.fromValues(0, 0, 10);
 
+  private static UP = vec3.fromValues(0, 1, 0);
+
   private static projectionMatrix: mat4 | null;
 
   private static viewMatrix: mat4 | null;
+
+  private static orientationQuat = quat.create();
 
   static projection(gl: WebGL2RenderingContext) {
     if (!Matrix.projectionMatrix) {
@@ -53,18 +57,25 @@ class Matrix {
   }
 
   static rotateView(axis: vec3, angle: number) {
+    let rotationAxis = vec3.transformQuat(axis, axis, Matrix.orientationQuat);
+    rotationAxis = vec3.normalize(rotationAxis, rotationAxis);
+
     const q = quat.setAxisAngle(
       quat.create(),
-      vec3.normalize(axis, axis),
+      rotationAxis,
       glMatrix.toRadian(angle)
+    );
+
+    Matrix.orientationQuat = quat.multiply(
+      Matrix.orientationQuat,
+      q,
+      Matrix.orientationQuat
     );
 
     Matrix.EYE = vec3.transformQuat(Matrix.EYE, Matrix.EYE, q);
     Matrix.UP = vec3.transformQuat(Matrix.UP, Matrix.UP, q);
 
     Matrix.viewMatrix = null;
-
-    return q;
   }
 
   static zoom(delta: number) {

@@ -11,6 +11,8 @@ import { CrepuscularRay } from "./shaders/crepuscular_ray/shader";
 import { Animation } from "./animations/animation";
 import { FadeIn, FadeOut } from "./animations/fade";
 import { Scale } from "./animations/scale";
+import { Rotation } from "./animations/rotation";
+import Matrix from "./matrix";
 
 interface Shaders {
   transparent: TransparentShader;
@@ -32,7 +34,7 @@ class GalaxyBrain {
 
   private readonly shaders: Shaders;
 
-  private stage = 0;
+  private models: mat4[];
 
   constructor(gl: WebGL2RenderingContext, shaders: Shaders) {
     this.shaders = shaders;
@@ -40,7 +42,7 @@ class GalaxyBrain {
     const center = vec3.fromValues(0, 2, 0);
     const model = mat4.fromRotationTranslation(
       mat4.create(),
-      quat.rotateY(quat.create(), quat.create(), glMatrix.toRadian(90)),
+      quat.rotateY(quat.create(), quat.create(), glMatrix.toRadian(-90)),
       center
     );
 
@@ -62,6 +64,12 @@ class GalaxyBrain {
       positions: [center],
     });
     this.light.alpha = 0;
+
+    this.models = [
+      model,
+      this.brain.model,
+      ...this.lasers.beams.map((b) => b.model),
+    ];
   }
 
   render(timestamp: DOMHighResTimeStamp, framebuffer: WebGLFramebuffer) {
@@ -89,27 +97,36 @@ class GalaxyBrain {
       case 0:
         Animation.run(
           new Scale(this.brain.model, 0.5, 500),
-          new FadeIn(this.skull, 2500),
-          new FadeOut(this.head, 2500),
-          new FadeOut(this.brain.neurons, 2500),
-          new FadeOut(this.lasers.stars, 2500),
-          new FadeOut(this.light, 1000)
+          new FadeIn(this.skull, 1000),
+          new FadeOut(this.head, 1000),
+          new FadeOut(this.brain.neurons, 1000),
+          new FadeOut(this.lasers.stars, 1000),
+          new FadeOut(this.light, 1000),
+          new Rotation(this.models, Matrix.Y_AXIS, -60, 500)
+        );
+        break;
+      case 1:
+        Animation.run(
+          new FadeIn(this.brain.neurons, 1000),
+          new Scale(this.brain.model, 2, 500),
+          new FadeIn(this.head, 1000),
+          new FadeOut(this.skull, 1000),
+          new Rotation(this.models, Matrix.Y_AXIS, -180, 500)
+        );
+        break;
+      case 2:
+        Animation.run(new FadeOut(this.brain.neurons, 1000));
+        break;
+      case 3:
+        Animation.run(
+          new FadeIn(this.lasers.stars, 1000),
+          new FadeIn(this.light, 500),
+          new Rotation(this.models, Matrix.Y_AXIS, -120, 500)
         );
         break;
       default:
-        if (this.stage === 0) {
-          Animation.run(
-            new Scale(this.brain.model, 2, 500),
-            new FadeIn(this.head, 2500),
-            new FadeIn(this.brain.neurons, 2500),
-            new FadeOut(this.skull, 2500),
-            new FadeIn(this.lasers.stars, 2500),
-            new FadeIn(this.light, 1000)
-          );
-        }
+        break;
     }
-
-    this.stage = stage;
   }
 }
 
