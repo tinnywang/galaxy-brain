@@ -66,12 +66,14 @@ class GalaxyBrain {
     this.brain.neurons.alpha = 0;
 
     this.lasers = new Laser(gl, model);
+    this.lasers.beams.forEach((b) => {
+      b.alpha = 0;
+    });
     this.lasers.stars.alpha = 0;
 
     this.light = new Light(gl, {
       positions: [center],
     });
-    this.light.alpha = 0;
 
     this.models = [
       model,
@@ -116,8 +118,8 @@ class GalaxyBrain {
           new FadeIn(this.skull, 1000),
           new FadeOut(this.head, 1000),
           new FadeOut(this.brain.neurons, 1000),
-          new FadeOut(this.lasers.stars, 1000),
-          new FadeOut(this.light, 1000),
+          ...this.lasers.beams.map((b) => new FadeOut(b, 1000)),
+          new FadeOut(this.lasers.stars, 500),
           new Rotation(this.models, axis, angle, 500)
         );
         break;
@@ -128,8 +130,8 @@ class GalaxyBrain {
           stage === 1
             ? new FadeIn(this.brain.neurons, 1000)
             : new FadeOut(this.brain.neurons, 1000),
-          new FadeOut(this.lasers.stars, 1000),
-          new FadeOut(this.light, 500),
+          ...this.lasers.beams.map((b) => new FadeOut(b, 1000)),
+          new FadeOut(this.lasers.stars, 500),
           new FadeIn(this.head, 1000),
           new FadeOut(this.skull, 1000),
           new Rotation(this.models, axis, angle, 500)
@@ -139,8 +141,8 @@ class GalaxyBrain {
         Animation.run(
           new FadeOut(this.brain.neurons, 1000),
           new FadeIn(this.head, 1000),
+          ...this.lasers.beams.map((b) => new FadeIn(b, 500)),
           new FadeIn(this.lasers.stars, 1000),
-          new FadeIn(this.light, 500),
           new Rotation(this.models, axis, angle, 500)
         );
         break;

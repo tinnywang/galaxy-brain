@@ -20,6 +20,7 @@
     "rules": {
         "no-bitwise": "off",
         "no-console": "off",
+        "no-param-reassign": ["error", {"props": false}],
         "prettier/prettier": "error"
     }
 }
