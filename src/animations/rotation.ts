@@ -1,4 +1,4 @@
-import { glMatrix, mat4, vec3 } from "gl-matrix";
+import { mat4, vec3 } from "gl-matrix";
 import { Animation } from "./animation";
 
 export class Rotation extends Animation {
@@ -25,7 +25,7 @@ export class Rotation extends Animation {
         if (!this.isDone()) {
             let delta = this.elapsedTimestamp ? this.delta * this.elapsedTimestamp : 0;
             this.matrices.forEach((m) => {
-                const rotation = mat4.fromRotation(mat4.create(), glMatrix.toRadian(delta), this.axis);
+                const rotation = mat4.fromRotation(mat4.create(), delta, this.axis);
                 mat4.multiply(m, rotation, m);
             });
             this.angle -= delta;
