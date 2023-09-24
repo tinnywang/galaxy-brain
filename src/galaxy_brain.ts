@@ -138,7 +138,6 @@ class GalaxyBrain {
           new FadeOut(this.brain.neurons, 1000),
           ...this.lasers.beams.map((b) => new FadeOut(b, 1000)),
           new FadeOut(this.lasers.stars, 500),
-          new FadeOut(this.light, 1000),
           new Rotation(this.models, axis, angle, 500)
         );
         break;
@@ -150,8 +149,10 @@ class GalaxyBrain {
           ...this.lasers.beams.map((b) => new FadeOut(b, 1000)),
           new FadeOut(this.lasers.stars, 500),
           stage === 1
-            ? new FadeOut(this.light, 1000)
-            : new FadeIn(this.light, 1000),
+            ? new FadeIn(this.brain.neurons, 1000)
+            : new FadeOut(this.brain.neurons, 1000),
+          ...this.lasers.beams.map((b) => new FadeOut(b, 1000)),
+          new FadeOut(this.lasers.stars, 500),
           new FadeIn(this.head, 1000),
           new FadeOut(this.skull, 1000),
           new Rotation(this.models, axis, angle, 500)
@@ -165,7 +166,6 @@ class GalaxyBrain {
           new FadeIn(this.head, 1000),
           ...this.lasers.beams.map((b) => new FadeIn(b, 500)),
           new FadeIn(this.lasers.stars, 1000),
-          new FadeIn(this.light, 1000),
           new Rotation(this.models, axis, angle, 500)
         );
         break;
