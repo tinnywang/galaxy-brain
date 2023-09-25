@@ -47,11 +47,10 @@ class GalaxyBrain {
   constructor(gl: WebGL2RenderingContext, shaders: Shaders) {
     this.shaders = shaders;
 
-    const center = vec3.fromValues(0, 2, 0);
     const model = mat4.fromRotationTranslation(
       mat4.create(),
       quat.rotateY(quat.create(), quat.create(), glMatrix.toRadian(-90)),
-      center
+      vec3.fromValues(0, 2, 0),
     );
 
     this.head = new Head(gl, model);
@@ -72,7 +71,8 @@ class GalaxyBrain {
     this.lasers.stars.alpha = 0;
 
     this.light = new Light(gl, {
-      positions: [center],
+      positions: [vec3.fromValues(0, -10, -10), vec3.fromValues(0, 10, 10)],
+      alpha: 1.0,
     });
 
     this.models = [
@@ -96,6 +96,10 @@ class GalaxyBrain {
 
     this.shaders.crepuscularRay.render(timestamp, framebuffer, {
       models: this.lasers.beams,
+      light: this.lasers.light,
+    });
+    this.shaders.crepuscularRay.render(timestamp, framebuffer, {
+      models: [this.brain],
       light: this.light,
     });
 
@@ -139,6 +143,7 @@ class GalaxyBrain {
         break;
       case 3:
         Animation.run(
+          new Scale(this.brain.model, 1 / this.brain.scaling(), 500),
           new FadeOut(this.brain.neurons, 1000),
           new FadeIn(this.head, 1000),
           ...this.lasers.beams.map((b) => new FadeIn(b, 500)),

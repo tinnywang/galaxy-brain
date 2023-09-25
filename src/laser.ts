@@ -13,11 +13,17 @@ class Laser {
     [Laser.GoldenRatio, 1 / Laser.GoldenRatio, 0],
   ];
 
+  readonly light: Light;
+
   readonly beams: Cylinder[];
 
   readonly stars: Light;
 
   constructor(gl: WebGL2RenderingContext, model?: mat4) {
+    this.light = new Light(gl, {
+      positions: [mat4.getTranslation(vec3.create(), model ?? mat4.create())],
+    });
+
     // Generate the coordinates of a regular dodecahedron.
     // https://en.wikipedia.org/wiki/Regular_dodecahedron#Cartesian_coordinates
     const vertices = Laser.Coordinates.flatMap((c) =>
