@@ -26,7 +26,6 @@ export class Light {
 
   alpha: number;
 
-
   constructor(gl: WebGL2RenderingContext, props: LightProps) {
     this.positions = props.positions;
     this.color = props.color ?? vec3.fromValues(1, 1, 1);

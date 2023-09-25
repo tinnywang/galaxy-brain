@@ -54,14 +54,7 @@ $(() => {
       fresnelHueShift: -20,
       fresnelExponent: 3.5,
     });
-    const crepuscularRay = new CrepuscularRay(gl, {
-      colorTexture,
-      samples: 50,
-      density: 0.35,
-      weight: 5.65,
-      decay: 0.99,
-      exposure: 0.0035,
-    });
+    const crepuscularRay = new CrepuscularRay(gl, colorTexture);
     const star = new Star(gl);
     const glow = new Glow(gl);
     const fxaa = new FXAA(gl);

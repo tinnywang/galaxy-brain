@@ -7,8 +7,9 @@ import WebGL2 from '../../gl';
 import { Light } from '../../light';
 import Matrix from '../../matrix';
 
-export interface CrepuscularRayProps {
-    colorTexture: WebGLTexture;
+export interface RenderProps {
+    models: Model[];
+    light: Light;
     samples: number;
     density: number;
     weight: number;
@@ -16,23 +17,18 @@ export interface CrepuscularRayProps {
     exposure: number;
 }
 
-export interface RenderProps {
-    models: Model[];
-    light: Light;
-}
-
 export class CrepuscularRay extends PostProcessing<RenderProps> {
-    private props: CrepuscularRayProps;
+    private colorTexture: WebGLTexture;
+    private texture: WebGLTexture;
     private occlusion: OcclusionShader;
     private postProcessing: PostProcessing;
-    private texture: WebGLTexture;
 
-    constructor(gl: WebGL2RenderingContext, props: CrepuscularRayProps) {
+    constructor(gl: WebGL2RenderingContext, colorTexture: WebGLTexture) {
         super(gl, vertexSrc, fragmentSrc);
 
-        this.props = props;
-        this.occlusion = new OcclusionShader(gl, { scale: 0.5 });
+        this.colorTexture = colorTexture;
         this.texture = WebGL2.createColorTextures(gl, 1)[0];
+        this.occlusion = new OcclusionShader(gl, { scale: 0.5 });
         this.postProcessing = new PostProcessing(gl);
 
         this.locations.setUniform('modelViewMatrix');
@@ -47,30 +43,30 @@ export class CrepuscularRay extends PostProcessing<RenderProps> {
         this.locations.setUniform('colorTexture');
     }
 
-    render(timestamp: DOMHighResTimeStamp, drawFramebuffer: WebGLFramebuffer, renderProps: RenderProps) {
-        if (renderProps.light.alpha === 0) {
+    render(timestamp: DOMHighResTimeStamp, drawFramebuffer: WebGLFramebuffer, props: RenderProps) {
+        if (props.light.alpha === 0) {
             return;
         }
 
         // Render occluding objects black and untextured.
-        this.occlusion.render(timestamp, drawFramebuffer, ...renderProps.models);
+        this.occlusion.render(timestamp, drawFramebuffer, ...props.models);
 
         // Render crepescular rays from the occluding texture.
         this.gl.useProgram(this.program);
 
         this.gl.uniformMatrix4fv(this.locations.getUniform('modelViewMatrix'), false, Matrix.modelView());
         this.gl.uniformMatrix4fv(this.locations.getUniform('projectionMatrix'), false, Matrix.projection(this.gl));
-        this.gl.uniform1i(this.locations.getUniform('samples'), this.props.samples);
-        this.gl.uniform1f(this.locations.getUniform('density'), this.props.density);
-        this.gl.uniform1f(this.locations.getUniform('weight'), this.props.weight);
-        this.gl.uniform1f(this.locations.getUniform('alpha'), renderProps.light.alpha);
-        this.gl.uniform1f(this.locations.getUniform('decay'), this.props.decay);
-        this.gl.uniform1f(this.locations.getUniform('exposure'), this.props.exposure);
+        this.gl.uniform1i(this.locations.getUniform('samples'), props.samples);
+        this.gl.uniform1f(this.locations.getUniform('density'), props.density);
+        this.gl.uniform1f(this.locations.getUniform('weight'), props.weight);
+        this.gl.uniform1f(this.locations.getUniform('alpha'), props.light.alpha);
+        this.gl.uniform1f(this.locations.getUniform('decay'), props.decay);
+        this.gl.uniform1f(this.locations.getUniform('exposure'), props.exposure);
 
         this.gl.framebufferTexture2D(this.gl.DRAW_FRAMEBUFFER, this.gl.COLOR_ATTACHMENT0, this.gl.TEXTURE_2D, this.texture, 0);
         this.gl.clear(this.gl.COLOR_BUFFER_BIT);
 
-        renderProps.light.positions.forEach((position) => {
+        props.light.positions.forEach((position) => {
             this.gl.uniform3fv(this.locations.getUniform('lightPosition'), position);
             super.render(timestamp, this.occlusion.texture);
         });
@@ -80,7 +76,7 @@ export class CrepuscularRay extends PostProcessing<RenderProps> {
         this.gl.enable(this.gl.BLEND);
         this.gl.blendFunc(this.gl.SRC_ALPHA, this.gl.ONE_MINUS_SRC_ALPHA);
 
-        this.gl.framebufferTexture2D(this.gl.DRAW_FRAMEBUFFER, this.gl.COLOR_ATTACHMENT0, this.gl.TEXTURE_2D, this.props.colorTexture, 0);
+        this.gl.framebufferTexture2D(this.gl.DRAW_FRAMEBUFFER, this.gl.COLOR_ATTACHMENT0, this.gl.TEXTURE_2D, this.colorTexture, 0);
         this.postProcessing.render(timestamp, this.texture);
     }
 }
