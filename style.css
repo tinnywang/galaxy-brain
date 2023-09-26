@@ -1,0 +1,20 @@
+canvas {
+    height: 100%;
+    width: 100%;
+}
+
+.stage-0 {
+    background: radial-gradient(circle, rgba(13,28,61,1) 0%, rgba(6, 5, 11,1) 100%);
+}
+
+.stage-1 {
+    background: radial-gradient(circle, rgba(0,212,255,1) 0%, rgba(9,9,121,1) 85%, rgba(2,0,36,1) 100%);
+}
+
+.stage-2 {
+    background: radial-gradient(circle, rgba(242,76,80,1) 0%, rgba(104,0,0,1) 85%, rgba(40,0,0,1) 100%);
+}
+
+.stage-3 {
+    background: radial-gradient(circle, rgba(5, 56, 147) 0%, rgba(1,8,54,1) 100%);
+}
