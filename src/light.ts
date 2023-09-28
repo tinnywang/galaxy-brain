@@ -6,6 +6,7 @@ export interface LightProps {
   positions: vec3[];
   model?: mat4;
   color?: vec3;
+  alpha?: number;
   power?: number;
   radius?: number;
 }
@@ -23,11 +24,12 @@ export class Light {
 
   private verticesBuffer: WebGLBuffer | null;
 
-  alpha = 1;
+  alpha: number;
 
   constructor(gl: WebGL2RenderingContext, props: LightProps) {
     this.positions = props.positions;
     this.color = props.color ?? vec3.fromValues(1, 1, 1);
+    this.alpha = props.alpha ?? 1;
     this.power = props.power ?? 1;
     this.radius = props.radius ?? 1;
     this.model = props.model;

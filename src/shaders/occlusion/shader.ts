@@ -53,8 +53,10 @@ export class OcclusionShader extends Shader<Model> {
         this.gl.clear(this.gl.COLOR_BUFFER_BIT);
 
         // Render occluding objects in white.
-        this.gl.uniform3fv(this.locations.getUniform('color'), OcclusionShader.White);
-        models?.forEach((m) => m.render(this.gl, this.locations));
+        models?.forEach((m) => {
+            this.gl.uniform4fv(this.locations.getUniform('color'), [...OcclusionShader.White, m.alpha]);
+            m.render(this.gl, this.locations)
+        });
 
         this.gl.viewport(x, y, width, height);
     }

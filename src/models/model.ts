@@ -1,4 +1,4 @@
-import { mat4 } from "gl-matrix";
+import { mat4, quat, vec3 } from "gl-matrix";
 import { Face, Object } from "../object";
 import Matrix from "../matrix";
 import { ShaderLocations } from "../shaders/shader_locations";
@@ -93,5 +93,26 @@ export abstract class Model {
       // Offset must be a multiple of 8 since an unsigned int is 8 bytes.
       offset += f.vertex_indices.length * 8;
     })
+  }
+
+  scaling() {
+    return mat4.getScaling(vec3.create(), this.model)[0];
+  }
+
+  rotation() {
+    const q = mat4.getRotation(quat.create(), this.model);
+    let axis = vec3.create();
+    let angle = quat.getAxisAngle(axis, q);
+
+    // All rotations are relative to the positive y-axis.
+    if (axis[1] < 0) {
+      axis = vec3.scale(axis, axis, -1);
+      angle *= -1;
+    }
+
+    return {
+      angle: angle,
+      axis: axis,
+    }
   }
 }

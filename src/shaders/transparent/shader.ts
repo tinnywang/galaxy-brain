@@ -46,7 +46,6 @@ export class TransparentShader extends Shader<Model> {
         this.locations.setUniform('shouldDepthPeel');
 
         // Uniforms for Fresnel effect outline.
-        this.locations.setUniform('eye');
         this.locations.setUniform('fresnelColor');
         this.locations.setUniform('fresnelHueShift');
         this.locations.setUniform('fresnelExponent');
