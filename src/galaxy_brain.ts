@@ -60,7 +60,7 @@ class GalaxyBrain {
     },
     3: {
       angle: glMatrix.toRadian(210),
-      color: vec3.fromValues(0.008, 0.380, 0.702),
+      color: vec3.fromValues(0.008, 0.38, 0.702),
     },
   };
 
@@ -102,11 +102,12 @@ class GalaxyBrain {
     ];
 
     this.models = [this.head, this.skull, this.brain];
-    this.models.forEach((m) => m.color = GalaxyBrain.STAGES[0].color);
+    this.models.forEach((m) => {
+      m.color = GalaxyBrain.STAGES[0].color
+    });
   }
 
   render(timestamp: DOMHighResTimeStamp, framebuffer: WebGLFramebuffer) {
-    // Render the laser beams behind the stars.
     this.shaders.star.render(timestamp, framebuffer, this.lasers.stars);
 
     this.shaders.crepuscularRay.render(timestamp, framebuffer, {
@@ -149,7 +150,9 @@ class GalaxyBrain {
       angle *= -1;
     }
 
-    this.models.forEach((m) => m.color = GalaxyBrain.STAGES[stage].color);
+    this.models.forEach((m) => {
+      m.color = GalaxyBrain.STAGES[stage].color
+    });
 
     switch (stage) {
       case 0:
@@ -197,9 +200,7 @@ class GalaxyBrain {
         break;
     }
 
-    const prevStage = this.stage;
     this.stage = stage;
-    return prevStage;
   }
 }
 
