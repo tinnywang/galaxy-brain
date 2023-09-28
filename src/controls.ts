@@ -3,6 +3,7 @@ import Matrix from "./matrix";
 import GalaxyBrain from "./galaxy_brain";
 
 const Controls = (
+  container: JQuery<HTMLElement>,
   canvas: JQuery<HTMLCanvasElement>,
   slider: JQuery<HTMLInputElement>,
   galaxyBrain: GalaxyBrain
@@ -75,8 +76,10 @@ const Controls = (
       return;
     }
 
-    galaxyBrain.evolve(stage);
+    const prevStage = galaxyBrain.evolve(stage);
+    container.addClass(`stage-${prevStage}`);
     canvas.attr("class", `stage-${stage}`);
+
   });
 };
 

@@ -5,7 +5,6 @@ import { PostProcessing } from '../post_processing/shader';
 import { Model } from '../../models/model';
 import WebGL2 from '../../gl';
 import { vec3 } from 'gl-matrix';
-import { Face } from '../../object';
 
 export interface TransparentShaderProps {
     alphaMaskTexture: WebGLTexture;
@@ -80,10 +79,9 @@ export class TransparentShader extends Shader<RenderProps> {
 
             props?.forEach((p) => {
                 const model = p.model;
-                model.render(this.gl, this.locations, (f: Face) => {
-                    this.gl.uniform4fv(this.locations.getUniform('color'), [...f.material.diffuse, model.alpha]);
-                    this.gl.uniform1i(this.locations.getUniform('xray'), p?.xray ? 1 : 0);
-                });
+                this.gl.uniform4fv(this.locations.getUniform('color'), [...model.color, model.alpha]);
+                this.gl.uniform1i(this.locations.getUniform('xray'), p?.xray ? 1 : 0);
+                model.render(this.gl, this.locations);
             });
         }
 
