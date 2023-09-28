@@ -10,6 +10,7 @@ import GalaxyBrain from "./galaxy_brain";
 import { Star } from "./shaders/star/shader";
 
 $(() => {
+  const $container: JQuery<HTMLElement> = $(".container");
   const $canvas: JQuery<HTMLCanvasElement> = $("canvas");
   const $slider: JQuery<HTMLInputElement> = $("input");
 
@@ -65,7 +66,7 @@ $(() => {
       glow,
     });
 
-    Controls($canvas, $slider, galaxyBrain);
+    Controls($container, $canvas, $slider, galaxyBrain);
 
     const render = (timestamp: DOMHighResTimeStamp) => {
       gl.bindFramebuffer(gl.DRAW_FRAMEBUFFER, framebuffer);

@@ -19,6 +19,8 @@ export abstract class Model {
   readonly model: mat4;
 
   alpha = 1;
+ 
+  color = vec3.fromValues(1, 1, 1);
 
   constructor(
     gl: WebGL2RenderingContext,

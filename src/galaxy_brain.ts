@@ -1,6 +1,7 @@
 import { glMatrix, vec3, mat4, quat } from "gl-matrix";
 import { Brain } from "./models/brain";
 import { Head } from "./models/head";
+import { Model } from "./models/model";
 import { Skull } from "./models/skull";
 import Laser from "./laser";
 import { Light } from "./light";
@@ -20,6 +21,11 @@ interface Shaders {
   glow: Glow;
 }
 
+interface Stage {
+  angle: number;
+  color: vec3;
+}
+
 class GalaxyBrain {
   readonly light: Light;
 
@@ -33,15 +39,29 @@ class GalaxyBrain {
 
   private readonly shaders: Shaders;
 
-  private models: mat4[];
+  private matrices: mat4[];
+
+  private models: Model[];
 
   private stage = 0;
 
-  private static readonly STAGE_ANGLES: { [stage: number]: number } = {
-    0: glMatrix.toRadian(-90),
-    1: glMatrix.toRadian(90),
-    2: glMatrix.toRadian(90),
-    3: glMatrix.toRadian(210),
+  private static readonly STAGES: { [stage: number]: Stage } = {
+    0: {
+      angle: glMatrix.toRadian(-90),
+      color: vec3.fromValues(0.141, 0.247, 0.557),
+    },
+    1: {
+      angle: glMatrix.toRadian(90),
+      color: vec3.fromValues(0.098, 0.016, 0.573),
+    },
+    2: {
+      angle: glMatrix.toRadian(90),
+      color: vec3.fromValues(0.325, 0.043, 0),
+    },
+    3: {
+      angle: glMatrix.toRadian(210),
+      color: vec3.fromValues(0.008, 0.380, 0.702),
+    },
   };
 
   constructor(gl: WebGL2RenderingContext, shaders: Shaders) {
@@ -75,11 +95,14 @@ class GalaxyBrain {
       alpha: 0,
     });
 
-    this.models = [
+    this.matrices = [
       model,
       this.brain.model,
       ...this.lasers.beams.map((b) => b.model),
     ];
+
+    this.models = [this.head, this.skull, this.brain];
+    this.models.forEach((m) => m.color = GalaxyBrain.STAGES[0].color);
   }
 
   render(timestamp: DOMHighResTimeStamp, framebuffer: WebGLFramebuffer) {
@@ -121,10 +144,12 @@ class GalaxyBrain {
     // It's okay to calculate rotation axis and angle from the brain
     // because all the models share the same rotation axis and angle.
     const { angle: rotationAngle, axis } = this.brain.rotation();
-    let angle = rotationAngle - GalaxyBrain.STAGE_ANGLES[stage];
+    let angle = rotationAngle - GalaxyBrain.STAGES[stage].angle;
     if (this.stage > stage) {
       angle *= -1;
     }
+
+    this.models.forEach((m) => m.color = GalaxyBrain.STAGES[stage].color);
 
     switch (stage) {
       case 0:
@@ -136,7 +161,7 @@ class GalaxyBrain {
           ...this.lasers.beams.map((b) => new FadeOut(b, 1000)),
           new FadeOut(this.lasers.stars, 500),
           new FadeOut(this.light, 1000),
-          new Rotation(this.models, axis, angle, 500)
+          new Rotation(this.matrices, axis, angle, 500)
         );
         break;
       case 1:
@@ -153,7 +178,7 @@ class GalaxyBrain {
             : new FadeIn(this.light, 1000),
           new FadeIn(this.head, 1000),
           new FadeOut(this.skull, 1000),
-          new Rotation(this.models, axis, angle, 500)
+          new Rotation(this.matrices, axis, angle, 500)
         );
         break;
       case 3:
@@ -165,14 +190,16 @@ class GalaxyBrain {
           ...this.lasers.beams.map((b) => new FadeIn(b, 500)),
           new FadeIn(this.lasers.stars, 1000),
           new FadeIn(this.light, 1000),
-          new Rotation(this.models, axis, angle, 500)
+          new Rotation(this.matrices, axis, angle, 500)
         );
         break;
       default:
         break;
     }
 
+    const prevStage = this.stage;
     this.stage = stage;
+    return prevStage;
   }
 }
 

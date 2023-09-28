@@ -5,7 +5,6 @@ import { PostProcessing } from '../post_processing/shader';
 import { Model } from '../../models/model';
 import WebGL2 from '../../gl';
 import { vec3 } from 'gl-matrix';
-import { Face } from '../../object';
 
 const NUM_PASSES = 4;
 
@@ -67,9 +66,8 @@ export class TransparentShader extends Shader<Model> {
             this.depthPeel(i);
 
             models?.forEach((m) => {
-                m.render(this.gl, this.locations, (f: Face) => {
-                    this.gl.uniform4fv(this.locations.getUniform('color'), [...f.material.diffuse, m.alpha]);
-                });
+                this.gl.uniform4fv(this.locations.getUniform('color'), [...m.color, m.alpha]);
+                m.render(this.gl, this.locations);
             });
         }
 

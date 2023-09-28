@@ -49,6 +49,6 @@ export class PostProcessing<T = void> extends Shader<T> {
         this.gl.texParameteri(this.gl.TEXTURE_2D, this.gl.TEXTURE_MIN_FILTER, this.gl.LINEAR);
 
         this.gl.uniform1i(this.locations.getUniform('textureImage'), 0);
-        this.gl.drawArrays(this.gl.TRIANGLES, 0, PostProcessing.vertices.length);
+        this.gl.drawArrays(this.gl.TRIANGLES, 0, PostProcessing.vertices.length / 2);
     }
 }
