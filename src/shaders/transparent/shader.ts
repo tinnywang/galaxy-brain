@@ -16,7 +16,12 @@ export interface TransparentShaderProps {
     fresnelExponent: number;
 }
 
-export class TransparentShader extends Shader<Model> {
+interface RenderProps {
+    model: Model;
+    xray?: boolean;
+}
+
+export class TransparentShader extends Shader<RenderProps> {
     private props: TransparentShaderProps;
 
     private postProcessing: PostProcessing;
@@ -49,10 +54,11 @@ export class TransparentShader extends Shader<Model> {
         this.locations.setUniform('fresnelColor');
         this.locations.setUniform('fresnelHueShift');
         this.locations.setUniform('fresnelExponent');
+        this.locations.setUniform('xray');
     }
 
-    render(timestamp: DOMHighResTimeStamp, drawFramebuffer: WebGLFramebuffer, ...models: Model[]) {
-        super.render(timestamp, drawFramebuffer, ...models);
+    render(timestamp: DOMHighResTimeStamp, drawFramebuffer: WebGLFramebuffer, ...props: RenderProps[]) {
+        super.render(timestamp, drawFramebuffer, ...props);
 
         this.gl.uniform3fv(this.locations.getUniform('fresnelColor'), this.props.fresnelColor);
         this.gl.uniform1f(this.locations.getUniform('fresnelHueShift'), this.props.fresnelHueShift);
@@ -66,9 +72,11 @@ export class TransparentShader extends Shader<Model> {
         for (let i = 0; i < NUM_PASSES; i++) {
             this.depthPeel(i);
 
-            models?.forEach((m) => {
-                m.render(this.gl, this.locations, (f: Face) => {
-                    this.gl.uniform4fv(this.locations.getUniform('color'), [...f.material.diffuse, m.alpha]);
+            props?.forEach((p) => {
+                const model = p.model;
+                model.render(this.gl, this.locations, (f: Face) => {
+                    this.gl.uniform4fv(this.locations.getUniform('color'), [...f.material.diffuse, model.alpha]);
+                    this.gl.uniform1i(this.locations.getUniform('xray'), p?.xray ? 1 : 0);
                 });
             });
         }

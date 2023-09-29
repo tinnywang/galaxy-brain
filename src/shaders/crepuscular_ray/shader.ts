@@ -7,7 +7,7 @@ import WebGL2 from '../../gl';
 import { Light } from '../../light';
 import Matrix from '../../matrix';
 
-export interface RenderProps {
+interface RenderProps {
     models: Model[];
     light: Light;
     samples: number;
