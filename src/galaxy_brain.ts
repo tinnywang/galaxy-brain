@@ -29,8 +29,6 @@ interface Stage {
 }
 
 class GalaxyBrain {
-  readonly light: Light;
-
   readonly head: Head;
 
   readonly skull: Skull;
@@ -38,6 +36,10 @@ class GalaxyBrain {
   readonly brain: Brain;
 
   readonly lasers: Laser;
+
+  readonly brainLight: Light;
+
+  readonly headLight: Light;
 
   private readonly shaders: Shaders;
 
@@ -92,9 +94,13 @@ class GalaxyBrain {
     });
     this.lasers.stars.alpha = 0;
 
-    this.light = new Light(gl, {
+    this.brainLight = new Light(gl, {
       positions: [vec3.fromValues(0, 0, 0)],
       alpha: 0,
+    });
+
+    this.headLight = new Light(gl, {
+      positions: [vec3.fromValues(0, 0, 0)],
     });
 
     this.matrices = [
@@ -113,11 +119,20 @@ class GalaxyBrain {
 
     this.shaders.crepuscularRay.render(timestamp, framebuffer, {
       models: [this.brain],
-      light: this.light,
+      light: this.brainLight,
       samples: 100,
       density: 0.5,
       weight: 5,
       decay: 0.99,
+      exposure: 0.0035,
+    });
+    this.shaders.crepuscularRay.render(timestamp, framebuffer, {
+      models: [this.head],
+      light: this.headLight,
+      samples: 50,
+      density: 0.15,
+      weight: 3,
+      decay: 0.995,
       exposure: 0.0035,
     });
 
@@ -163,7 +178,7 @@ class GalaxyBrain {
           new FadeOut(this.brain.neurons, 1000),
           ...this.lasers.beams.map((b) => new FadeOut(b, 1000)),
           new FadeOut(this.lasers.stars, 500),
-          new FadeOut(this.light, 1000),
+          new FadeOut(this.brainLight, 1000),
           new Rotation(this.matrices, axis, angle, 500)
         );
         break;
@@ -175,8 +190,8 @@ class GalaxyBrain {
           ...this.lasers.beams.map((b) => new FadeOut(b, 1000)),
           new FadeOut(this.lasers.stars, 500),
           stage === 1
-            ? new FadeIn(this.brain.neurons, 1000)
-            : new FadeOut(this.brain.neurons, 1000),
+            ? new FadeOut(this.brainLight, 1000)
+            : new FadeIn(this.brainLight, 1000),
           ...this.lasers.beams.map((b) => new FadeOut(b, 1000)),
           new FadeOut(this.lasers.stars, 500),
           new FadeIn(this.head, 1000),
@@ -190,9 +205,9 @@ class GalaxyBrain {
           new FadeOut(this.skull, 1000),
           new FadeOut(this.brain.neurons, 1000),
           new FadeIn(this.head, 1000),
-          ...this.lasers.beams.map((b) => new FadeIn(b, 500)),
+          ...this.lasers.beams.map((b) => new FadeIn(b, 1000)),
           new FadeIn(this.lasers.stars, 1000),
-          new FadeIn(this.light, 1000),
+          new FadeIn(this.brainLight, 1000),
           new Rotation(this.matrices, axis, angle, 500)
         );
         break;
