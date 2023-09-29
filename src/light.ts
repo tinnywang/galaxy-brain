@@ -14,8 +14,6 @@ export interface LightProps {
 export class Light {
   readonly positions: vec3[];
 
-  readonly color: vec3;
-
   readonly power: number;
 
   readonly radius: number;
@@ -23,6 +21,8 @@ export class Light {
   private model?: mat4;
 
   private verticesBuffer: WebGLBuffer | null;
+
+  color: vec3;
 
   alpha: number;
 

@@ -98,7 +98,7 @@ class GalaxyBrain {
     );
     this.brain.neurons.alpha = 0;
 
-    this.lasers = new Laser(gl, model);
+    this.lasers = new Laser(gl, GalaxyBrain.STAGES[3].color.highlight, model);
     this.lasers.beams.forEach((b) => {
       b.alpha = 0;
     });
@@ -166,7 +166,7 @@ class GalaxyBrain {
       light: this.lasers.light,
       samples: 50,
       density: 0.35,
-      weight: 5.65,
+      weight: 5,
       decay: 0.99,
       exposure: 0.0035,
     });
@@ -187,6 +187,7 @@ class GalaxyBrain {
     this.head.color = color.base;
     this.skull.color = color.base;
     this.brain.color = color.highlight;
+    this.brainLight.color = vec3.fromValues(1, 1, 1);
 
     switch (stage) {
       case 0:
@@ -219,6 +220,7 @@ class GalaxyBrain {
         );
         break;
       case 3:
+        this.brainLight.color = color.highlight;
         Animation.run(
           new Scale(this.brain.model, 1 / this.brain.scaling(), 500),
           new FadeOut(this.skull, 1000),
