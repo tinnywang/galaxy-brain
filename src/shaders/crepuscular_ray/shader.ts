@@ -78,5 +78,7 @@ export class CrepuscularRay extends PostProcessing<RenderProps> {
 
         this.gl.framebufferTexture2D(this.gl.DRAW_FRAMEBUFFER, this.gl.COLOR_ATTACHMENT0, this.gl.TEXTURE_2D, this.colorTexture, 0);
         this.postProcessing.render(timestamp, this.texture);
+
+        this.gl.disable(this.gl.BLEND);
     }
 }

@@ -82,6 +82,8 @@ export class TransparentShader extends Shader<Model> {
         for (let i = NUM_PASSES - 1; i >= 0; i--) {
             this.postProcessing.render(timestamp, this.colorTextures[i]);
         }
+
+        this.gl.disable(this.gl.BLEND);
     }
 
     private depthPeel(i: number) {

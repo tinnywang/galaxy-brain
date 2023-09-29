@@ -47,6 +47,8 @@ export class LensFlare extends Shader<Light> {
         this.gl.uniform1i(this.locations.getUniform('lensFlareTexture'), 0);
 
         lights?.forEach((l) => l.render(this.gl, this.locations));
+
+        this.gl.disable(this.gl.BLEND);
     }
 
     private static withRandom(vertexSrc: string): string {
