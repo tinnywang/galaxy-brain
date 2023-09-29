@@ -1,13 +1,11 @@
 import { glMatrix, vec3 } from "gl-matrix";
 import Matrix from "./matrix";
 import GalaxyBrain from "./galaxy_brain";
-import Canvas2D from "./canvas";
 
 const Controls = (
   canvas: JQuery<HTMLCanvasElement>,
   slider: JQuery<HTMLInputElement>,
-  galaxyBrain: GalaxyBrain,
-  ctx: CanvasRenderingContext2D
+  galaxyBrain: GalaxyBrain
 ) => {
   const LEFT_MOUSE = 0;
 
@@ -78,7 +76,7 @@ const Controls = (
     }
 
     galaxyBrain.evolve(stage);
-    Canvas2D.evolve(ctx, stage);
+    canvas.attr("class", `stage-${stage}`);
   });
 };
 

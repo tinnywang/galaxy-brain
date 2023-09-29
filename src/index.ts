@@ -1,6 +1,5 @@
 import $ from "jquery";
 import { vec3 } from "gl-matrix";
-import Canvas2D from "./canvas";
 import WebGL2 from "./gl";
 import { CrepuscularRay } from "./shaders/crepuscular_ray/shader";
 import { TransparentShader } from "./shaders/transparent/shader";
@@ -11,15 +10,10 @@ import GalaxyBrain from "./galaxy_brain";
 import { Star } from "./shaders/star/shader";
 
 $(() => {
-  const $canvas: JQuery<HTMLCanvasElement> = $("canvas.galaxy-brain");
+  const $canvas: JQuery<HTMLCanvasElement> = $("canvas");
   const canvas = $canvas[0];
   canvas.width = canvas.clientWidth;
   canvas.height = canvas.clientHeight;
-
-  const $background: JQuery<HTMLCanvasElement> = $("canvas.background");
-  const background = $background[0];
-  background.width = background.clientWidth;
-  background.height = background.clientHeight;
 
   const $slider: JQuery<HTMLInputElement> = $("input");
 
@@ -71,8 +65,7 @@ $(() => {
       glow,
     });
 
-    const ctx = Canvas2D.renderingContext(background);
-    Controls($canvas, $slider, galaxyBrain, ctx);
+    Controls($canvas, $slider, galaxyBrain);
 
     const render = (timestamp: DOMHighResTimeStamp) => {
       gl.bindFramebuffer(gl.DRAW_FRAMEBUFFER, framebuffer);
