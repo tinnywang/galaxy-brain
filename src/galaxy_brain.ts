@@ -1,7 +1,6 @@
 import { glMatrix, vec3, mat4, quat } from "gl-matrix";
 import { Brain } from "./models/brain";
 import { Head } from "./models/head";
-import { Model } from "./models/model";
 import { Skull } from "./models/skull";
 import Laser from "./laser";
 import { Light } from "./light";
@@ -25,7 +24,10 @@ interface Shaders {
 
 interface Stage {
   angle: number;
-  color: vec3;
+  color: {
+    base: vec3;
+    highlight: vec3;
+  };
 }
 
 class GalaxyBrain {
@@ -45,26 +47,36 @@ class GalaxyBrain {
 
   private matrices: mat4[];
 
-  private models: Model[];
-
   private stage = 0;
 
   private static readonly STAGES: { [stage: number]: Stage } = {
     0: {
       angle: glMatrix.toRadian(-90),
-      color: vec3.fromValues(0.141, 0.247, 0.557),
+      color: {
+        base: vec3.fromValues(63 / 255, 108 / 255, 249 / 255),
+        highlight: vec3.fromValues(0 / 255, 128 / 255, 201 / 255),
+      },
     },
     1: {
       angle: glMatrix.toRadian(90),
-      color: vec3.fromValues(0.098, 0.016, 0.573),
+      color: {
+        base: vec3.fromValues(28 / 255, 50 / 255, 159 / 255),
+        highlight: vec3.fromValues(228 / 255, 226 / 266, 255 / 255),
+      },
     },
     2: {
       angle: glMatrix.toRadian(90),
-      color: vec3.fromValues(0.325, 0.043, 0),
+      color: {
+        base: vec3.fromValues(141 / 255, 26 / 255, 7 / 255),
+        highlight: vec3.fromValues(255 / 255, 242 / 255, 237 / 255),
+      },
     },
     3: {
       angle: glMatrix.toRadian(210),
-      color: vec3.fromValues(0.008, 0.380, 0.702),
+      color: {
+        base: vec3.fromValues(0, 31 / 255, 121 / 225),
+        highlight: vec3.fromValues(86 / 255, 240 / 255, 255 / 255),
+      },
     },
   };
 
@@ -88,7 +100,7 @@ class GalaxyBrain {
     );
     this.brain.neurons.alpha = 0;
 
-    this.lasers = new Laser(gl, model);
+    this.lasers = new Laser(gl, GalaxyBrain.STAGES[3].color.highlight, model);
     this.lasers.beams.forEach((b) => {
       b.alpha = 0;
     });
@@ -109,12 +121,13 @@ class GalaxyBrain {
       ...this.lasers.beams.map((b) => b.model),
     ];
 
-    this.models = [this.head, this.skull, this.brain];
-    this.models.forEach((m) => m.color = GalaxyBrain.STAGES[0].color);
+    const stage = GalaxyBrain.STAGES[0];
+    this.head.color = stage.color.base;
+    this.skull.color = stage.color.base;
+    this.brain.color = stage.color.highlight;
   }
 
   render(timestamp: DOMHighResTimeStamp, framebuffer: WebGLFramebuffer) {
-    // Render the laser beams behind the stars.
     this.shaders.star.render(timestamp, framebuffer, this.lasers.stars);
 
     this.shaders.crepuscularRay.render(timestamp, framebuffer, {
@@ -150,7 +163,7 @@ class GalaxyBrain {
       light: this.lasers.light,
       samples: 50,
       density: 0.35,
-      weight: 5.65,
+      weight: 5,
       decay: 0.99,
       exposure: 0.0035,
     });
@@ -167,7 +180,11 @@ class GalaxyBrain {
       angle *= -1;
     }
 
-    this.models.forEach((m) => m.color = GalaxyBrain.STAGES[stage].color);
+    const { color } = GalaxyBrain.STAGES[stage];
+    this.head.color = color.base;
+    this.skull.color = color.base;
+    this.brain.color = color.highlight;
+    this.brainLight.color = vec3.fromValues(1, 1, 1);
 
     switch (stage) {
       case 0:
@@ -200,6 +217,7 @@ class GalaxyBrain {
         );
         break;
       case 3:
+        this.brainLight.color = color.highlight;
         Animation.run(
           new Scale(this.brain.model, 1 / this.brain.scaling(), 500),
           new FadeOut(this.skull, 1000),
@@ -215,9 +233,7 @@ class GalaxyBrain {
         break;
     }
 
-    const prevStage = this.stage;
     this.stage = stage;
-    return prevStage;
   }
 }
 

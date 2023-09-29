@@ -28,7 +28,7 @@ export class CrepuscularRay extends PostProcessing<RenderProps> {
 
         this.colorTexture = colorTexture;
         this.texture = WebGL2.createColorTextures(gl, 1)[0];
-        this.occlusion = new OcclusionShader(gl, { scale: 0.5 });
+        this.occlusion = new OcclusionShader(gl, 0.5);
         this.postProcessing = new PostProcessing(gl);
 
         this.locations.setUniform('modelViewMatrix');
@@ -49,7 +49,10 @@ export class CrepuscularRay extends PostProcessing<RenderProps> {
         }
 
         // Render occluding objects black and untextured.
-        this.occlusion.render(timestamp, drawFramebuffer, ...props.models);
+        this.occlusion.render(timestamp, drawFramebuffer, {
+            models: props.models,
+            color: props.light.color,
+        });
 
         // Render crepescular rays from the occluding texture.
         this.gl.useProgram(this.program);
