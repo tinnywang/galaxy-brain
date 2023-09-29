@@ -16,6 +16,7 @@ uniform bool shouldDepthPeel;
 uniform highp vec3 fresnelColor;
 uniform float fresnelHueShift;
 uniform float fresnelExponent;
+uniform bool xray;
 
 const vec3 Z_AXIS = vec3(0, 0, 1);
 
@@ -48,6 +49,6 @@ void main() {
         fragColor = fresnel * vec4(fresnelColor + gradientColor, color.a);
 
         fresnel = smoothstep(0.0, 1.0, dotProduct);
-        fragColor = mix(fragColor, fresnel * color, dotProduct);
+        fragColor = mix(fragColor, color, xray ? 1.0 - dotProduct : dotProduct);
     }
 }

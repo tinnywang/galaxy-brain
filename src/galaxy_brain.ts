@@ -103,7 +103,7 @@ class GalaxyBrain {
 
     this.models = [this.head, this.skull, this.brain];
     this.models.forEach((m) => {
-      m.color = GalaxyBrain.STAGES[0].color
+      m.color = GalaxyBrain.STAGES[0].color;
     });
   }
 
@@ -123,10 +123,16 @@ class GalaxyBrain {
     this.shaders.transparent.render(
       timestamp,
       framebuffer,
-      this.head,
-      this.skull,
-      this.brain
+      { model: this.head },
+      { model: this.skull, xray: true }
     );
+
+    // Render the brain separately from the other transparent objects so that it isn't occluded.
+    // This isn't technically or anatomically correct, but it is more aesthetically pleasing.
+    this.shaders.transparent.render(timestamp, framebuffer, {
+      model: this.brain,
+      xray: true,
+    });
 
     this.shaders.crepuscularRay.render(timestamp, framebuffer, {
       models: this.lasers.beams,
@@ -151,7 +157,7 @@ class GalaxyBrain {
     }
 
     this.models.forEach((m) => {
-      m.color = GalaxyBrain.STAGES[stage].color
+      m.color = GalaxyBrain.STAGES[stage].color;
     });
 
     switch (stage) {
