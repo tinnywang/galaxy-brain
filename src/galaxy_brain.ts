@@ -151,15 +151,9 @@ class GalaxyBrain {
       timestamp,
       framebuffer,
       { model: this.head },
-      { model: this.skull, xray: true }
+      { model: this.skull, xray: true },
+      { model: this.brain, xray: true }
     );
-
-    // Render the brain separately from the other transparent objects so that it isn't occluded.
-    // This isn't technically or anatomically correct, but it is more aesthetically pleasing.
-    this.shaders.transparent.render(timestamp, framebuffer, {
-      model: this.brain,
-      xray: true,
-    });
 
     this.shaders.crepuscularRay.render(timestamp, framebuffer, {
       models: this.lasers.beams,
@@ -206,9 +200,7 @@ class GalaxyBrain {
       case 2:
         Animation.run(
           new Scale(this.brain.model, 1 / this.brain.scaling(), 500),
-          stage === 1
-            ? new FadeIn(this.brain.neurons, 1000)
-            : new FadeOut(this.brain.neurons, 1000),
+          new FadeIn(this.brain.neurons, 1000),
           ...this.lasers.beams.map((b) => new FadeOut(b, 1000)),
           new FadeOut(this.lasers.stars, 500),
           stage === 1
