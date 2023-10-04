@@ -12,8 +12,10 @@ import { Animation } from "./animations/animation";
 import { FadeIn, FadeOut } from "./animations/fade";
 import { Scale } from "./animations/scale";
 import { Rotation } from "./animations/rotation";
+import { AlphaMask } from "./shaders/alpha_mask/shader";
 
 interface Shaders {
+  alphaMask: AlphaMask;
   transparent: TransparentShader;
   crepuscularRay: CrepuscularRay;
   star: Star;
@@ -147,6 +149,7 @@ class GalaxyBrain {
       exposure: 0.0035,
     });
 
+    this.shaders.alphaMask.render(timestamp, framebuffer, this.brain);
     this.shaders.transparent.render(
       timestamp,
       framebuffer,

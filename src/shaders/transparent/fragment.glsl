@@ -9,9 +9,9 @@ out vec4 fragColor;
 
 uniform sampler2D opaqueDepthTexture;
 uniform sampler2D peelDepthTexture;
+uniform sampler2D alphaMaskTexture;
 uniform highp vec4 color;
 uniform int pass;
-uniform int numPasses;
 
 // Uniforms for Fresnel effect outline.
 uniform highp vec3 fresnelColor;
@@ -37,15 +37,17 @@ void main() {
     ivec2 textCoord = ivec2(gl_FragCoord.xy);
     float peelDepth = texelFetch(peelDepthTexture, textCoord, 0).r;
     float opaqueDepth = texelFetch(opaqueDepthTexture, textCoord, 0).r;
+    float alphaMask = texelFetch(alphaMaskTexture, textCoord, 0).a;
 
     if (pass > 0 && gl_FragDepth <= peelDepth) {
         discard;
     } else if (opaqueDepth < gl_FragDepth) {
         discard;
     } else {
-        float refraction = abs(refract(fragNormal, Z_AXIS, 1.762).z);
+        float refraction = abs(refract(fragNormal, Z_AXIS, 1.5).z);
         float reflection = abs(reflect(fragNormal, Z_AXIS).z);
-        float alpha = xray ? 1.0 - reflection : pass > 0 && pass < numPasses ? reflection : refraction;
+        float alpha = xray ? 1.0 - reflection : pass == 0 ? refraction : reflection;
+        alpha = pass == 0 && alphaMask > 0.0 ? smoothstep(0.0, alphaMask, 1.0 - reflection) : alpha;
 
         float fresnel = smoothstep(0.0, 1.0, pow(1.0 - reflection, fresnelExponent));
         vec3 gradientColor = hueShift(color.rgb, fresnelHueShift);
