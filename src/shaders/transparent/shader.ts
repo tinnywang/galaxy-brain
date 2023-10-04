@@ -8,6 +8,7 @@ import { vec3 } from 'gl-matrix';
 import { Face } from '../../object';
 
 export interface TransparentShaderProps {
+    alphaMaskTexture: WebGLTexture;
     opaqueDepthTexture: WebGLTexture;
     fresnelColor: vec3;
     fresnelHueShift: number;
@@ -48,7 +49,7 @@ export class TransparentShader extends Shader<RenderProps> {
         this.locations.setUniform('color');
         this.locations.setUniform('opaqueDepthTexture');
         this.locations.setUniform('peelDepthTexture');
-        this.locations.setUniform('numPasses');
+        this.locations.setUniform('alphaMaskTexture');
         this.locations.setUniform('pass');
 
         // Uniforms for Fresnel effect outline.
@@ -61,16 +62,18 @@ export class TransparentShader extends Shader<RenderProps> {
     render(timestamp: DOMHighResTimeStamp, drawFramebuffer: WebGLFramebuffer, ...props: RenderProps[]) {
         super.render(timestamp, drawFramebuffer, ...props);
 
-        this.gl.uniform1i(this.locations.getUniform('numPasses'), TransparentShader.NUM_PASSES);
-
         this.gl.uniform3fv(this.locations.getUniform('fresnelColor'), this.props.fresnelColor);
         this.gl.uniform1f(this.locations.getUniform('fresnelHueShift'), this.props.fresnelHueShift);
         this.gl.uniform1f(this.locations.getUniform('fresnelExponent'), this.props.fresnelExponent);
 
-        // Texture units 0 and 1 are used for the depth peel read/write textures.
         this.gl.activeTexture(this.gl.TEXTURE2);
+        this.gl.bindTexture(this.gl.TEXTURE_2D, this.props.alphaMaskTexture);
+        this.gl.uniform1i(this.locations.getUniform('alphaMaskTexture'), 2);
+
+        // Texture units 0 and 1 are used for the depth peel read/write textures.
+        this.gl.activeTexture(this.gl.TEXTURE3);
         this.gl.bindTexture(this.gl.TEXTURE_2D, this.props.opaqueDepthTexture);
-        this.gl.uniform1i(this.locations.getUniform('opaqueDepthTexture'), 2);
+        this.gl.uniform1i(this.locations.getUniform('opaqueDepthTexture'), 3);
 
         for (let i = 0; i < TransparentShader.NUM_PASSES; i++) {
             this.depthPeel(i);
