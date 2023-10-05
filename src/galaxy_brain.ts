@@ -12,8 +12,10 @@ import { Animation } from "./animations/animation";
 import { FadeIn, FadeOut } from "./animations/fade";
 import { Scale } from "./animations/scale";
 import { Rotation } from "./animations/rotation";
+import { AlphaMask } from "./shaders/alpha_mask/shader";
 
 interface Shaders {
+  alphaMask: AlphaMask;
   transparent: TransparentShader;
   crepuscularRay: CrepuscularRay;
   star: Star;
@@ -96,12 +98,13 @@ class GalaxyBrain {
       exposure: 0.0035,
     });
 
+    this.shaders.alphaMask.render(timestamp, framebuffer, this.brain);
     this.shaders.transparent.render(
       timestamp,
       framebuffer,
-      this.head,
-      this.skull,
-      this.brain
+      { model: this.head },
+      { model: this.skull, xray: true },
+      { model: this.brain, xray: true }
     );
 
     this.shaders.crepuscularRay.render(timestamp, framebuffer, {
@@ -143,9 +146,7 @@ class GalaxyBrain {
       case 2:
         Animation.run(
           new Scale(this.brain.model, 1 / this.brain.scaling(), 500),
-          stage === 1
-            ? new FadeIn(this.brain.neurons, 1000)
-            : new FadeOut(this.brain.neurons, 1000),
+          new FadeIn(this.brain.neurons, 1000),
           ...this.lasers.beams.map((b) => new FadeOut(b, 1000)),
           new FadeOut(this.lasers.stars, 500),
           stage === 1

@@ -7,6 +7,7 @@ import { FXAA } from "./shaders/fxaa/shader";
 import { Glow } from "./shaders/glow/shader";
 import Controls from "./controls";
 import GalaxyBrain from "./galaxy_brain";
+import { AlphaMask } from "./shaders/alpha_mask/shader";
 import { Star } from "./shaders/star/shader";
 
 $(() => {
@@ -48,7 +49,9 @@ $(() => {
       0
     );
 
+    const alphaMask = new AlphaMask(gl, colorTexture);
     const transparent = new TransparentShader(gl, {
+      alphaMaskTexture: alphaMask.texture,
       opaqueDepthTexture: depthTexture,
       fresnelColor: vec3.fromValues(1, 1, 1),
       fresnelHueShift: -20,
@@ -59,6 +62,7 @@ $(() => {
     const glow = new Glow(gl);
     const fxaa = new FXAA(gl);
     const galaxyBrain = new GalaxyBrain(gl, {
+      alphaMask,
       transparent,
       crepuscularRay,
       star,

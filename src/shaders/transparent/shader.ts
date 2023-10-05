@@ -7,16 +7,20 @@ import WebGL2 from '../../gl';
 import { vec3 } from 'gl-matrix';
 import { Face } from '../../object';
 
-const NUM_PASSES = 4;
-
 export interface TransparentShaderProps {
+    alphaMaskTexture: WebGLTexture;
     opaqueDepthTexture: WebGLTexture;
     fresnelColor: vec3;
     fresnelHueShift: number;
     fresnelExponent: number;
 }
 
-export class TransparentShader extends Shader<Model> {
+interface RenderProps {
+    model: Model;
+    xray?: boolean;
+}
+
+export class TransparentShader extends Shader<RenderProps> {
     private props: TransparentShaderProps;
 
     private postProcessing: PostProcessing;
@@ -24,6 +28,8 @@ export class TransparentShader extends Shader<Model> {
     private framebuffer: WebGLFramebuffer | null;
     private depthTextures: Array<WebGLTexture>
     private colorTextures: Array<WebGLTexture>;
+
+    private static NUM_PASSES = 4;
 
     constructor(gl: WebGL2RenderingContext, props: TransparentShaderProps) {
         super(gl, vertexSrc, fragmentSrc);
@@ -34,7 +40,7 @@ export class TransparentShader extends Shader<Model> {
 
         this.framebuffer = gl.createFramebuffer();
         this.depthTextures = WebGL2.createDepthTextures(this.gl, 2);
-        this.colorTextures = WebGL2.createColorTextures(this.gl, NUM_PASSES);
+        this.colorTextures = WebGL2.createColorTextures(this.gl, TransparentShader.NUM_PASSES);
 
         this.locations.setAttribute('vertexPosition');
         this.locations.setAttribute('normal');
@@ -43,32 +49,40 @@ export class TransparentShader extends Shader<Model> {
         this.locations.setUniform('color');
         this.locations.setUniform('opaqueDepthTexture');
         this.locations.setUniform('peelDepthTexture');
-        this.locations.setUniform('shouldDepthPeel');
+        this.locations.setUniform('alphaMaskTexture');
+        this.locations.setUniform('pass');
 
         // Uniforms for Fresnel effect outline.
         this.locations.setUniform('fresnelColor');
         this.locations.setUniform('fresnelHueShift');
         this.locations.setUniform('fresnelExponent');
+        this.locations.setUniform('xray');
     }
 
-    render(timestamp: DOMHighResTimeStamp, drawFramebuffer: WebGLFramebuffer, ...models: Model[]) {
-        super.render(timestamp, drawFramebuffer, ...models);
+    render(timestamp: DOMHighResTimeStamp, drawFramebuffer: WebGLFramebuffer, ...props: RenderProps[]) {
+        super.render(timestamp, drawFramebuffer, ...props);
 
         this.gl.uniform3fv(this.locations.getUniform('fresnelColor'), this.props.fresnelColor);
         this.gl.uniform1f(this.locations.getUniform('fresnelHueShift'), this.props.fresnelHueShift);
         this.gl.uniform1f(this.locations.getUniform('fresnelExponent'), this.props.fresnelExponent);
 
-        // Texture units 0 and 1 are used for the depth peel read/write textures.
         this.gl.activeTexture(this.gl.TEXTURE2);
-        this.gl.bindTexture(this.gl.TEXTURE_2D, this.props.opaqueDepthTexture);
-        this.gl.uniform1i(this.locations.getUniform('opaqueDepthTexture'), 2);
+        this.gl.bindTexture(this.gl.TEXTURE_2D, this.props.alphaMaskTexture);
+        this.gl.uniform1i(this.locations.getUniform('alphaMaskTexture'), 2);
 
-        for (let i = 0; i < NUM_PASSES; i++) {
+        // Texture units 0 and 1 are used for the depth peel read/write textures.
+        this.gl.activeTexture(this.gl.TEXTURE3);
+        this.gl.bindTexture(this.gl.TEXTURE_2D, this.props.opaqueDepthTexture);
+        this.gl.uniform1i(this.locations.getUniform('opaqueDepthTexture'), 3);
+
+        for (let i = 0; i < TransparentShader.NUM_PASSES; i++) {
             this.depthPeel(i);
 
-            models?.forEach((m) => {
-                m.render(this.gl, this.locations, (f: Face) => {
-                    this.gl.uniform4fv(this.locations.getUniform('color'), [...f.material.diffuse, m.alpha]);
+            props?.forEach((p) => {
+                const model = p.model;
+                model.render(this.gl, this.locations, (f: Face) => {
+                    this.gl.uniform4fv(this.locations.getUniform('color'), [...f.material.diffuse, model.alpha]);
+                    this.gl.uniform1i(this.locations.getUniform('xray'), p?.xray ? 1 : 0);
                 });
             });
         }
@@ -81,7 +95,7 @@ export class TransparentShader extends Shader<Model> {
         this.gl.enable(this.gl.BLEND);
         this.gl.blendFunc(this.gl.SRC_ALPHA, this.gl.ONE_MINUS_SRC_ALPHA);
 
-        for (let i = NUM_PASSES - 1; i >= 0; i--) {
+        for (let i = TransparentShader.NUM_PASSES - 1; i >= 0; i--) {
             this.postProcessing.render(timestamp, this.colorTextures[i]);
         }
 
@@ -97,7 +111,7 @@ export class TransparentShader extends Shader<Model> {
         this.gl.uniform1i(this.locations.getUniform('peelDepthTexture'), readIndex);
 
         // No depth peeling on 0th iteration.
-        this.gl.uniform1i(this.locations.getUniform('shouldDepthPeel'), i);
+        this.gl.uniform1i(this.locations.getUniform('pass'), i);
 
         this.gl.bindFramebuffer(this.gl.DRAW_FRAMEBUFFER, this.framebuffer);
         this.gl.activeTexture(this.gl.TEXTURE0 + writeIndex);
