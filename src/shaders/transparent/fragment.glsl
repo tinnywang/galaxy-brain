@@ -4,6 +4,7 @@ precision highp float;
 
 in float fragDepth;
 in highp vec3 fragNormal;
+in highp vec2 textCoord;
 
 out vec4 fragColor;
 
@@ -34,10 +35,9 @@ void main() {
     // (see "An Invariance Issue" - https://my.eng.utah.edu/~cs5610/handouts/order_independent_transparency.pdf).
     gl_FragDepth = fragDepth;
 
-    ivec2 textCoord = ivec2(gl_FragCoord.xy);
-    float peelDepth = texelFetch(peelDepthTexture, textCoord, 0).r;
-    float opaqueDepth = texelFetch(opaqueDepthTexture, textCoord, 0).r;
-    float alphaMask = texelFetch(alphaMaskTexture, textCoord, 0).a;
+    float peelDepth = texture(peelDepthTexture, textCoord).r;
+    float opaqueDepth = texture(opaqueDepthTexture, textCoord).r;
+    float alphaMask = texture(alphaMaskTexture, textCoord).a;
 
     if (pass > 0 && gl_FragDepth <= peelDepth) {
         discard;
