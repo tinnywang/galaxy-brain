@@ -25,8 +25,9 @@ interface Shaders {
 interface Stage {
   angle: number;
   color: {
-    base: vec3;
-    highlight: vec3;
+    primary: vec3;
+    secondary: vec3;
+    highlight?: vec3;
   };
 }
 
@@ -53,29 +54,31 @@ class GalaxyBrain {
     0: {
       angle: glMatrix.toRadian(-90),
       color: {
-        base: vec3.fromValues(63 / 255, 108 / 255, 249 / 255),
-        highlight: vec3.fromValues(0 / 255, 128 / 255, 201 / 255),
+        primary: vec3.fromValues(63 / 255, 108 / 255, 249 / 255),
+        secondary: vec3.fromValues(0 / 255, 128 / 255, 201 / 255),
       },
     },
     1: {
       angle: glMatrix.toRadian(90),
       color: {
-        base: vec3.fromValues(28 / 255, 50 / 255, 159 / 255),
-        highlight: vec3.fromValues(228 / 255, 226 / 266, 255 / 255),
+        primary: vec3.fromValues(28 / 255, 50 / 255, 159 / 255),
+        secondary: vec3.fromValues(228 / 255, 226 / 266, 255 / 255),
+        highlight: vec3.fromValues(255 / 255, 0, 128 / 255),
       },
     },
     2: {
       angle: glMatrix.toRadian(90),
       color: {
-        base: vec3.fromValues(141 / 255, 26 / 255, 7 / 255),
-        highlight: vec3.fromValues(255 / 255, 242 / 255, 237 / 255),
+        primary: vec3.fromValues(141 / 255, 26 / 255, 7 / 255),
+        secondary: vec3.fromValues(255 / 255, 242 / 255, 237 / 255),
+        highlight: vec3.fromValues(250 / 255, 255 / 255, 179 / 255),
       },
     },
     3: {
       angle: glMatrix.toRadian(210),
       color: {
-        base: vec3.fromValues(0, 31 / 255, 121 / 225),
-        highlight: vec3.fromValues(86 / 255, 240 / 255, 255 / 255),
+        primary: vec3.fromValues(0, 31 / 255, 121 / 225),
+        secondary: vec3.fromValues(86 / 255, 240 / 255, 255 / 255),
       },
     },
   };
@@ -100,7 +103,7 @@ class GalaxyBrain {
     );
     this.brain.neurons.alpha = 0;
 
-    this.lasers = new Laser(gl, GalaxyBrain.STAGES[3].color.highlight, model);
+    this.lasers = new Laser(gl, GalaxyBrain.STAGES[3].color.secondary, model);
     this.lasers.beams.forEach((b) => {
       b.alpha = 0;
     });
@@ -122,14 +125,12 @@ class GalaxyBrain {
     ];
 
     const stage = GalaxyBrain.STAGES[0];
-    this.head.color = stage.color.base;
-    this.skull.color = stage.color.base;
-    this.brain.color = stage.color.highlight;
+    this.head.color = stage.color.primary;
+    this.skull.color = stage.color.primary;
+    this.brain.color = stage.color.secondary;
   }
 
   render(timestamp: DOMHighResTimeStamp, framebuffer: WebGLFramebuffer) {
-    this.shaders.star.render(timestamp, framebuffer, this.lasers.stars);
-
     this.shaders.crepuscularRay.render(timestamp, framebuffer, {
       models: [this.brain],
       light: this.brainLight,
@@ -148,6 +149,9 @@ class GalaxyBrain {
       decay: 0.995,
       exposure: 0.0035,
     });
+
+    this.shaders.star.render(timestamp, framebuffer, this.lasers.stars);
+    this.shaders.glow.render(timestamp, framebuffer, this.brain.neurons);
 
     this.shaders.alphaMask.render(timestamp, framebuffer, this.brain);
     this.shaders.transparent.render(
@@ -170,24 +174,25 @@ class GalaxyBrain {
       decay: 0.99,
       exposure: 0.0035,
     });
-
-    this.shaders.glow.render(timestamp, framebuffer, this.brain.neurons);
   }
 
   evolve(stage: number) {
     // It's okay to calculate rotation axis and angle from the brain
     // because all the models share the same rotation axis and angle.
     const { angle: rotationAngle, axis } = this.brain.rotation();
-    let angle = rotationAngle - GalaxyBrain.STAGES[stage].angle;
+    const s = GalaxyBrain.STAGES[stage];
+    let angle = rotationAngle - s.angle;
     if (this.stage > stage) {
       angle *= -1;
     }
 
-    const { color } = GalaxyBrain.STAGES[stage];
-    this.head.color = color.base;
-    this.skull.color = color.base;
-    this.brain.color = color.highlight;
+    this.head.color = s.color.primary;
+    this.skull.color = s.color.primary;
+    this.brain.color = s.color.secondary;
     this.brainLight.color = vec3.fromValues(1, 1, 1);
+    if (s.color?.highlight) {
+      this.brain.neurons.color = s.color.highlight;
+    }
 
     switch (stage) {
       case 0:
@@ -220,7 +225,7 @@ class GalaxyBrain {
         );
         break;
       case 3:
-        this.brainLight.color = color.highlight;
+        this.brainLight.color = s.color.secondary;
         Animation.run(
           new Scale(this.brain.model, 1 / this.brain.scaling(), 500),
           new FadeOut(this.skull, 1000),
