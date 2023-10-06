@@ -1,3 +1,4 @@
+import $ from "jquery";
 import { glMatrix, vec3 } from "gl-matrix";
 import Matrix from "./matrix";
 import GalaxyBrain from "./galaxy_brain";
@@ -77,6 +78,10 @@ const Controls = (
 
     galaxyBrain.evolve(stage);
     canvas.attr("class", `stage-${stage}`);
+  });
+
+  $(window).on("resize", () => {
+    window.location.reload();
   });
 };
 
