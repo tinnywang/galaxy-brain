@@ -19,7 +19,7 @@ class Laser {
 
   readonly stars: Light;
 
-  constructor(gl: WebGL2RenderingContext, model?: mat4) {
+  constructor(gl: WebGL2RenderingContext, color: vec3, model?: mat4) {
     this.light = new Light(gl, {
       positions: [mat4.getTranslation(vec3.create(), model ?? mat4.create())],
     });
@@ -52,8 +52,8 @@ class Laser {
     this.stars = new Light(gl, {
       positions: vertices,
       model,
-      color: vec3.fromValues(0.2, 0.4, 0.8),
-      radius: 100,
+      color,
+      radius: 150,
     });
   }
 

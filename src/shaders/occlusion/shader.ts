@@ -5,27 +5,26 @@ import WebGL2 from '../../gl';
 import { vec3 } from 'gl-matrix';
 import { Model } from '../../models/model';
 
-export interface OcclusionProps {
-    scale: number;
+interface RenderProps {
+    models: Model[];
+    color: vec3;
 }
 
-export class OcclusionShader extends Shader<Model> {
-    private static White = vec3.fromValues(1, 1, 1);
-
-    private props: OcclusionProps;
+export class OcclusionShader extends Shader<RenderProps> {
+    private readonly scale: number;
 
     readonly texture: WebGLTexture;
 
-    constructor(gl: WebGL2RenderingContext, props: OcclusionProps) {
+    constructor(gl: WebGL2RenderingContext, scale: number) {
         super(gl, vertexSrc, fragmentSrc);
 
-        this.props = props;
+        this.scale = scale;
 
         this.texture = WebGL2.createColorTextures(
             gl,
             1,
-            gl.drawingBufferWidth * props.scale,
-            gl.drawingBufferHeight * props.scale,
+            gl.drawingBufferWidth * scale,
+            gl.drawingBufferHeight * scale,
         )[0];
 
         this.locations.setAttribute('vertexPosition');
@@ -34,8 +33,8 @@ export class OcclusionShader extends Shader<Model> {
         this.locations.setUniform('color');
     }
 
-    render(timestamp: DOMHighResTimeStamp, drawFramebuffer: WebGLFramebuffer, ...models: Model[]) {
-        super.render(timestamp, drawFramebuffer, ...models);
+    render(timestamp: DOMHighResTimeStamp, drawFramebuffer: WebGLFramebuffer, props: RenderProps) {
+        super.render(timestamp, drawFramebuffer, props);
 
         this.gl.bindFramebuffer(this.gl.DRAW_FRAMEBUFFER, drawFramebuffer);
         this.gl.framebufferTexture2D(this.gl.DRAW_FRAMEBUFFER, this.gl.COLOR_ATTACHMENT0, this.gl.TEXTURE_2D, this.texture, 0);
@@ -43,18 +42,18 @@ export class OcclusionShader extends Shader<Model> {
 
         const [x, y, width, height] = this.gl.getParameter(this.gl.VIEWPORT);
         this.gl.viewport(
-            x * this.props.scale,
-            y * this.props.scale,
-            width * this.props.scale,
-            height * this.props.scale,
+            x * this.scale,
+            y * this.scale,
+            width * this.scale,
+            height * this.scale,
         );
 
         this.gl.disable(this.gl.DEPTH_TEST);
         this.gl.clear(this.gl.COLOR_BUFFER_BIT);
 
         // Render occluding objects in white.
-        models?.forEach((m) => {
-            this.gl.uniform4fv(this.locations.getUniform('color'), [...OcclusionShader.White, m.alpha]);
+        props.models?.forEach((m) => {
+            this.gl.uniform4fv(this.locations.getUniform('color'), [...props.color, m.alpha]);
             m.render(this.gl, this.locations)
         });
 

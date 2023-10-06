@@ -76,6 +76,7 @@ const Controls = (
     }
 
     galaxyBrain.evolve(stage);
+    canvas.attr("class", `stage-${stage}`);
   });
 };
 

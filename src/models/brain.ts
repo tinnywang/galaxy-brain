@@ -4,7 +4,7 @@ import brain from "../assets/models/brain.json"
 import { Light } from "../light";
 
 export class Brain extends Model {
-    private static readonly NEURON_PERCENTAGE = 0.005;
+    private static readonly NEURON_PERCENTAGE = 0.05;
 
     readonly neurons: Light;
 
@@ -32,7 +32,6 @@ export class Brain extends Model {
           positions,
           model,
           radius: 50,
-          color: vec3.fromValues(1, 0, 0.5),
         });
     }
 }
