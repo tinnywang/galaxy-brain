@@ -154,9 +154,12 @@ class GalaxyBrain {
       timestamp,
       framebuffer,
       { model: this.head },
-      { model: this.skull, xray: true },
       { model: this.brain, xray: true }
     );
+    this.shaders.transparent.render(timestamp, framebuffer, {
+      model: this.skull,
+      xray: true,
+    });
 
     this.shaders.crepuscularRay.render(timestamp, framebuffer, {
       models: this.lasers.beams,
