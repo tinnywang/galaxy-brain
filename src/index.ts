@@ -1,6 +1,6 @@
 import $ from "jquery";
 import { vec3 } from "gl-matrix";
-import * as matrixRain from "@ojdom/matrix-rain";
+import { MatrixController } from "@ojdom/matrix-rain";
 import WebGL2 from "./gl";
 import { CrepuscularRay } from "./shaders/crepuscular_ray/shader";
 import { TransparentShader } from "./shaders/transparent/shader";
@@ -70,9 +70,8 @@ $(() => {
       glow,
     });
 
-    Controls($canvas, $slider, galaxyBrain);
-
-    const matrixController = new matrixRain.MatrixController(
+    const $matrixRain: JQuery<HTMLCanvasElement> = $("canvas#matrix-rain");
+    const matrixController = new MatrixController(
       {
         animationSpeed: 10,
         chars: "01",
@@ -84,9 +83,10 @@ $(() => {
         fontFamily: "Share Tech Mono",
         fontSize: 40,
       },
-      $("canvas#matrix-rain")[0]
+      $matrixRain[0]
     );
-    matrixController.start();
+
+    Controls($canvas, $slider, galaxyBrain, matrixController);
 
     const render = (timestamp: DOMHighResTimeStamp) => {
       gl.bindFramebuffer(gl.DRAW_FRAMEBUFFER, framebuffer);

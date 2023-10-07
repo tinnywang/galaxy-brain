@@ -1,4 +1,8 @@
 declare module "@ojdom/matrix-rain" {
-    const value: any;
-    export = value;
+    export class MatrixController {
+		constructor(options?: {}, canvas?: HTMLCanvasElement);
+		start: () => void;
+		disable: () => void;
+		stop: () => void;
+	}
 }
