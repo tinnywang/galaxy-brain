@@ -3,6 +3,15 @@ canvas {
     width: 100%;
 }
 
+#matrix-rain {
+    position: absolute;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    left: 0;
+    z-index: -1;
+}
+
 .stage-0 {
     background: radial-gradient(circle, rgba(13,28,61,1) 0%, rgba(6, 5, 11,1) 100%);
 }
@@ -16,5 +25,5 @@ canvas {
 }
 
 .stage-3 {
-    background: radial-gradient(circle, rgba(5, 56, 147) 0%, rgba(1,8,54,1) 100%);
+    background: transparent;
 }

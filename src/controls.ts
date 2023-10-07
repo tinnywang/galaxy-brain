@@ -1,12 +1,14 @@
 import $ from "jquery";
 import { glMatrix, vec3 } from "gl-matrix";
+import { MatrixController } from "@ojdom/matrix-rain";
 import Matrix from "./matrix";
 import GalaxyBrain from "./galaxy_brain";
 
 const Controls = (
   canvas: JQuery<HTMLCanvasElement>,
   slider: JQuery<HTMLInputElement>,
-  galaxyBrain: GalaxyBrain
+  galaxyBrain: GalaxyBrain,
+  matrixController: MatrixController
 ) => {
   const LEFT_MOUSE = 0;
 
@@ -78,6 +80,12 @@ const Controls = (
 
     galaxyBrain.evolve(stage);
     canvas.attr("class", `stage-${stage}`);
+
+    if (stage === 3) {
+      matrixController.start();
+    } else {
+      matrixController.stop();
+    }
   });
 
   $(window).on("resize", () => {
