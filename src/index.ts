@@ -1,5 +1,6 @@
 import $ from "jquery";
 import { vec3 } from "gl-matrix";
+import * as matrixRain from "@ojdom/matrix-rain";
 import WebGL2 from "./gl";
 import { CrepuscularRay } from "./shaders/crepuscular_ray/shader";
 import { TransparentShader } from "./shaders/transparent/shader";
@@ -11,7 +12,7 @@ import { AlphaMask } from "./shaders/alpha_mask/shader";
 import { Star } from "./shaders/star/shader";
 
 $(() => {
-  const $canvas: JQuery<HTMLCanvasElement> = $("canvas");
+  const $canvas: JQuery<HTMLCanvasElement> = $("canvas#galaxy-brain");
   const $slider: JQuery<HTMLInputElement> = $("input");
 
   const canvas = $canvas[0];
@@ -70,6 +71,22 @@ $(() => {
     });
 
     Controls($canvas, $slider, galaxyBrain);
+
+    const matrixController = new matrixRain.MatrixController(
+      {
+        animationSpeed: 10,
+        chars: "01",
+        colors: {
+          background: "rgb(0,15,56)",
+          primary: "rgb(10,47,153)",
+          flashed: "rgb(10,47,153)",
+        },
+        fontFamily: "Share Tech Mono",
+        fontSize: 40,
+      },
+      $("canvas#matrix-rain")[0]
+    );
+    matrixController.start();
 
     const render = (timestamp: DOMHighResTimeStamp) => {
       gl.bindFramebuffer(gl.DRAW_FRAMEBUFFER, framebuffer);
