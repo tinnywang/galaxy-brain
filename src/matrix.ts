@@ -3,11 +3,11 @@ import { vec3, glMatrix, mat4, quat } from "gl-matrix";
 class Matrix {
   static Y_AXIS = vec3.fromValues(0, 1, 0);
 
-  private static MINIMUM_FOV = glMatrix.toRadian(60);
+  private static MINIMUM_FOV = glMatrix.toRadian(50);
 
-  private static MAXIMUM_FOV = glMatrix.toRadian(120);
+  private static MAXIMUM_FOV = glMatrix.toRadian(90);
 
-  private static FOV = glMatrix.toRadian(90);
+  private static FOV = glMatrix.toRadian(70);
 
   private static NEAR = 1;
 
@@ -15,7 +15,7 @@ class Matrix {
 
   private static CENTER = vec3.fromValues(0, 0, 0);
 
-  private static EYE = vec3.fromValues(0, 0, 10);
+  private static EYE = vec3.fromValues(0, 0, 15);
 
   private static UP = vec3.fromValues(0, 1, 0);
 
