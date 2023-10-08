@@ -46,6 +46,7 @@ void main() {
     } else {
         float refraction = abs(refract(fragNormal, Z_AXIS, 1.5).z);
         float reflection = abs(reflect(fragNormal, Z_AXIS).z);
+
         float alpha = xray ? 1.0 - reflection : pass == 0 ? refraction : reflection;
         alpha = pass == 0 && alphaMask > 0.0 ? smoothstep(0.0, alphaMask, 1.0 - reflection) : alpha;
 

@@ -51,7 +51,7 @@ export class OcclusionShader extends Shader<RenderProps> {
         this.gl.disable(this.gl.DEPTH_TEST);
         this.gl.clear(this.gl.COLOR_BUFFER_BIT);
 
-        // Render occluding objects in white.
+        // Render occluding objects.
         props.models?.forEach((m) => {
             this.gl.uniform4fv(this.locations.getUniform('color'), [...props.color, m.alpha]);
             m.render(this.gl, this.locations)

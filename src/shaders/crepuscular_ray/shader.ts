@@ -48,7 +48,7 @@ export class CrepuscularRay extends PostProcessing<RenderProps> {
             return;
         }
 
-        // Render occluding objects black and untextured.
+        // Render occluding objects colored and untextured.
         this.occlusion.render(timestamp, drawFramebuffer, {
             models: props.models,
             color: props.light.color,
