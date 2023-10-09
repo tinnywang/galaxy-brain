@@ -59,19 +59,21 @@ input[type="range"]::-moz-range-track {
 input[type="range"]::-webkit-slider-thumb {
   -webkit-appearance: none;
   appearance: none;
-  height: 30px;
+  background-image: url("./assets/brain.png");
+  background-size: 30px;
   width: 30px;
+  height: 30px;
   margin-top: -10px;
-  background-image: url("./src/assets/brain.svg");
   cursor: pointer;
 }
 
 input[type="range"]::-moz-range-thumb {
-  height: 30px;
-  width: 30px;
-  margin-top: -10px;
-  background: transparent;
-  background-image: url("./src/assets/brain.svg");
   border: none;
+  background: transparent;
+  background-image: url("./assets/brain.png");
+  background-size: 30px;
+  width: 30px;
+  height: 30px;
+  margin-top: -10px;
   cursor: pointer;
 }
