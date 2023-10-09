@@ -1,5 +1,5 @@
 declare module "@ojdom/matrix-rain" {
-  export class MatrixController {
+  class MatrixController {
     constructor(options?: {}, canvas?: HTMLCanvasElement);
     start: () => void;
 
@@ -7,4 +7,8 @@ declare module "@ojdom/matrix-rain" {
 
     stop: () => void;
   }
+
+  const Matrix: any;
+
+  export { Matrix, MatrixController };
 }
