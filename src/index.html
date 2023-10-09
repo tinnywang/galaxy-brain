@@ -5,13 +5,21 @@
     <meta charset="utf-8">
   </head>
   <body>
-    <input type="range" min="0" max="3" value="0" step="1" list="stages">
-    <datalist id="stages">
-      <option>0</option>
-      <option>1</option>
-      <option>2</option>
-      <option>3</option>
-    </datalist>
+    <div class="controls">
+      <div class="slider">
+        <input type="range" min="0" max="3" value="0" step="1" list="stages">
+        <datalist id="stages">
+          <option>0</option>
+          <option>1</option>
+          <option>2</option>
+          <option>3</option>
+        </datalist>
+      </div>
+      <div class="key-bindings">
+        <div>Use <strong>left mouse</strong> to rotate.</div>
+        <div>Use <strong>mouse wheel</strong> to zoom.</div>
+      </div>
+    </div>
     <canvas id="matrix-rain"></canvas>
     <canvas id="galaxy-brain" class="stage-0"></canvas>
   </body>

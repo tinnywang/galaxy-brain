@@ -2,6 +2,9 @@ body {
     height: 100%;
     margin: 0;
     overflow: hidden;
+    font-family: "Share Tech Mono";
+    font-size: 14px;
+    color: white;
 }
 
 canvas {
@@ -34,10 +37,27 @@ canvas {
     background: transparent;
 }
 
-input[type="range"] {
+.controls {
     position: absolute;
-    top: 10px;
-    left: 10px;
+    padding: 15px;
+}
+
+.slider {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    margin-bottom: 15px;
+}
+
+.key-bindings > div {
+    margin-bottom: 5px;
+}
+
+.key-bindings strong {
+    text-transform: uppercase;
+}
+
+input[type="range"] {
     -webkit-appearance: none;
     appearance: none;
     outline: none;
