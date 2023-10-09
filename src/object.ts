@@ -1,20 +1,8 @@
 /* eslint-disable camelcase */
 
-interface Material {
-  ambient: number[];
-  diffuse: number[];
-  specular: number[];
-  specular_exponent: number;
-}
-
-export interface Face {
-  material: Material;
-  vertex_indices: number[];
-}
-
 export interface Object {
   name: string;
-  faces: Face[];
+  faces: number[];
   normals: number[];
   vertices: number[];
 }

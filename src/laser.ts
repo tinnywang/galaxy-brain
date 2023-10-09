@@ -29,7 +29,8 @@ class Laser {
     const vertices = Laser.Coordinates.flatMap((c) =>
       this.permutate(c).map((p) => {
         const v = vec3.fromValues(p[0], p[1], p[2]);
-        return vec3.scale(v, v, 5);
+        const r = Math.floor(Math.random() * 5);
+        return vec3.scale(v, v, 5 + r);
       })
     ).filter((v) => vec3.angle(v, Matrix.Y_AXIS) < glMatrix.toRadian(135));
 
@@ -53,7 +54,7 @@ class Laser {
       positions: vertices,
       model,
       color,
-      radius: 150,
+      radius: 120,
     });
   }
 

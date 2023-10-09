@@ -1,5 +1,5 @@
 import { mat4, quat, vec3 } from "gl-matrix";
-import { Face, Object } from "../object";
+import { Object } from "../object";
 import Matrix from "../matrix";
 import { ShaderLocations } from "../shaders/shader_locations";
 
@@ -43,16 +43,9 @@ export abstract class Model {
     gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, faces);
     gl.bufferData(
       gl.ELEMENT_ARRAY_BUFFER,
-      o.faces.reduce((accumulator, f) => accumulator + f.vertex_indices.length * 8, 0),
+      new Uint32Array(o.faces),
       gl.STATIC_DRAW,
     );
-
-    let offset = 0;
-    o.faces.forEach((f) => {
-      gl.bufferSubData(gl.ELEMENT_ARRAY_BUFFER, offset, new Uint32Array(f.vertex_indices), offset);
-      // Offset must be a multiple of 8 since an unsigned int is 8 bytes.
-      offset += f.vertex_indices.length * 8;
-    });
 
     this.buffer = {
       vertices,
@@ -64,7 +57,7 @@ export abstract class Model {
     this.object = o;
   }
 
-  render(gl: WebGL2RenderingContext, locations: ShaderLocations, perFace?: (f: Face) => void) {
+  render(gl: WebGL2RenderingContext, locations: ShaderLocations) {
     if (this.alpha == 0) {
       return;
     }
@@ -88,13 +81,10 @@ export abstract class Model {
 
     let offset = 0;
     gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, this.buffer.faces);
-    this.object.faces.forEach((f) => {
-      perFace?.(f);
 
-      this.gl.drawElements(this.gl.TRIANGLES, f.vertex_indices.length, this.gl.UNSIGNED_INT, offset);
-      // Offset must be a multiple of 8 since an unsigned int is 8 bytes.
-      offset += f.vertex_indices.length * 8;
-    })
+    this.gl.drawElements(this.gl.TRIANGLES, this.object.faces.length, this.gl.UNSIGNED_INT, offset);
+    // Offset must be a multiple of 8 since an unsigned int is 8 bytes.
+    offset += this.object.faces.length * 8;
   }
 
   scaling() {
