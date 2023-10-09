@@ -1,0 +1,99 @@
+body {
+    height: 100%;
+    margin: 0;
+    overflow: hidden;
+    font-family: "Share Tech Mono";
+    font-size: 14px;
+    color: white;
+}
+
+canvas {
+    height: 100%;
+    width: 100%;
+}
+
+#matrix-rain {
+    position: absolute;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    left: 0;
+    z-index: -1;
+}
+
+.stage-0 {
+    background: radial-gradient(circle, rgba(13,28,61,1) 0%, rgba(6, 5, 11,1) 100%);
+}
+
+.stage-1 {
+    background: radial-gradient(circle, rgba(0,212,255,1) 0%, rgba(9,9,121,1) 85%, rgba(2,0,36,1) 100%);
+}
+
+.stage-2 {
+    background: radial-gradient(circle, rgba(228,75,41,1) 0%, rgba(104,0,0,1) 85%, rgba(40,0,0,1) 100%);
+}
+
+.stage-3 {
+    background: transparent;
+}
+
+.controls {
+    position: absolute;
+    padding: 15px;
+}
+
+.slider {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    margin-bottom: 15px;
+}
+
+.key-bindings > div {
+    margin-bottom: 5px;
+}
+
+.key-bindings strong {
+    text-transform: uppercase;
+}
+
+input[type="range"] {
+    -webkit-appearance: none;
+    appearance: none;
+    outline: none;
+    background: transparent;
+}
+
+input[type="range"]::-webkit-slider-runnable-track {
+    height: 5px;
+    background: silver;
+    border-radius: 5px;
+}
+
+input[type="range"]::-moz-range-track {
+    height: 5px;
+    background: silver;
+    border-radius: 5px;
+}
+
+input[type="range"]::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  background-image: url("./assets/brain.png");
+  background-size: 30px;
+  width: 30px;
+  height: 30px;
+  margin-top: -10px;
+  cursor: pointer;
+}
+
+input[type="range"]::-moz-range-thumb {
+  border: none;
+  background: transparent;
+  background-image: url("./assets/brain.png");
+  background-size: 30px;
+  width: 30px;
+  height: 30px;
+  margin-top: -10px;
+  cursor: pointer;
+}

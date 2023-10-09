@@ -1,4 +1,5 @@
 const path = require('path');
+const HtmlWebpackPlugin = require('html-webpack-plugin');
 
 module.exports = {
   entry: './src/index.ts',
@@ -10,6 +11,13 @@ module.exports = {
     }
   },
   devtool: 'inline-source-map',
+  plugins: [
+    new HtmlWebpackPlugin({
+      favicon: "./src/assets/brain.png",
+      template: "./src/index.html",
+      title: "Galaxy Brain"
+    }),
+  ],
   module: {
     rules: [
       {
@@ -24,6 +32,10 @@ module.exports = {
       {
         test: /\.(jpg|jpeg|png)$/,
         type: 'asset/resource',
+      },
+      {
+        test: /\.css$/i,
+        use: ["style-loader", "css-loader"],
       },
     ],
   },
