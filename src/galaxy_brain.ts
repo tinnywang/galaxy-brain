@@ -177,6 +177,10 @@ class GalaxyBrain {
   }
 
   evolve(stage: number) {
+    if (this.stage === stage) {
+      return;
+    }
+
     // It's okay to calculate rotation axis and angle from the brain
     // because all the models share the same rotation axis and angle.
     const { angle: rotationAngle, axis } = this.brain.rotation();

@@ -5,8 +5,8 @@ import Matrix from "./matrix";
 import GalaxyBrain from "./galaxy_brain";
 
 const Controls = (
-  canvas: JQuery<HTMLCanvasElement>,
-  slider: JQuery<HTMLInputElement>,
+  $canvas: JQuery<HTMLCanvasElement>,
+  $slider: JQuery<HTMLInputElement>,
   galaxyBrain: GalaxyBrain,
   matrixController: MatrixController
 ) => {
@@ -20,7 +20,28 @@ const Controls = (
 
   let wheelTimestamp: DOMHighResTimeStamp | undefined;
 
-  canvas.on("mousedown", (event) => {
+  const evolve = (stage: number) => {
+    galaxyBrain.evolve(stage);
+    $canvas.attr("class", `stage-${stage}`);
+
+    if (stage === 3) {
+      matrixController.start();
+    } else {
+      matrixController.stop();
+    }
+  };
+
+  if (window.location.hash) {
+    const stage = parseInt(window.location.hash.slice(1), 10);
+    if (Number.isNaN(stage)) {
+      return;
+    }
+
+    $slider.val(stage);
+    evolve(stage);
+  }
+
+  $canvas.on("mousedown", (event) => {
     if (event.button !== LEFT_MOUSE) {
       return;
     }
@@ -28,7 +49,7 @@ const Controls = (
     mousePosition = vec3.fromValues(event.pageX, event.pageY, 0);
   });
 
-  canvas.on("mousemove", (event) => {
+  $canvas.on("mousemove", (event) => {
     if (
       !mousePosition ||
       event.button !== LEFT_MOUSE ||
@@ -54,7 +75,7 @@ const Controls = (
     mousePosition = currentMousePosition;
   });
 
-  canvas.on("mouseup", (event) => {
+  $canvas.on("mouseup", (event) => {
     if (event.button !== LEFT_MOUSE) {
       return;
     }
@@ -62,7 +83,7 @@ const Controls = (
     mousePosition = undefined;
   });
 
-  canvas.on("wheel", (event) => {
+  $canvas.on("wheel", (event) => {
     if (wheelTimestamp !== event.timeStamp) {
       const elapsedTimestamp = event.timeStamp - (wheelTimestamp ?? 0);
       wheelTimestamp = event.timeStamp;
@@ -72,20 +93,14 @@ const Controls = (
     }
   });
 
-  slider.on("change", (event) => {
+  $slider.on("change", (event) => {
     const stage = parseInt(event.target.value, 10);
     if (Number.isNaN(stage)) {
       return;
     }
 
-    galaxyBrain.evolve(stage);
-    canvas.attr("class", `stage-${stage}`);
-
-    if (stage === 3) {
-      matrixController.start();
-    } else {
-      matrixController.stop();
-    }
+    window.location.hash = event.target.value;
+    evolve(stage);
   });
 
   $(window).on("resize", () => {
