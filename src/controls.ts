@@ -31,6 +31,11 @@ const Controls = (
     }
   };
 
+  const coordinates = (event: JQuery.TriggeredEvent<HTMLCanvasElement>) => ({
+    pageX: event.pageX || event.changedTouches?.[0].pageX,
+    pageY: event.pageY || event.changedTouches?.[0].pageY,
+  });
+
   if (window.location.hash) {
     const stage = parseInt(window.location.hash.slice(1), 10);
     if (Number.isNaN(stage)) {
@@ -41,18 +46,21 @@ const Controls = (
     evolve(stage);
   }
 
-  $canvas.on("mousedown", (event) => {
-    if (event.button !== LEFT_MOUSE) {
+  $canvas.on("mousedown touchstart", (event) => {
+    if (event.type === "mousedown" && event.button !== LEFT_MOUSE) {
       return;
     }
 
-    mousePosition = vec3.fromValues(event.pageX, event.pageY, 0);
+    const { pageX, pageY } = coordinates(event);
+    if (pageX && pageY) {
+      mousePosition = vec3.fromValues(pageX, pageY, 0);
+    }
   });
 
-  $canvas.on("mousemove", (event) => {
+  $canvas.on("mousemove touchmove", (event) => {
     if (
       !mousePosition ||
-      event.button !== LEFT_MOUSE ||
+      (event.type === "mousemove" && event.button !== LEFT_MOUSE) ||
       mouseMoveTimestamp === event.timeStamp
     ) {
       return;
@@ -61,22 +69,25 @@ const Controls = (
     const elapsedTimestamp = event.timeStamp - (mouseMoveTimestamp ?? 0);
     mouseMoveTimestamp = event.timeStamp;
 
-    const currentMousePosition = vec3.fromValues(-event.pageX, event.pageY, 0);
-    const mouseMovement = vec3.subtract(
-      vec3.create(),
-      mousePosition,
-      currentMousePosition
-    );
+    const { pageX, pageY } = coordinates(event);
+    if (pageX && pageY) {
+      const currentMousePosition = vec3.fromValues(-pageX, pageY, 0);
+      const mouseMovement = vec3.subtract(
+        vec3.create(),
+        mousePosition,
+        currentMousePosition
+      );
 
-    const axis = vec3.cross(vec3.create(), mouseMovement, Z_AXIS);
-    const angle = vec3.length(mouseMovement) / elapsedTimestamp;
-    Matrix.rotateView(axis, angle);
+      const axis = vec3.cross(vec3.create(), mouseMovement, Z_AXIS);
+      const angle = vec3.length(mouseMovement) / elapsedTimestamp;
+      Matrix.rotateView(axis, angle);
 
-    mousePosition = currentMousePosition;
+      mousePosition = currentMousePosition;
+    }
   });
 
-  $canvas.on("mouseup", (event) => {
-    if (event.button !== LEFT_MOUSE) {
+  $canvas.on("mouseup touchend", (event) => {
+    if (event.type === "mouseup" && event.button !== LEFT_MOUSE) {
       return;
     }
 
