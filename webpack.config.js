@@ -14,8 +14,7 @@ module.exports = {
   plugins: [
     new HtmlWebpackPlugin({
       favicon: "./src/assets/brain.png",
-      template: "./src/index.html",
-      title: "Galaxy Brain"
+      template: "./src/index.html"
     }),
   ],
   module: {
