@@ -31,18 +31,23 @@ export class Scale extends Animation {
         // Scale the model linearly over time.
         // If the model were scaled by delta every frame, it would be scaled exponentially (delta^n).
         if (!this.isDone()) {
-           let delta = this.elapsedTimestamp ? this.delta * this.elapsedTimestamp : 0;
+            let delta = this.elapsedTimestamp ? this.delta * this.elapsedTimestamp : 0;
             if (!this.scaleUp) {
-                delta *= -1
+                delta *= -1;
             }
-            const s = 1 + delta / this.scaling();
+
+            const scaling = this.scaling();
+            if ((this.scaleUp && this.scale < scaling + delta) || (!this.scaleUp && this.scale > scaling + delta)) {
+                delta = this.scale - scaling;
+            }
+
+            const s = 1 + delta / scaling;
             mat4.scale(this.matrix, this.matrix, vec3.fromValues(s, s, s));
         }
     }
 
     isDone() {
-        const s = this.scaling();
-        return this.scaleUp ? s >= this.scale : s <= this.scale;
+        return this.scale === this.scaling();
     }
 
     private scaling() {
