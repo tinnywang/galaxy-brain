@@ -24,15 +24,20 @@ export class Rotation extends Animation {
 
         if (!this.isDone()) {
             let delta = this.elapsedTimestamp ? this.delta * this.elapsedTimestamp : 0;
+            if (Math.abs(this.angle) < Math.abs(delta)) {
+              delta = this.angle;
+            }
+
             this.matrices.forEach((m) => {
                 const rotation = mat4.fromRotation(mat4.create(), delta, this.axis);
                 mat4.multiply(m, rotation, m);
             });
+
             this.angle -= delta;
         }
     }
 
     isDone(): boolean {
-        return this.delta > 0 ? this.angle <= 0 : this.angle >= 0;
+        return this.delta === 0;
     }
 }
