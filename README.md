@@ -1,6 +1,8 @@
 # [galaxy-brain](https://tinnywang.github.io/galaxy-brain/)
 
-https://github.com/tinnywang/galaxy-brain/assets/1168893/4a2f1cad-32c9-45b4-b39f-f40dc8dafc6d
+<video controls>
+    <source src="GalaxyBrain.mp4" type="video/mp4">
+</video>
 
 ## About
 This project is a WebGL homage to the [galaxy brain](https://memepediadankmemes.fandom.com/wiki/Expanding_Brain) meme.
